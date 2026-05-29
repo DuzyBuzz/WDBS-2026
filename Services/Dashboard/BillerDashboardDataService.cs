@@ -18,7 +18,8 @@ internal static class BillerDashboardDataService
         (decimal totalBilledAmount, int totalBillCount, int unpaidBillCount) = await GetBillingTotalsAsync(connection, periodStart, periodEnd);
         int activeConcessionaireCount = await GetActiveConcessionaireCountAsync(connection);
 
-        IReadOnlyList<BillerDashboardPoint> billedTrend = await GetMonthlyTrendAsync(connection, periodStart, periodEnd);
+        DateTime trendStart = periodStart.AddMonths(-11);
+        IReadOnlyList<BillerDashboardPoint> billedTrend = await GetMonthlyTrendAsync(connection, trendStart, periodEnd);
         IReadOnlyList<BillerDashboardPoint> billingStatusBreakdown = await GetBillingStatusBreakdownAsync(connection, periodStart, periodEnd);
         IReadOnlyList<BillerDashboardPoint> concessionairesByZone = await GetConcessionairesByZoneAsync(connection);
         IReadOnlyList<BillerDashboardPoint> concessionaireStatusMix = await GetConcessionaireStatusMixAsync(connection);
@@ -87,26 +88,26 @@ WHERE UPPER(TRIM(v.Status)) = 'ACTIVE';";
 
     private static async Task<IReadOnlyList<BillerDashboardPoint>> GetMonthlyTrendAsync(
         MySqlConnection connection,
-        DateTime periodStart,
-        DateTime periodEnd)
+        DateTime trendStart,
+        DateTime trendEnd)
     {
         const string sql = @"
 SELECT
     DATE_FORMAT(b.billing_date, '%Y-%m') AS month_key,
     SUM(b.total_amount) AS total_billed
 FROM billing b
-WHERE b.billing_date >= @periodStart
-  AND b.billing_date < @periodEnd
+WHERE b.billing_date >= @trendStart
+  AND b.billing_date < @trendEnd
 GROUP BY DATE_FORMAT(b.billing_date, '%Y-%m')
 ORDER BY month_key ASC;";
 
         await using var command = new MySqlCommand(sql, connection);
-        command.Parameters.AddWithValue("@periodStart", periodStart);
-        command.Parameters.AddWithValue("@periodEnd", periodEnd);
+        command.Parameters.AddWithValue("@trendStart", trendStart);
+        command.Parameters.AddWithValue("@trendEnd", trendEnd);
 
         await using var reader = await command.ExecuteReaderAsync();
 
-        var points = new List<BillerDashboardPoint>();
+        var valuesByMonth = new Dictionary<string, decimal>(StringComparer.Ordinal);
         while (await reader.ReadAsync())
         {
             int labelOrdinal = reader.GetOrdinal("month_key");
@@ -114,7 +115,22 @@ ORDER BY month_key ASC;";
 
             string label = reader.IsDBNull(labelOrdinal) ? string.Empty : Convert.ToString(reader.GetValue(labelOrdinal)) ?? string.Empty;
             decimal value = reader.IsDBNull(valueOrdinal) ? 0M : Convert.ToDecimal(reader.GetValue(valueOrdinal));
-            points.Add(new BillerDashboardPoint(label, value));
+            if (!string.IsNullOrWhiteSpace(label))
+            {
+                valuesByMonth[label] = value;
+            }
+        }
+
+        var points = new List<BillerDashboardPoint>(12);
+        DateTime monthCursor = new DateTime(trendStart.Year, trendStart.Month, 1);
+        DateTime trendLimit = new DateTime(trendEnd.Year, trendEnd.Month, 1);
+
+        while (monthCursor < trendLimit)
+        {
+            string monthKey = monthCursor.ToString("yyyy-MM");
+            decimal value = valuesByMonth.TryGetValue(monthKey, out decimal existing) ? existing : 0M;
+            points.Add(new BillerDashboardPoint(monthKey, value));
+            monthCursor = monthCursor.AddMonths(1);
         }
 
         return points;

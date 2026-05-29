@@ -100,7 +100,7 @@ partial class UpsertConcessionaireForm
         fieldsLayout.Controls.Add(accountNoTextBox, 0, 1);
         fieldsLayout.Controls.Add(accountNoLabel, 0, 0);
         fieldsLayout.Dock = DockStyle.Fill;
-        fieldsLayout.Location = new Point(24, 55);
+        fieldsLayout.Location = new Point(24, 39);
         fieldsLayout.Margin = new Padding(0);
         fieldsLayout.Name = "fieldsLayout";
         fieldsLayout.RowCount = 13;
@@ -117,14 +117,14 @@ partial class UpsertConcessionaireForm
         fieldsLayout.RowStyles.Add(new RowStyle());
         fieldsLayout.RowStyles.Add(new RowStyle());
         fieldsLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        fieldsLayout.Size = new Size(712, 641);
+        fieldsLayout.Size = new Size(712, 657);
         fieldsLayout.TabIndex = 1;
         // 
         // statusLabel
         // 
         statusLabel.AutoSize = true;
         fieldsLayout.SetColumnSpan(statusLabel, 2);
-        statusLabel.Location = new Point(0, 385);
+        statusLabel.Location = new Point(0, 337);
         statusLabel.Margin = new Padding(0, 14, 0, 0);
         statusLabel.Name = "statusLabel";
         statusLabel.Size = new Size(39, 15);
@@ -134,11 +134,11 @@ partial class UpsertConcessionaireForm
         // buttonPanel
         // 
         buttonPanel.AutoSize = true;
+        fieldsLayout.SetColumnSpan(buttonPanel, 2);
         buttonPanel.Controls.Add(cancelButton);
         buttonPanel.Controls.Add(saveButton);
-        fieldsLayout.SetColumnSpan(buttonPanel, 2);
         buttonPanel.FlowDirection = FlowDirection.RightToLeft;
-        buttonPanel.Location = new Point(0, 414);
+        buttonPanel.Location = new Point(0, 366);
         buttonPanel.Margin = new Padding(0, 14, 0, 0);
         buttonPanel.Name = "buttonPanel";
         buttonPanel.Size = new Size(176, 32);
@@ -169,14 +169,14 @@ partial class UpsertConcessionaireForm
         // optionsPanel
         // 
         optionsPanel.AutoSize = true;
+        fieldsLayout.SetColumnSpan(optionsPanel, 2);
         optionsPanel.Controls.Add(taxExemptedCheckBox);
         optionsPanel.Controls.Add(dueExemptedCheckBox);
         optionsPanel.Controls.Add(discountedCheckBox);
-        fieldsLayout.SetColumnSpan(optionsPanel, 2);
-        optionsPanel.Location = new Point(0, 352);
+        optionsPanel.Location = new Point(0, 304);
         optionsPanel.Margin = new Padding(0, 14, 0, 0);
         optionsPanel.Name = "optionsPanel";
-        optionsPanel.Size = new Size(291, 19);
+        optionsPanel.Size = new Size(285, 19);
         optionsPanel.TabIndex = 22;
         // 
         // taxExemptedCheckBox
@@ -185,7 +185,7 @@ partial class UpsertConcessionaireForm
         taxExemptedCheckBox.Location = new Point(0, 0);
         taxExemptedCheckBox.Margin = new Padding(0, 0, 16, 0);
         taxExemptedCheckBox.Name = "taxExemptedCheckBox";
-        taxExemptedCheckBox.Size = new Size(100, 19);
+        taxExemptedCheckBox.Size = new Size(99, 19);
         taxExemptedCheckBox.TabIndex = 0;
         taxExemptedCheckBox.Text = "Tax Exempted";
         taxExemptedCheckBox.UseVisualStyleBackColor = true;
@@ -193,10 +193,10 @@ partial class UpsertConcessionaireForm
         // dueExemptedCheckBox
         // 
         dueExemptedCheckBox.AutoSize = true;
-        dueExemptedCheckBox.Location = new Point(116, 0);
+        dueExemptedCheckBox.Location = new Point(115, 0);
         dueExemptedCheckBox.Margin = new Padding(0, 0, 16, 0);
         dueExemptedCheckBox.Name = "dueExemptedCheckBox";
-        dueExemptedCheckBox.Size = new Size(102, 19);
+        dueExemptedCheckBox.Size = new Size(103, 19);
         dueExemptedCheckBox.TabIndex = 1;
         dueExemptedCheckBox.Text = "Due Exempted";
         dueExemptedCheckBox.UseVisualStyleBackColor = true;
@@ -207,7 +207,7 @@ partial class UpsertConcessionaireForm
         discountedCheckBox.Location = new Point(234, 0);
         discountedCheckBox.Margin = new Padding(0);
         discountedCheckBox.Name = "discountedCheckBox";
-        discountedCheckBox.Size = new Size(57, 19);
+        discountedCheckBox.Size = new Size(51, 19);
         discountedCheckBox.TabIndex = 2;
         discountedCheckBox.Text = "Disc.";
         discountedCheckBox.UseVisualStyleBackColor = true;
@@ -215,26 +215,27 @@ partial class UpsertConcessionaireForm
         // scfMonthlyTextBox
         // 
         scfMonthlyTextBox.Dock = DockStyle.Top;
-        scfMonthlyTextBox.Location = new Point(368, 315);
+        scfMonthlyTextBox.Location = new Point(368, 267);
         scfMonthlyTextBox.Margin = new Padding(12, 6, 0, 0);
         scfMonthlyTextBox.Name = "scfMonthlyTextBox";
         scfMonthlyTextBox.Size = new Size(344, 23);
         scfMonthlyTextBox.TabIndex = 21;
+        scfMonthlyTextBox.Text = "500";
         // 
         // scfMonthlyLabel
         // 
         scfMonthlyLabel.AutoSize = true;
-        scfMonthlyLabel.Location = new Point(368, 294);
+        scfMonthlyLabel.Location = new Point(368, 246);
         scfMonthlyLabel.Margin = new Padding(12, 14, 0, 0);
         scfMonthlyLabel.Name = "scfMonthlyLabel";
-        scfMonthlyLabel.Size = new Size(76, 15);
+        scfMonthlyLabel.Size = new Size(75, 15);
         scfMonthlyLabel.TabIndex = 20;
         scfMonthlyLabel.Text = "SCF Monthly";
         // 
         // scfTotalTextBox
         // 
         scfTotalTextBox.Dock = DockStyle.Top;
-        scfTotalTextBox.Location = new Point(0, 315);
+        scfTotalTextBox.Location = new Point(0, 267);
         scfTotalTextBox.Margin = new Padding(0, 6, 12, 0);
         scfTotalTextBox.Name = "scfTotalTextBox";
         scfTotalTextBox.Size = new Size(344, 23);
@@ -243,10 +244,10 @@ partial class UpsertConcessionaireForm
         // scfTotalLabel
         // 
         scfTotalLabel.AutoSize = true;
-        scfTotalLabel.Location = new Point(0, 294);
+        scfTotalLabel.Location = new Point(0, 246);
         scfTotalLabel.Margin = new Padding(0, 14, 0, 0);
         scfTotalLabel.Name = "scfTotalLabel";
-        scfTotalLabel.Size = new Size(92, 15);
+        scfTotalLabel.Size = new Size(84, 15);
         scfTotalLabel.TabIndex = 18;
         scfTotalLabel.Text = "SCF Total Amt.";
         // 
@@ -254,7 +255,7 @@ partial class UpsertConcessionaireForm
         // 
         firstReadingDatePicker.Dock = DockStyle.Top;
         firstReadingDatePicker.Format = DateTimePickerFormat.Short;
-        firstReadingDatePicker.Location = new Point(368, 255);
+        firstReadingDatePicker.Location = new Point(368, 209);
         firstReadingDatePicker.Margin = new Padding(12, 6, 0, 0);
         firstReadingDatePicker.Name = "firstReadingDatePicker";
         firstReadingDatePicker.Size = new Size(344, 23);
@@ -263,17 +264,17 @@ partial class UpsertConcessionaireForm
         // firstReadingDateLabel
         // 
         firstReadingDateLabel.AutoSize = true;
-        firstReadingDateLabel.Location = new Point(368, 234);
+        firstReadingDateLabel.Location = new Point(368, 188);
         firstReadingDateLabel.Margin = new Padding(12, 14, 0, 0);
         firstReadingDateLabel.Name = "firstReadingDateLabel";
-        firstReadingDateLabel.Size = new Size(101, 15);
+        firstReadingDateLabel.Size = new Size(102, 15);
         firstReadingDateLabel.TabIndex = 16;
         firstReadingDateLabel.Text = "First Reading Date";
         // 
         // meterNumberTextBox
         // 
         meterNumberTextBox.Dock = DockStyle.Top;
-        meterNumberTextBox.Location = new Point(0, 255);
+        meterNumberTextBox.Location = new Point(0, 209);
         meterNumberTextBox.Margin = new Padding(0, 6, 12, 0);
         meterNumberTextBox.Name = "meterNumberTextBox";
         meterNumberTextBox.Size = new Size(344, 23);
@@ -282,10 +283,10 @@ partial class UpsertConcessionaireForm
         // meterLabel
         // 
         meterLabel.AutoSize = true;
-        meterLabel.Location = new Point(0, 234);
+        meterLabel.Location = new Point(0, 188);
         meterLabel.Margin = new Padding(0, 14, 0, 0);
         meterLabel.Name = "meterLabel";
-        meterLabel.Size = new Size(84, 15);
+        meterLabel.Size = new Size(85, 15);
         meterLabel.TabIndex = 14;
         meterLabel.Text = "Meter Number";
         // 
@@ -294,7 +295,7 @@ partial class UpsertConcessionaireForm
         serviceComboBox.Dock = DockStyle.Top;
         serviceComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
         serviceComboBox.FormattingEnabled = true;
-        serviceComboBox.Location = new Point(368, 195);
+        serviceComboBox.Location = new Point(368, 151);
         serviceComboBox.Margin = new Padding(12, 6, 0, 0);
         serviceComboBox.Name = "serviceComboBox";
         serviceComboBox.Size = new Size(344, 23);
@@ -303,10 +304,10 @@ partial class UpsertConcessionaireForm
         // serviceLabel
         // 
         serviceLabel.AutoSize = true;
-        serviceLabel.Location = new Point(368, 174);
+        serviceLabel.Location = new Point(368, 130);
         serviceLabel.Margin = new Padding(12, 14, 0, 0);
         serviceLabel.Name = "serviceLabel";
-        serviceLabel.Size = new Size(69, 15);
+        serviceLabel.Size = new Size(71, 15);
         serviceLabel.TabIndex = 12;
         serviceLabel.Text = "Service Type";
         // 
@@ -315,7 +316,7 @@ partial class UpsertConcessionaireForm
         zoneComboBox.Dock = DockStyle.Top;
         zoneComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
         zoneComboBox.FormattingEnabled = true;
-        zoneComboBox.Location = new Point(0, 195);
+        zoneComboBox.Location = new Point(0, 151);
         zoneComboBox.Margin = new Padding(0, 6, 12, 0);
         zoneComboBox.Name = "zoneComboBox";
         zoneComboBox.Size = new Size(344, 23);
@@ -324,7 +325,7 @@ partial class UpsertConcessionaireForm
         // zoneLabel
         // 
         zoneLabel.AutoSize = true;
-        zoneLabel.Location = new Point(0, 174);
+        zoneLabel.Location = new Point(0, 130);
         zoneLabel.Margin = new Padding(0, 14, 0, 0);
         zoneLabel.Name = "zoneLabel";
         zoneLabel.Size = new Size(34, 15);
@@ -334,7 +335,7 @@ partial class UpsertConcessionaireForm
         // addressTextBox
         // 
         addressTextBox.Dock = DockStyle.Top;
-        addressTextBox.Location = new Point(368, 135);
+        addressTextBox.Location = new Point(368, 93);
         addressTextBox.Margin = new Padding(12, 6, 0, 0);
         addressTextBox.Name = "addressTextBox";
         addressTextBox.Size = new Size(344, 23);
@@ -343,7 +344,7 @@ partial class UpsertConcessionaireForm
         // addressLabel
         // 
         addressLabel.AutoSize = true;
-        addressLabel.Location = new Point(368, 114);
+        addressLabel.Location = new Point(368, 72);
         addressLabel.Margin = new Padding(12, 14, 0, 0);
         addressLabel.Name = "addressLabel";
         addressLabel.Size = new Size(49, 15);
@@ -353,7 +354,7 @@ partial class UpsertConcessionaireForm
         // tinTextBox
         // 
         tinTextBox.Dock = DockStyle.Top;
-        tinTextBox.Location = new Point(0, 135);
+        tinTextBox.Location = new Point(0, 93);
         tinTextBox.Margin = new Padding(0, 6, 12, 0);
         tinTextBox.Name = "tinTextBox";
         tinTextBox.Size = new Size(344, 23);
@@ -362,7 +363,7 @@ partial class UpsertConcessionaireForm
         // tinLabel
         // 
         tinLabel.AutoSize = true;
-        tinLabel.Location = new Point(0, 114);
+        tinLabel.Location = new Point(0, 72);
         tinLabel.Margin = new Padding(0, 14, 0, 0);
         tinLabel.Name = "tinLabel";
         tinLabel.Size = new Size(25, 15);
@@ -372,7 +373,7 @@ partial class UpsertConcessionaireForm
         // nameTextBox
         // 
         nameTextBox.Dock = DockStyle.Top;
-        nameTextBox.Location = new Point(368, 75);
+        nameTextBox.Location = new Point(368, 35);
         nameTextBox.Margin = new Padding(12, 6, 0, 0);
         nameTextBox.Name = "nameTextBox";
         nameTextBox.Size = new Size(344, 23);
@@ -381,7 +382,7 @@ partial class UpsertConcessionaireForm
         // nameLabel
         // 
         nameLabel.AutoSize = true;
-        nameLabel.Location = new Point(368, 54);
+        nameLabel.Location = new Point(368, 14);
         nameLabel.Margin = new Padding(12, 14, 0, 0);
         nameLabel.Name = "nameLabel";
         nameLabel.Size = new Size(39, 15);
@@ -391,7 +392,7 @@ partial class UpsertConcessionaireForm
         // accountNoTextBox
         // 
         accountNoTextBox.Dock = DockStyle.Top;
-        accountNoTextBox.Location = new Point(0, 75);
+        accountNoTextBox.Location = new Point(0, 35);
         accountNoTextBox.Margin = new Padding(0, 6, 12, 0);
         accountNoTextBox.Name = "accountNoTextBox";
         accountNoTextBox.Size = new Size(344, 23);
@@ -400,10 +401,10 @@ partial class UpsertConcessionaireForm
         // accountNoLabel
         // 
         accountNoLabel.AutoSize = true;
-        accountNoLabel.Location = new Point(0, 54);
+        accountNoLabel.Location = new Point(0, 14);
         accountNoLabel.Margin = new Padding(0, 14, 0, 0);
         accountNoLabel.Name = "accountNoLabel";
-        accountNoLabel.Size = new Size(69, 15);
+        accountNoLabel.Size = new Size(71, 15);
         accountNoLabel.TabIndex = 2;
         accountNoLabel.Text = "Account No";
         // 
@@ -413,7 +414,7 @@ partial class UpsertConcessionaireForm
         titleLabel.Location = new Point(24, 24);
         titleLabel.Margin = new Padding(0);
         titleLabel.Name = "titleLabel";
-        titleLabel.Size = new Size(109, 15);
+        titleLabel.Size = new Size(124, 15);
         titleLabel.TabIndex = 0;
         titleLabel.Text = "Upsert Concessionaire";
         // 

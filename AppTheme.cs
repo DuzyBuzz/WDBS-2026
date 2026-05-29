@@ -1,3 +1,5 @@
+using System.ComponentModel;
+
 namespace WDBS_2026;
 
 internal enum ButtonSeverity
@@ -19,6 +21,11 @@ internal readonly record struct ButtonPalette(
 
 internal static class AppTheme
 {
+    private const string GlobalIconRelativePath = "Resources\\tubungan logo.ico";
+
+    private static Icon? _cachedGlobalIcon;
+    private static bool _isGlobalIconLoaded;
+
     public static readonly Color ShellBackgroundColor = Color.FromArgb(239, 245, 248);
     public static readonly Color SurfaceColor = Color.White;
     public static readonly Color PrimaryColor = Color.FromArgb(18, 96, 128);
@@ -43,6 +50,11 @@ internal static class AppTheme
     {
         form.BackColor = ShellBackgroundColor;
         form.Font = BodyFont;
+
+        if (LicenseManager.UsageMode != LicenseUsageMode.Designtime)
+        {
+            ApplyGlobalFormIcon(form);
+        }
     }
 
     public static void ApplySurfacePanel(Panel panel)
@@ -197,5 +209,33 @@ internal static class AppTheme
                 Color.White,
                 NeutralColor)
         };
+    }
+
+    private static void ApplyGlobalFormIcon(Form form)
+    {
+        Icon? icon = GetGlobalIcon();
+        if (icon is null)
+        {
+            return;
+        }
+
+        form.Icon = (Icon)icon.Clone();
+    }
+
+    private static Icon? GetGlobalIcon()
+    {
+        if (_isGlobalIconLoaded)
+        {
+            return _cachedGlobalIcon;
+        }
+
+        string iconPath = Path.Combine(AppContext.BaseDirectory, GlobalIconRelativePath);
+        if (File.Exists(iconPath))
+        {
+            _cachedGlobalIcon = new Icon(iconPath);
+        }
+
+        _isGlobalIconLoaded = true;
+        return _cachedGlobalIcon;
     }
 }

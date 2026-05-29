@@ -6,6 +6,7 @@ using ClosedXML.Excel;
 using PdfSharp;
 using PdfSharp.Drawing;
 using PdfSharp.Drawing.Layout;
+using PdfSharp.Fonts;
 using PdfSharp.Pdf;
 
 namespace WDBS_2026.Services.Printing;
@@ -20,14 +21,18 @@ public sealed record MeterReadingSheetDocumentData(
 internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
 {
     private const string WaterDistrictTitle = "TUBUNGAN WATER DISTRICT";
+    private const float A4WidthPoints = 595.28F;
+    private const float A4HeightPoints = 841.89F;
     private const float HeaderHeight = 46F;
     private const float TableHeaderHeight = 22F;
     private const float FooterHeight = 16F;
-    private const float RowHeight = 18F;
+    private const float RowHeight = 28F;
     private const float CellPadding = 3F;
 
     private readonly MeterReadingSheetDocumentData _document;
     private readonly object _previewPreparationSync = new();
+    private static readonly object PdfFontResolverSync = new();
+    private static bool _pdfFontResolverConfigured;
 
     private IReadOnlyList<SheetPage>? _preparedPages;
     private int _preparedPageCount = 1;
@@ -87,8 +92,8 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
     private PrintDocument CreatePrintDocument(PrintRenderState state, bool preservePreparedPages)
     {
         var document = new PrintDocument();
-        document.DefaultPageSettings.Landscape = true;
-        document.DefaultPageSettings.Margins = new Margins(18, 18, 26, 22);
+        document.DefaultPageSettings.Landscape = false;
+        document.DefaultPageSettings.Margins = new Margins(14, 14, 18, 16);
         document.BeginPrint += (_, _) => state.Reset(preservePreparedPages);
         document.PrintPage += (_, e) => PrintPage(e, state);
         return document;
@@ -108,7 +113,7 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         graphics.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
 
         var bounds = new RectangleF(e.MarginBounds.Left, e.MarginBounds.Top, e.MarginBounds.Width, e.MarginBounds.Height);
-        List<SheetPage> pages = state.Pages ??= BuildPages(bounds, state.Progress, state.CancellationToken, "Preparing preview pages", 15, 90);
+        List<SheetPage> pages = state.Pages ??= BuildPages(graphics, bounds, state.Progress, state.CancellationToken, "Preparing preview pages", 15, 90);
 
         if (state.PageIndex >= pages.Count)
         {
@@ -152,20 +157,21 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         for (int rowOffset = 0; rowOffset < page.RowCount; rowOffset++)
         {
             int rowIndex = page.StartIndex + rowOffset;
+            float rowHeight = page.RowHeights[rowOffset];
             if (rowOffset % 2 == 1)
             {
-                graphics.FillRectangle(altBrush, new RectangleF(bounds.Left, currentTop, bounds.Width, RowHeight));
+                graphics.FillRectangle(altBrush, new RectangleF(bounds.Left, currentTop, bounds.Width, rowHeight));
             }
 
             foreach (ColumnLayout column in columns)
             {
-                var rect = new RectangleF(column.X, currentTop, column.Width, RowHeight);
+                var rect = new RectangleF(column.X, currentTop, column.Width, rowHeight);
                 graphics.DrawRectangle(borderPen, rect.X, rect.Y, rect.Width, rect.Height);
                 string text = GetCellDisplay(_document.Rows.Rows[rowIndex], column.Key);
                 DrawCellText(graphics, text, bodyFont, textBrush, rect, column.Alignment, column.Wrap);
             }
 
-            currentTop += RowHeight;
+            currentTop += rowHeight;
         }
 
         float footerTop = bounds.Bottom - FooterHeight;
@@ -178,10 +184,29 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
 
     private void DrawHeader(Graphics graphics, RectangleF bounds, Font titleFont, Font subtitleFont, Font captionFont, Brush textBrush)
     {
+        float logoSize = 44F;
+        float logoTop = bounds.Top;
+
+        using Image? leftLogo = TryLoadImage(Path.Combine(AppContext.BaseDirectory, "Resources", "republika_ng_pilipinas.jpg"));
+        using Image? rightLogo = TryLoadImage(Path.Combine(AppContext.BaseDirectory, "Resources", "tubungan logo.jpg"));
+
+        if (leftLogo is not null)
+        {
+            graphics.DrawImage(leftLogo, bounds.Left, logoTop, logoSize, logoSize);
+        }
+
+        if (rightLogo is not null)
+        {
+            graphics.DrawImage(rightLogo, bounds.Right - logoSize, logoTop, logoSize, logoSize);
+        }
+
+        float centerLeft = bounds.Left + logoSize + 12F;
+        float centerWidth = bounds.Width - ((logoSize * 2F) + 24F);
+
         using var format = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Near };
-        graphics.DrawString(WaterDistrictTitle, titleFont, textBrush, new RectangleF(bounds.Left, bounds.Top + 1F, bounds.Width, 18F), format);
-        graphics.DrawString(_document.ReportTitle, subtitleFont, textBrush, new RectangleF(bounds.Left, bounds.Top + 19F, bounds.Width, 14F), format);
-        graphics.DrawString(_document.PeriodCaption, captionFont, textBrush, new RectangleF(bounds.Left, bounds.Top + 33F, bounds.Width, 12F), format);
+        graphics.DrawString(WaterDistrictTitle, titleFont, textBrush, new RectangleF(centerLeft, bounds.Top + 1F, centerWidth, 18F), format);
+        graphics.DrawString(_document.ReportTitle, subtitleFont, textBrush, new RectangleF(centerLeft, bounds.Top + 19F, centerWidth, 14F), format);
+        graphics.DrawString(_document.PeriodCaption, captionFont, textBrush, new RectangleF(centerLeft, bounds.Top + 33F, centerWidth, 12F), format);
     }
 
     private static void DrawCellText(Graphics graphics, string text, Font font, Brush brush, RectangleF rect, StringAlignment alignment, bool wrap)
@@ -191,7 +216,7 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         {
             Alignment = alignment,
             LineAlignment = wrap ? StringAlignment.Near : StringAlignment.Center,
-            Trimming = StringTrimming.EllipsisCharacter
+            Trimming = wrap ? StringTrimming.None : StringTrimming.EllipsisCharacter
         };
 
         if (!wrap)
@@ -204,15 +229,22 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
 
     private void ExportToPdfInternal(string filePath, IProgress<ReportOperationProgress>? progress, CancellationToken cancellationToken)
     {
+        EnsurePdfFontResolverConfigured();
         ReportProgress(progress, 5, "Preparing PDF export...");
 
         using var pdfDocument = new PdfDocument();
         pdfDocument.Info.Title = _document.ReportTitle;
 
-        const float pageWidth = 841.89F;
-        const float pageHeight = 595.28F;
+        const float pageWidth = A4WidthPoints;
+        const float pageHeight = A4HeightPoints;
         var bounds = new RectangleF(16F, 16F, pageWidth - 32F, pageHeight - 32F);
-        List<SheetPage> pages = BuildPages(bounds, progress, cancellationToken, "Preparing PDF pages", 10, 55);
+        using var bitmap = new Bitmap(1, 1);
+        using var graphics = Graphics.FromImage(bitmap);
+        graphics.PageUnit = GraphicsUnit.Point;
+        List<SheetPage> pages = BuildPages(graphics, bounds, progress, cancellationToken, "Preparing PDF pages", 10, 55);
+
+        using XImage? leftLogo = TryLoadPdfImage(Path.Combine(AppContext.BaseDirectory, "Resources", "republika_ng_pilipinas.jpg"));
+        using XImage? rightLogo = TryLoadPdfImage(Path.Combine(AppContext.BaseDirectory, "Resources", "tubungan logo.jpg"));
 
         IReadOnlyList<ColumnLayout> columns = BuildColumnLayouts(bounds);
 
@@ -222,10 +254,10 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
 
             PdfPage page = pdfDocument.AddPage();
             page.Size = PageSize.A4;
-            page.Orientation = PageOrientation.Landscape;
+            page.Orientation = PageOrientation.Portrait;
 
             using XGraphics gfx = XGraphics.FromPdfPage(page);
-            DrawPdfPage(gfx, bounds, pages[pageIndex], pageIndex + 1, pages.Count, columns);
+            DrawPdfPage(gfx, bounds, pages[pageIndex], pageIndex + 1, pages.Count, columns, leftLogo, rightLogo);
 
             int percentage = pages.Count == 0
                 ? 95
@@ -237,7 +269,7 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         ReportProgress(progress, 100, "PDF export completed.");
     }
 
-    private void DrawPdfPage(XGraphics gfx, RectangleF bounds, SheetPage page, int pageNumber, int totalPages, IReadOnlyList<ColumnLayout> columns)
+    private void DrawPdfPage(XGraphics gfx, RectangleF bounds, SheetPage page, int pageNumber, int totalPages, IReadOnlyList<ColumnLayout> columns, XImage? leftLogo, XImage? rightLogo)
     {
         var titleFont = new XFont("Arial", 16, XFontStyleEx.Bold);
         var subtitleFont = new XFont("Arial", 10, XFontStyleEx.Bold);
@@ -251,9 +283,22 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         var alternateBrush = new XSolidBrush(ToXColor(Color.FromArgb(246, 249, 251)));
         var borderPen = new XPen(ToXColor(AppTheme.BorderColor), 0.5);
 
-        DrawCenteredPdfText(gfx, WaterDistrictTitle, titleFont, textBrush, bounds.Left, bounds.Top + 1F, bounds.Width);
-        DrawCenteredPdfText(gfx, _document.ReportTitle, subtitleFont, textBrush, bounds.Left, bounds.Top + 19F, bounds.Width);
-        DrawCenteredPdfText(gfx, _document.PeriodCaption, captionFont, textBrush, bounds.Left, bounds.Top + 33F, bounds.Width);
+        float logoSize = 44F;
+        if (leftLogo is not null)
+        {
+            gfx.DrawImage(leftLogo, bounds.Left, bounds.Top, logoSize, logoSize);
+        }
+
+        if (rightLogo is not null)
+        {
+            gfx.DrawImage(rightLogo, bounds.Right - logoSize, bounds.Top, logoSize, logoSize);
+        }
+
+        float centerLeft = bounds.Left + logoSize + 12F;
+        float centerWidth = bounds.Width - ((logoSize * 2F) + 24F);
+        DrawCenteredPdfText(gfx, WaterDistrictTitle, titleFont, textBrush, centerLeft, bounds.Top + 1F, centerWidth);
+        DrawCenteredPdfText(gfx, _document.ReportTitle, subtitleFont, textBrush, centerLeft, bounds.Top + 19F, centerWidth);
+        DrawCenteredPdfText(gfx, _document.PeriodCaption, captionFont, textBrush, centerLeft, bounds.Top + 33F, centerWidth);
 
         float tableTop = bounds.Top + HeaderHeight;
 
@@ -269,19 +314,20 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         for (int rowOffset = 0; rowOffset < page.RowCount; rowOffset++)
         {
             int rowIndex = page.StartIndex + rowOffset;
+            float rowHeight = page.RowHeights[rowOffset];
             if (rowOffset % 2 == 1)
             {
-                gfx.DrawRectangle(alternateBrush, bounds.Left, currentTop, bounds.Width, RowHeight);
+                gfx.DrawRectangle(alternateBrush, bounds.Left, currentTop, bounds.Width, rowHeight);
             }
 
             foreach (ColumnLayout column in columns)
             {
-                var rect = new XRect(column.X, currentTop, column.Width, RowHeight);
+                var rect = new XRect(column.X, currentTop, column.Width, rowHeight);
                 gfx.DrawRectangle(borderPen, rect);
                 DrawPdfText(gfx, GetCellDisplay(_document.Rows.Rows[rowIndex], column.Key), bodyFont, textBrush, rect, ToXAlignment(column.Alignment), column.Wrap);
             }
 
-            currentTop += RowHeight;
+            currentTop += rowHeight;
         }
 
         float footerTop = bounds.Bottom - FooterHeight;
@@ -351,16 +397,17 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         ReportProgress(progress, 100, "Excel export completed.");
     }
 
-    private List<SheetPage> BuildPages(RectangleF contentBounds, IProgress<ReportOperationProgress>? progress, CancellationToken cancellationToken, string progressMessage, int progressStart, int progressEnd)
+    private List<SheetPage> BuildPages(Graphics graphics, RectangleF contentBounds, IProgress<ReportOperationProgress>? progress, CancellationToken cancellationToken, string progressMessage, int progressStart, int progressEnd)
     {
         int totalRows = _document.Rows.Rows.Count;
-        float rowsHeight = contentBounds.Height - HeaderHeight - TableHeaderHeight - FooterHeight - 2F;
-        int rowsPerPage = Math.Max(1, (int)Math.Floor(rowsHeight / RowHeight));
+        float maxRowsHeightPerPage = contentBounds.Height - HeaderHeight - TableHeaderHeight - FooterHeight - 2F;
+        IReadOnlyList<ColumnLayout> columns = BuildColumnLayouts(contentBounds);
+        using var bodyFont = new Font("Segoe UI", 8F, FontStyle.Regular);
 
         var pages = new List<SheetPage>();
         if (totalRows == 0)
         {
-            pages.Add(new SheetPage(0, 0));
+            pages.Add(new SheetPage(0, 0, Array.Empty<float>()));
             ReportProgress(progress, progressEnd, progressMessage);
             return pages;
         }
@@ -369,9 +416,25 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         while (processed < totalRows)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            int count = Math.Min(rowsPerPage, totalRows - processed);
-            pages.Add(new SheetPage(processed, count));
-            processed += count;
+
+            int startIndex = processed;
+            float consumedHeight = 0F;
+            var rowHeights = new List<float>();
+
+            while (processed < totalRows)
+            {
+                float rowHeight = GetRowHeight(graphics, bodyFont, _document.Rows.Rows[processed], columns);
+                if (rowHeights.Count > 0 && consumedHeight + rowHeight > maxRowsHeightPerPage)
+                {
+                    break;
+                }
+
+                rowHeights.Add(rowHeight);
+                consumedHeight += rowHeight;
+                processed++;
+            }
+
+            pages.Add(new SheetPage(startIndex, rowHeights.Count, rowHeights.ToArray()));
 
             int percentage = progressStart + (int)Math.Round(((double)processed / totalRows) * Math.Max(progressEnd - progressStart, 1), MidpointRounding.AwayFromZero);
             ReportProgress(progress, percentage, $"{progressMessage} ({processed} of {totalRows} rows)...");
@@ -414,25 +477,79 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
             graphics.PageUnit = GraphicsUnit.Point;
 
             using PrintDocument tempDocument = CreatePrintDocument();
-            RectangleF bounds = new(tempDocument.DefaultPageSettings.Margins.Left, tempDocument.DefaultPageSettings.Margins.Top, 841.89F - tempDocument.DefaultPageSettings.Margins.Left - tempDocument.DefaultPageSettings.Margins.Right, 595.28F - tempDocument.DefaultPageSettings.Margins.Top - tempDocument.DefaultPageSettings.Margins.Bottom);
+            RectangleF bounds = GetDocumentPageBounds(tempDocument);
 
-            _preparedPages = BuildPages(bounds, progress, cancellationToken, "Preparing preview pages", 20, 95).ToArray();
+            _preparedPages = BuildPages(graphics, bounds, progress, cancellationToken, "Preparing preview pages", 20, 95).ToArray();
             _preparedPageCount = Math.Max(1, _preparedPages.Count);
             ReportProgress(progress, 100, $"Prepared {_preparedPageCount} preview page(s).");
         }
+    }
+
+    private static float GetRowHeight(Graphics graphics, Font bodyFont, DataRow row, IReadOnlyList<ColumnLayout> columns)
+    {
+        float resolvedHeight = RowHeight;
+
+        foreach (ColumnLayout column in columns)
+        {
+            if (!column.Wrap)
+            {
+                continue;
+            }
+
+            string text = GetCellDisplay(row, column.Key);
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                continue;
+            }
+
+            float contentWidth = Math.Max(1F, column.Width - (CellPadding * 2F));
+            float measuredHeight = MeasureWrappedTextHeight(graphics, text, bodyFont, contentWidth);
+            resolvedHeight = Math.Max(resolvedHeight, measuredHeight + (CellPadding * 2F) + 2F);
+        }
+
+        return (float)Math.Ceiling(resolvedHeight);
+    }
+
+    private static float MeasureWrappedTextHeight(Graphics graphics, string text, Font font, float width)
+    {
+        using var format = new StringFormat
+        {
+            Alignment = StringAlignment.Near,
+            LineAlignment = StringAlignment.Near,
+            Trimming = StringTrimming.None
+        };
+
+        SizeF measured = graphics.MeasureString(text, font, new SizeF(Math.Max(1F, width), 1000F), format);
+        return measured.Height;
+    }
+
+    private static RectangleF GetDocumentPageBounds(PrintDocument document)
+    {
+        PaperSize paperSize = document.DefaultPageSettings.PaperSize;
+        Margins margins = document.DefaultPageSettings.Margins;
+        bool isLandscape = document.DefaultPageSettings.Landscape;
+
+        float width = isLandscape ? paperSize.Height : paperSize.Width;
+        float height = isLandscape ? paperSize.Width : paperSize.Height;
+
+        return new RectangleF(
+            margins.Left,
+            margins.Top,
+            Math.Max(1F, width - margins.Left - margins.Right),
+            Math.Max(1F, height - margins.Top - margins.Bottom));
     }
 
     private IReadOnlyList<ColumnLayout> BuildColumnLayouts(RectangleF bounds)
     {
         ColumnDefinition[] definitions =
         [
-            new("Zone", "Zone", 7F, StringAlignment.Center),
+            new("Zone", "Zone", 5F, StringAlignment.Center),
             new("Concessionaire_Code", "Account No", 12F, StringAlignment.Center),
-            new("Concessionaire_Name", "Concessionaire Name", 24F, StringAlignment.Near, true),
-            new("Meter_Number", "Meter No", 11F, StringAlignment.Center),
-            new("Previous_Reading_Date", "Previous Reading Date", 14F, StringAlignment.Center),
-            new("Previous_Reading", "Previous Reading", 11F, StringAlignment.Far),
-            new("Present_Reading", "Present Reading", 11F, StringAlignment.Far)
+            new("Concessionaire_Name", "Concessionaire Name", 40F, StringAlignment.Near, true),
+            new("Meter_Number", "Meter No", 8F, StringAlignment.Center),
+            new("Previous_Reading_Date", "Prev Dt", 10F, StringAlignment.Center),
+            new("Previous_Reading", "Prev", 8F, StringAlignment.Far),
+            new("Present_Reading", "Curr", 8F, StringAlignment.Far)
         ];
 
         float totalWeight = definitions.Sum(item => item.Weight);
@@ -575,6 +692,23 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         return XColor.FromArgb(color.A, color.R, color.G, color.B);
     }
 
+    private static Image? TryLoadImage(string filePath)
+    {
+        if (!File.Exists(filePath))
+        {
+            return null;
+        }
+
+        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        using var image = Image.FromStream(stream);
+        return new Bitmap(image);
+    }
+
+    private static XImage? TryLoadPdfImage(string filePath)
+    {
+        return File.Exists(filePath) ? XImage.FromFile(filePath) : null;
+    }
+
     private static XStringAlignment ToXAlignment(StringAlignment alignment)
     {
         return alignment switch
@@ -588,6 +722,81 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
     private static void ReportProgress(IProgress<ReportOperationProgress>? progress, int percentage, string message)
     {
         progress?.Report(new ReportOperationProgress(Math.Clamp(percentage, 0, 100), message));
+    }
+
+    private static void EnsurePdfFontResolverConfigured()
+    {
+        if (_pdfFontResolverConfigured)
+        {
+            return;
+        }
+
+        lock (PdfFontResolverSync)
+        {
+            if (_pdfFontResolverConfigured)
+            {
+                return;
+            }
+
+            GlobalFontSettings.FontResolver ??= new WindowsFontResolver();
+            _pdfFontResolverConfigured = true;
+        }
+    }
+
+    private sealed class WindowsFontResolver : IFontResolver
+    {
+        private const string ArialRegularFace = "arial#regular";
+        private const string ArialBoldFace = "arial#bold";
+        private const string ArialItalicFace = "arial#italic";
+        private const string ArialBoldItalicFace = "arial#bolditalic";
+
+        public byte[]? GetFont(string faceName)
+        {
+            string fontsFolder = Environment.GetFolderPath(Environment.SpecialFolder.Fonts);
+
+            string fileName = faceName switch
+            {
+                ArialBoldFace => "arialbd.ttf",
+                ArialItalicFace => "ariali.ttf",
+                ArialBoldItalicFace => "arialbi.ttf",
+                _ => "arial.ttf"
+            };
+
+            string path = Path.Combine(fontsFolder, fileName);
+            if (File.Exists(path))
+            {
+                return File.ReadAllBytes(path);
+            }
+
+            string fallback = Path.Combine(fontsFolder, "segoeui.ttf");
+            return File.Exists(fallback) ? File.ReadAllBytes(fallback) : null;
+        }
+
+        public FontResolverInfo? ResolveTypeface(string familyName, bool isBold, bool isItalic)
+        {
+            string normalized = (familyName ?? string.Empty).Trim().ToLowerInvariant();
+            if (normalized is "" or "helvetica" or "arial" or "segoe ui" or "segoe ui semibold")
+            {
+                if (isBold && isItalic)
+                {
+                    return new FontResolverInfo(ArialBoldItalicFace);
+                }
+
+                if (isBold)
+                {
+                    return new FontResolverInfo(ArialBoldFace);
+                }
+
+                if (isItalic)
+                {
+                    return new FontResolverInfo(ArialItalicFace);
+                }
+
+                return new FontResolverInfo(ArialRegularFace);
+            }
+
+            return new FontResolverInfo(ArialRegularFace);
+        }
     }
 
     private sealed class PrintRenderState
@@ -622,7 +831,7 @@ internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
         }
     }
 
-    private sealed record SheetPage(int StartIndex, int RowCount);
+    private sealed record SheetPage(int StartIndex, int RowCount, IReadOnlyList<float> RowHeights);
 
     private sealed record ColumnDefinition(string Key, string HeaderText, float Weight, StringAlignment Alignment, bool Wrap = false);
 

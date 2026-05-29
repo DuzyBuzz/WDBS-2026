@@ -212,11 +212,11 @@
             // searchTextBox
             // 
             searchTextBox.Dock = DockStyle.Fill;
-            searchTextBox.Location = new Point(399, 0);
+            searchTextBox.Location = new Point(446, 0);
             searchTextBox.Margin = new Padding(8, 0, 0, 0);
             searchTextBox.Name = "searchTextBox";
             searchTextBox.PlaceholderText = "Search Concessionaire Name or Invoice Number";
-            searchTextBox.Size = new Size(347, 23);
+            searchTextBox.Size = new Size(300, 23);
             searchTextBox.TabIndex = 4;
             searchTextBox.KeyDown += searchTextBox_KeyDown;
             // 
@@ -225,7 +225,7 @@
             periodPicker.Format = DateTimePickerFormat.Short;
             periodPicker.Location = new Point(215, 3);
             periodPicker.Name = "periodPicker";
-            periodPicker.Size = new Size(173, 23);
+            periodPicker.Size = new Size(220, 23);
             periodPicker.TabIndex = 3;
             periodPicker.ValueChanged += periodPicker_ValueChanged;
             // 

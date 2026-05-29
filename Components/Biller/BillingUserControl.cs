@@ -21,6 +21,7 @@ public partial class BillingUserControl : UserControl
 
     private int _currentPage = 1;
     private int _totalRecords;
+    private bool _isAdjustingPeriodPicker;
 
     public BillingUserControl(AuthenticatedUserDto user)
     {
@@ -88,6 +89,7 @@ public partial class BillingUserControl : UserControl
         billingGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         billingGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
         billingGrid.DataBindingComplete += billingGrid_DataBindingComplete;
+        billingGrid.CellFormatting += billingGrid_CellFormatting;
     }
 
     private async Task LoadBillingAsync()
@@ -97,13 +99,13 @@ public partial class BillingUserControl : UserControl
             SetBusyState(true, "Loading billings...");
 
             BillingReportQueryOptions options = BuildQueryOptions();
-            _totalRecords = await BillingReportService.GetTotalRecordsAsync(_user.Role, options);
+            _totalRecords = await BillingReportService.GetTableTotalRecordsAsync(_user.Role, options);
 
             int totalPages = Math.Max(1, (int)Math.Ceiling(_totalRecords / (double)PageSize));
             _currentPage = Math.Max(1, Math.Min(_currentPage, totalPages));
 
             int offset = (_currentPage - 1) * PageSize;
-            DataTable rows = await BillingReportService.GetPagedRowsAsync(_user.Role, options, offset, PageSize);
+            DataTable rows = await BillingReportService.GetTablePagedRowsAsync(_user.Role, options, offset, PageSize);
 
             billingGrid.DataSource = rows;
             ApplyGridLayout();
@@ -154,21 +156,42 @@ public partial class BillingUserControl : UserControl
             column.Width = Math.Max(column.Width, 120);
         }
 
-        if (billingGrid.Columns["billing_id"] is { } billingIdColumn)
+        foreach (DataGridViewColumn column in billingGrid.Columns)
         {
-            billingIdColumn.Visible = false;
+            if (column.Name.EndsWith("_id", StringComparison.OrdinalIgnoreCase))
+            {
+                column.Visible = false;
+            }
         }
 
-        if (billingGrid.Columns["zone_id"] is { } zoneIdColumn)
+        foreach (string hiddenColumn in new[]
+                 {
+                     "updated_at", "scf_status", "last_payment_date", "created_at", "penalty_applied_at",
+                     "scf_monthly_used", "scf_total_cap_used", "paid_at", "created_by_username", "created_by_role",
+                     "updated_by_username", "updated_by_full_name", "updated_by_role"
+                 })
         {
-            zoneIdColumn.Visible = false;
+            HideColumn(hiddenColumn);
         }
 
+        SetColumnWidth("billing_date", 124);
+        SetColumnWidth("concessionaire_code", 122);
         SetColumnWidth("concessionaire_name", 260);
+        SetColumnWidth("zone", 130);
+        SetColumnWidth("bill_number", 120);
         SetColumnWidth("address", 260);
-        SetColumnWidth("meter_no", 140);
+        SetColumnWidth("meter_number", 140);
         SetColumnWidth("status", 120);
         SetColumnWidth("scf_status", 120);
+        SetColumnWidth("created_by_username", 140);
+        SetColumnWidth("created_by_full_name", 200);
+        SetColumnWidth("created_by_role", 120);
+        SetColumnWidth("updated_by_username", 140);
+        SetColumnWidth("updated_by_full_name", 200);
+        SetColumnWidth("updated_by_role", 120);
+        SetColumnWidth("created_at", 150);
+        SetColumnWidth("updated_at", 150);
+        SetColumnWidth("paid_at", 150);
 
         // Backward compatibility in case legacy projected columns are used.
         SetColumnWidth("Date", 108);
@@ -193,7 +216,7 @@ public partial class BillingUserControl : UserControl
 
         billingGrid.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
 
-        foreach (string dateOnlyColumn in new[] { "Date", "billing_date", "due_date", "last_payment_date", "first_reading_date", "paid_at", "previous_reading_date", "current_reading_date" })
+        foreach (string dateOnlyColumn in new[] { "Date", "billing_date", "due_date", "last_payment_date", "first_reading_date", "previous_reading_date", "current_reading_date" })
         {
             if (billingGrid.Columns[dateOnlyColumn] is { } column)
             {
@@ -211,7 +234,7 @@ public partial class BillingUserControl : UserControl
             }
         }
 
-        foreach (string dateTimeColumn in new[] { "created_at", "updated_at", "penalty_applied_at" })
+        foreach (string dateTimeColumn in new[] { "created_at", "updated_at", "penalty_applied_at", "paid_at" })
         {
             if (billingGrid.Columns[dateTimeColumn] is { } column)
             {
@@ -252,9 +275,26 @@ public partial class BillingUserControl : UserControl
         {
             if (billingGrid.Columns[boolColumn] is { } column)
             {
+                EnsureCheckBoxColumn(boolColumn);
                 column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
             }
         }
+
+        foreach (string textCenterColumn in new[] { "created_by_role", "updated_by_role", "status", "scf_status" })
+        {
+            if (billingGrid.Columns[textCenterColumn] is { } column)
+            {
+                column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+            }
+        }
+
+        SetColumnDisplayIndex("billing_date", 0);
+        SetColumnDisplayIndex("bill_number", 1);
+        SetColumnDisplayIndex("status", 2);
+        SetColumnDisplayIndex("is_initial", 3);
+        SetColumnDisplayIndex("concessionaire_code", 4);
+        SetColumnDisplayIndex("concessionaire_name", 5);
+        SetColumnDisplayIndex("zone", 6);
     }
 
     private static string GetFriendlyHeader(string columnName)
@@ -270,9 +310,10 @@ public partial class BillingUserControl : UserControl
             "Cu_m³" => "Cu m³",
             "Un_m³" => "Un m³",
             "billing_id" => "Billing ID",
-            "bill_number" => "Bill Number",
-            "concessionaire_code" => "Concessionaire Code",
+            "bill_number" => "Invoice Number",
+            "concessionaire_code" => "Account No",
             "concessionaire_name" => "Concessionaire Name",
+            "zone" => "Zone",
             "previous_reading_date" => "Previous Reading Date",
             "current_reading_date" => "Current Reading Date",
             "previous_reading" => "Previous Reading",
@@ -292,6 +333,12 @@ public partial class BillingUserControl : UserControl
             "due_date" => "Due Date",
             "scf_status" => "SCF Status",
             "is_initial" => "Is Initial",
+            "created_by_username" => "Created By Username",
+            "created_by_full_name" => "Created By",
+            "created_by_role" => "Created By Role",
+            "updated_by_username" => "Updated By Username",
+            "updated_by_full_name" => "Updated By Full Name",
+            "updated_by_role" => "Updated By Role",
             _ => ToProfessionalTitle(columnName)
         };
     }
@@ -332,6 +379,67 @@ public partial class BillingUserControl : UserControl
         }
     }
 
+    private void HideColumn(string columnName)
+    {
+        if (billingGrid.Columns[columnName] is { } column)
+        {
+            column.Visible = false;
+        }
+    }
+
+    private void EnsureCheckBoxColumn(string columnName)
+    {
+        if (billingGrid.Columns[columnName] is not { } existingColumn)
+        {
+            return;
+        }
+
+        if (existingColumn is DataGridViewCheckBoxColumn checkColumn)
+        {
+            checkColumn.ThreeState = false;
+            checkColumn.ReadOnly = true;
+            return;
+        }
+
+        int insertIndex = existingColumn.Index;
+        int displayIndex = existingColumn.DisplayIndex;
+
+        var replacement = new DataGridViewCheckBoxColumn
+        {
+            Name = existingColumn.Name,
+            DataPropertyName = existingColumn.DataPropertyName,
+            HeaderText = existingColumn.HeaderText,
+            Width = existingColumn.Width,
+            Visible = existingColumn.Visible,
+            Frozen = existingColumn.Frozen,
+            ReadOnly = true,
+            SortMode = DataGridViewColumnSortMode.NotSortable,
+            ThreeState = false,
+            TrueValue = true,
+            FalseValue = false,
+            IndeterminateValue = DBNull.Value
+        };
+
+        billingGrid.Columns.RemoveAt(insertIndex);
+        billingGrid.Columns.Insert(insertIndex, replacement);
+
+        if (replacement.Visible)
+        {
+            replacement.DisplayIndex = displayIndex;
+        }
+
+        replacement.ThreeState = false;
+        replacement.ReadOnly = true;
+    }
+
+    private void SetColumnDisplayIndex(string columnName, int displayIndex)
+    {
+        if (billingGrid.Columns[columnName] is { Visible: true } column)
+        {
+            column.DisplayIndex = Math.Min(displayIndex, billingGrid.Columns.Count - 1);
+        }
+    }
+
     private void SetBusyState(bool isBusy, string? busyMessage = null)
     {
         modeComboBox.Enabled = !isBusy;
@@ -359,7 +467,9 @@ public partial class BillingUserControl : UserControl
 
     private async void clearButton_Click(object sender, EventArgs e)
     {
-        periodPicker.Value = DateTime.Today;
+        periodPicker.Value = GetSelectedMode() == BillingViewMode.Monthly
+            ? new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1)
+            : DateTime.Today;
         ApplySelectedMode();
         searchTextBox.Clear();
         _currentPage = 1;
@@ -404,6 +514,33 @@ public partial class BillingUserControl : UserControl
     private void billingGrid_DataBindingComplete(object? sender, DataGridViewBindingCompleteEventArgs e)
     {
         billingGrid.ClearSelection();
+    }
+
+    private void billingGrid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.ColumnIndex < 0)
+        {
+            return;
+        }
+
+        string columnName = billingGrid.Columns[e.ColumnIndex].Name;
+        if (columnName is not ("tax_percent_used" or "discount_percent_used" or "penalty_percent_used"))
+        {
+            return;
+        }
+
+        if (e.Value is null || e.Value == DBNull.Value)
+        {
+            e.Value = string.Empty;
+            e.FormattingApplied = true;
+            return;
+        }
+
+        if (decimal.TryParse(Convert.ToString(e.Value, CultureInfo.InvariantCulture), NumberStyles.Any, CultureInfo.InvariantCulture, out decimal parsed))
+        {
+            e.Value = $"{Math.Round(parsed, MidpointRounding.AwayFromZero):N0}%";
+            e.FormattingApplied = true;
+        }
     }
 
     private async void printReportButton_Click(object sender, EventArgs e)
@@ -471,8 +608,15 @@ public partial class BillingUserControl : UserControl
 
     private async void periodPicker_ValueChanged(object sender, EventArgs e)
     {
-        if (!IsHandleCreated)
+        if (!IsHandleCreated || _isAdjustingPeriodPicker)
         {
+            return;
+        }
+
+        if (GetSelectedMode() == BillingViewMode.Monthly && NormalizeMonthlyPickerValue())
+        {
+            _currentPage = 1;
+            await LoadBillingAsync();
             return;
         }
 
@@ -519,7 +663,30 @@ public partial class BillingUserControl : UserControl
             periodPicker.ShowUpDown = true;
             periodPicker.Format = DateTimePickerFormat.Custom;
             periodPicker.CustomFormat = "MMMM yyyy";
+            NormalizeMonthlyPickerValue();
         }
+    }
+
+    private bool NormalizeMonthlyPickerValue()
+    {
+        DateTime currentValue = periodPicker.Value.Date;
+        DateTime normalizedValue = new(currentValue.Year, currentValue.Month, 1);
+        if (currentValue == normalizedValue)
+        {
+            return false;
+        }
+
+        _isAdjustingPeriodPicker = true;
+        try
+        {
+            periodPicker.Value = normalizedValue;
+        }
+        finally
+        {
+            _isAdjustingPeriodPicker = false;
+        }
+
+        return true;
     }
 
     private BillingViewMode GetSelectedMode()

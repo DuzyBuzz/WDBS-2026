@@ -107,14 +107,21 @@ public partial class MainShellForm : Form
                 _ => throw new InvalidOperationException("Unsupported user role.")
             };
 
-            dashboard.Dock = DockStyle.Fill;
-            contentHostPanel.Controls.Clear();
-            contentHostPanel.Controls.Add(dashboard);
+            SetContentControl(dashboard);
         }
         catch (Exception ex)
         {
-            contentHostPanel.Controls.Clear();
-            contentHostPanel.Controls.Add(CreateDashboardErrorPanel(ex.Message));
+            AppDiagnostics.ReportException("MainShell dashboard load", ex, showDialog: false);
+
+            try
+            {
+                contentHostPanel.Controls.Clear();
+                contentHostPanel.Controls.Add(CreateDashboardErrorPanel(ex.Message));
+            }
+            catch
+            {
+                // Keep shell alive even if fallback rendering fails.
+            }
 
             MessageBox.Show(
                 this,
@@ -167,13 +174,13 @@ public partial class MainShellForm : Form
 
         if (_currentUser.Role == UserRole.Biller && string.Equals(moduleName, "Concessionaire", StringComparison.OrdinalIgnoreCase))
         {
-            LoadModuleControl(new ConcessionaireUserControl(_currentUser.Role));
+            TryLoadModuleControl(() => new ConcessionaireUserControl(_currentUser.Role), moduleName);
             return;
         }
 
         if (_currentUser.Role == UserRole.Biller && string.Equals(moduleName, "Reading", StringComparison.OrdinalIgnoreCase))
         {
-            LoadModuleControl(new MeterReadingUserControl(_currentUser));
+            TryLoadModuleControl(() => new MeterReadingUserControl(_currentUser), moduleName);
             return;
         }
 
@@ -181,7 +188,7 @@ public partial class MainShellForm : Form
             (string.Equals(moduleName, "Billing", StringComparison.OrdinalIgnoreCase)
              || string.Equals(moduleName, "Reports", StringComparison.OrdinalIgnoreCase)))
         {
-            LoadModuleControl(new BillingUserControl(_currentUser));
+            TryLoadModuleControl(() => new BillingUserControl(_currentUser), moduleName);
             return;
         }
 
@@ -195,9 +202,42 @@ public partial class MainShellForm : Form
 
     private void LoadModuleControl(Control control)
     {
+        SetContentControl(control);
+    }
+
+    private void TryLoadModuleControl(Func<Control> controlFactory, string moduleName)
+    {
+        try
+        {
+            LoadModuleControl(controlFactory());
+        }
+        catch (Exception ex)
+        {
+            AppDiagnostics.ReportException($"MainShell module load [{moduleName}]", ex, showDialog: false);
+
+            MessageBox.Show(
+                this,
+                $"{moduleName} failed to open, but the application will stay running.\n\n{ex.Message}",
+                "Module Error",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+    }
+
+    private void SetContentControl(Control control)
+    {
         control.Dock = DockStyle.Fill;
-        contentHostPanel.Controls.Clear();
-        contentHostPanel.Controls.Add(control);
+
+        contentHostPanel.SuspendLayout();
+        try
+        {
+            contentHostPanel.Controls.Clear();
+            contentHostPanel.Controls.Add(control);
+        }
+        finally
+        {
+            contentHostPanel.ResumeLayout();
+        }
     }
 
     private void profileButton_Click(object sender, EventArgs e)
