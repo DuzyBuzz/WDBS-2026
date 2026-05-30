@@ -391,8 +391,8 @@ partial class BillerDashboardControl
         // 
         // reportsTabControl
         // 
-        reportsTabControl.Controls.Add(topConcessionairesTabPage);
         reportsTabControl.Controls.Add(billedTrendTabPage);
+        reportsTabControl.Controls.Add(topConcessionairesTabPage);
         reportsTabControl.Controls.Add(billingStatusTabPage);
         reportsTabControl.Controls.Add(concessionairesByZoneTabPage);
         reportsTabControl.Controls.Add(concessionaireStatusTabPage);

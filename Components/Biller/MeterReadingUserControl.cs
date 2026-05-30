@@ -1423,13 +1423,13 @@ ON DUPLICATE KEY UPDATE settings_value = @settingsValue;";
             DateTime.Now,
             rows);
 
-        using var previewForm = new PrintPreviewForm(
+        var previewForm = new PrintPreviewForm(
             documentData.ReportTitle,
             documentData.PeriodCaption,
             new MeterReadingSheetPrintHelper(documentData),
             "Latest_Meter_Reading_Sheet");
 
-        previewForm.ShowDialog(this);
+        previewForm.Show(this);
     }
 
     private async void generatedBillsDatePicker_ValueChanged(object sender, EventArgs e)

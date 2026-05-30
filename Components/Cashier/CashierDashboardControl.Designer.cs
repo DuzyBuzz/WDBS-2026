@@ -19,178 +19,784 @@ partial class CashierDashboardControl
     private void InitializeComponent()
     {
         layoutPanel = new TableLayoutPanel();
-        subtitleLabel = new Label();
         headingLabel = new Label();
-        cardsFlowLayoutPanel = new FlowLayoutPanel();
-        collectionCardPanel = new Panel();
-        collectionBodyLabel = new Label();
-        collectionTitleLabel = new Label();
-        scfCollectionCardPanel = new Panel();
-        scfCollectionBodyLabel = new Label();
-        scfCollectionTitleLabel = new Label();
-        recordsCardPanel = new Panel();
-        recordsBodyLabel = new Label();
-        recordsTitleLabel = new Label();
+        toolbarPanel = new Panel();
+        prevDayButton = new Button();
+        selectedDateLabel = new Label();
+        nextDayButton = new Button();
+        dashboardStatusLabel = new Label();
+        refreshButton = new Button();
+        dashboardPanel = new TableLayoutPanel();
+        metricsLayoutPanel = new TableLayoutPanel();
+        totalCollectedCardPanel = new Panel();
+        totalCollectedValueLabel = new Label();
+        totalCollectedCaptionLabel = new Label();
+        receiptCountCardPanel = new Panel();
+        receiptCountValueLabel = new Label();
+        receiptCountCaptionLabel = new Label();
+        scfCollectedCardPanel = new Panel();
+        scfCollectedValueLabel = new Label();
+        scfCollectedCaptionLabel = new Label();
+        outstandingAccountsCardPanel = new Panel();
+        outstandingAccountsValueLabel = new Label();
+        outstandingAccountsCaptionLabel = new Label();
+        reportsTabControl = new TabControl();
+        collectionTrendTabPage = new TabPage();
+        collectionTrendSplitContainer = new SplitContainer();
+        collectionTrendCardPanel = new Panel();
+        collectionTrendTitleLabel = new Label();
+        collectionTrendTablePanel = new TableLayoutPanel();
+        collectionTrendTableTitleLabel = new Label();
+        collectionTrendGrid = new DataGridView();
+        paymentTypesTabPage = new TabPage();
+        paymentTypesSplitContainer = new SplitContainer();
+        paymentTypesCardPanel = new Panel();
+        paymentTypesTitleLabel = new Label();
+        paymentTypesTablePanel = new TableLayoutPanel();
+        paymentTypesTableTitleLabel = new Label();
+        paymentTypesGrid = new DataGridView();
+        topAccountsTabPage = new TabPage();
+        topAccountsSplitContainer = new SplitContainer();
+        topAccountsCardPanel = new Panel();
+        topAccountsTitleLabel = new Label();
+        topAccountsTablePanel = new TableLayoutPanel();
+        topAccountsTableTitleLabel = new Label();
+        topAccountsGrid = new DataGridView();
+        recentCollectionsTabPage = new TabPage();
+        recentCollectionsSplitContainer = new SplitContainer();
+        recentCollectionsCardPanel = new Panel();
+        recentCollectionsSummaryLabel = new Label();
+        recentCollectionsTitleLabel = new Label();
+        recentCollectionsTablePanel = new TableLayoutPanel();
+        recentCollectionsTableTitleLabel = new Label();
+        recentCollectionsGrid = new DataGridView();
         layoutPanel.SuspendLayout();
-        cardsFlowLayoutPanel.SuspendLayout();
-        collectionCardPanel.SuspendLayout();
-        scfCollectionCardPanel.SuspendLayout();
-        recordsCardPanel.SuspendLayout();
+        toolbarPanel.SuspendLayout();
+        dashboardPanel.SuspendLayout();
+        metricsLayoutPanel.SuspendLayout();
+        totalCollectedCardPanel.SuspendLayout();
+        receiptCountCardPanel.SuspendLayout();
+        scfCollectedCardPanel.SuspendLayout();
+        outstandingAccountsCardPanel.SuspendLayout();
+        reportsTabControl.SuspendLayout();
+        collectionTrendTabPage.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)collectionTrendSplitContainer).BeginInit();
+        collectionTrendSplitContainer.Panel1.SuspendLayout();
+        collectionTrendSplitContainer.Panel2.SuspendLayout();
+        collectionTrendSplitContainer.SuspendLayout();
+        collectionTrendCardPanel.SuspendLayout();
+        collectionTrendTablePanel.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)collectionTrendGrid).BeginInit();
+        paymentTypesTabPage.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)paymentTypesSplitContainer).BeginInit();
+        paymentTypesSplitContainer.Panel1.SuspendLayout();
+        paymentTypesSplitContainer.Panel2.SuspendLayout();
+        paymentTypesSplitContainer.SuspendLayout();
+        paymentTypesCardPanel.SuspendLayout();
+        paymentTypesTablePanel.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)paymentTypesGrid).BeginInit();
+        topAccountsTabPage.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)topAccountsSplitContainer).BeginInit();
+        topAccountsSplitContainer.Panel1.SuspendLayout();
+        topAccountsSplitContainer.Panel2.SuspendLayout();
+        topAccountsSplitContainer.SuspendLayout();
+        topAccountsCardPanel.SuspendLayout();
+        topAccountsTablePanel.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)topAccountsGrid).BeginInit();
+        recentCollectionsTabPage.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)recentCollectionsSplitContainer).BeginInit();
+        recentCollectionsSplitContainer.Panel1.SuspendLayout();
+        recentCollectionsSplitContainer.Panel2.SuspendLayout();
+        recentCollectionsSplitContainer.SuspendLayout();
+        recentCollectionsCardPanel.SuspendLayout();
+        recentCollectionsTablePanel.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)recentCollectionsGrid).BeginInit();
         SuspendLayout();
         // 
         // layoutPanel
         // 
         layoutPanel.ColumnCount = 1;
         layoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        layoutPanel.Controls.Add(subtitleLabel, 0, 1);
         layoutPanel.Controls.Add(headingLabel, 0, 0);
-        layoutPanel.Controls.Add(cardsFlowLayoutPanel, 0, 2);
+        layoutPanel.Controls.Add(toolbarPanel, 0, 2);
+        layoutPanel.Controls.Add(dashboardPanel, 0, 3);
         layoutPanel.Dock = DockStyle.Fill;
         layoutPanel.Location = new Point(0, 0);
+        layoutPanel.Margin = new Padding(3, 2, 3, 2);
         layoutPanel.Name = "layoutPanel";
-        layoutPanel.Padding = new Padding(0, 4, 0, 0);
-        layoutPanel.RowCount = 3;
+        layoutPanel.Padding = new Padding(0, 3, 0, 0);
+        layoutPanel.RowCount = 4;
+        layoutPanel.RowStyles.Add(new RowStyle());
         layoutPanel.RowStyles.Add(new RowStyle());
         layoutPanel.RowStyles.Add(new RowStyle());
         layoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        layoutPanel.Size = new Size(1046, 618);
+        layoutPanel.Size = new Size(1120, 568);
         layoutPanel.TabIndex = 0;
-        // 
-        // subtitleLabel
-        // 
-        subtitleLabel.AutoSize = true;
-        subtitleLabel.Location = new Point(3, 41);
-        subtitleLabel.MaximumSize = new Size(900, 0);
-        subtitleLabel.Name = "subtitleLabel";
-        subtitleLabel.Size = new Size(44, 19);
-        subtitleLabel.TabIndex = 1;
-        subtitleLabel.Text = "State";
         // 
         // headingLabel
         // 
         headingLabel.AutoSize = true;
-        headingLabel.Location = new Point(3, 4);
+        headingLabel.Location = new Point(3, 3);
         headingLabel.Name = "headingLabel";
-        headingLabel.Size = new Size(86, 19);
+        headingLabel.Size = new Size(72, 15);
         headingLabel.TabIndex = 0;
         headingLabel.Text = "Cashier Hub";
         // 
-        // cardsFlowLayoutPanel
+        // toolbarPanel
         // 
-        cardsFlowLayoutPanel.Controls.Add(collectionCardPanel);
-        cardsFlowLayoutPanel.Controls.Add(scfCollectionCardPanel);
-        cardsFlowLayoutPanel.Controls.Add(recordsCardPanel);
-        cardsFlowLayoutPanel.Dock = DockStyle.Fill;
-        cardsFlowLayoutPanel.Location = new Point(0, 84);
-        cardsFlowLayoutPanel.Margin = new Padding(0, 24, 0, 0);
-        cardsFlowLayoutPanel.Name = "cardsFlowLayoutPanel";
-        cardsFlowLayoutPanel.Size = new Size(1046, 534);
-        cardsFlowLayoutPanel.TabIndex = 2;
-        cardsFlowLayoutPanel.WrapContents = true;
+        toolbarPanel.Controls.Add(prevDayButton);
+        toolbarPanel.Controls.Add(selectedDateLabel);
+        toolbarPanel.Controls.Add(nextDayButton);
+        toolbarPanel.Controls.Add(dashboardStatusLabel);
+        toolbarPanel.Controls.Add(refreshButton);
+        toolbarPanel.Dock = DockStyle.Fill;
+        toolbarPanel.Location = new Point(0, 24);
+        toolbarPanel.Margin = new Padding(0, 6, 0, 0);
+        toolbarPanel.Name = "toolbarPanel";
+        toolbarPanel.Size = new Size(1120, 35);
+        toolbarPanel.TabIndex = 2;
         // 
-        // collectionCardPanel
+        // prevDayButton
         // 
-        collectionCardPanel.Controls.Add(collectionBodyLabel);
-        collectionCardPanel.Controls.Add(collectionTitleLabel);
-        collectionCardPanel.Location = new Point(0, 0);
-        collectionCardPanel.Margin = new Padding(0, 0, 18, 18);
-        collectionCardPanel.Name = "collectionCardPanel";
-        collectionCardPanel.Size = new Size(300, 170);
-        collectionCardPanel.TabIndex = 0;
+        prevDayButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        prevDayButton.Location = new Point(686, 5);
+        prevDayButton.Margin = new Padding(3, 2, 3, 2);
+        prevDayButton.Name = "prevDayButton";
+        prevDayButton.Size = new Size(75, 25);
+        prevDayButton.TabIndex = 1;
+        prevDayButton.Text = "Prev";
+        prevDayButton.UseVisualStyleBackColor = true;
+        prevDayButton.Click += prevDayButton_Click;
         // 
-        // collectionBodyLabel
+        // selectedDateLabel
         // 
-        collectionBodyLabel.AutoSize = true;
-        collectionBodyLabel.Location = new Point(24, 62);
-        collectionBodyLabel.MaximumSize = new Size(240, 0);
-        collectionBodyLabel.Name = "collectionBodyLabel";
-        collectionBodyLabel.Size = new Size(239, 57);
-        collectionBodyLabel.TabIndex = 1;
-        collectionBodyLabel.Text = "Preserve the layout and logic for OR generation, preview, and standard bill collection.";
+        selectedDateLabel.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        selectedDateLabel.Location = new Point(767, 10);
+        selectedDateLabel.Name = "selectedDateLabel";
+        selectedDateLabel.Size = new Size(125, 15);
+        selectedDateLabel.TabIndex = 2;
+        selectedDateLabel.Text = "May 30, 2026";
+        selectedDateLabel.TextAlign = ContentAlignment.MiddleCenter;
         // 
-        // collectionTitleLabel
+        // nextDayButton
         // 
-        collectionTitleLabel.AutoSize = true;
-        collectionTitleLabel.Location = new Point(24, 24);
-        collectionTitleLabel.Name = "collectionTitleLabel";
-        collectionTitleLabel.Size = new Size(67, 19);
-        collectionTitleLabel.TabIndex = 0;
-        collectionTitleLabel.Text = "Collection";
+        nextDayButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        nextDayButton.Location = new Point(898, 5);
+        nextDayButton.Margin = new Padding(3, 2, 3, 2);
+        nextDayButton.Name = "nextDayButton";
+        nextDayButton.Size = new Size(75, 25);
+        nextDayButton.TabIndex = 3;
+        nextDayButton.Text = "Next";
+        nextDayButton.UseVisualStyleBackColor = true;
+        nextDayButton.Click += nextDayButton_Click;
         // 
-        // scfCollectionCardPanel
+        // dashboardStatusLabel
         // 
-        scfCollectionCardPanel.Controls.Add(scfCollectionBodyLabel);
-        scfCollectionCardPanel.Controls.Add(scfCollectionTitleLabel);
-        scfCollectionCardPanel.Location = new Point(318, 0);
-        scfCollectionCardPanel.Margin = new Padding(0, 0, 18, 18);
-        scfCollectionCardPanel.Name = "scfCollectionCardPanel";
-        scfCollectionCardPanel.Size = new Size(300, 170);
-        scfCollectionCardPanel.TabIndex = 1;
+        dashboardStatusLabel.AutoSize = true;
+        dashboardStatusLabel.Location = new Point(0, 10);
+        dashboardStatusLabel.Name = "dashboardStatusLabel";
+        dashboardStatusLabel.Size = new Size(249, 15);
+        dashboardStatusLabel.TabIndex = 0;
+        dashboardStatusLabel.Text = "Loading cashier collections and activity data...";
         // 
-        // scfCollectionBodyLabel
+        // refreshButton
         // 
-        scfCollectionBodyLabel.AutoSize = true;
-        scfCollectionBodyLabel.Location = new Point(24, 62);
-        scfCollectionBodyLabel.MaximumSize = new Size(240, 0);
-        scfCollectionBodyLabel.Name = "scfCollectionBodyLabel";
-        scfCollectionBodyLabel.Size = new Size(227, 57);
-        scfCollectionBodyLabel.TabIndex = 1;
-        scfCollectionBodyLabel.Text = "Support SCF-specific cashier posting and keep the legacy flow ready for migration.";
+        refreshButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        refreshButton.Location = new Point(980, 5);
+        refreshButton.Margin = new Padding(3, 2, 3, 2);
+        refreshButton.Name = "refreshButton";
+        refreshButton.Size = new Size(140, 25);
+        refreshButton.TabIndex = 4;
+        refreshButton.Text = "Refresh Dashboard";
+        refreshButton.UseVisualStyleBackColor = true;
+        refreshButton.Click += refreshButton_Click;
         // 
-        // scfCollectionTitleLabel
+        // dashboardPanel
         // 
-        scfCollectionTitleLabel.AutoSize = true;
-        scfCollectionTitleLabel.Location = new Point(24, 24);
-        scfCollectionTitleLabel.Name = "scfCollectionTitleLabel";
-        scfCollectionTitleLabel.Size = new Size(93, 19);
-        scfCollectionTitleLabel.TabIndex = 0;
-        scfCollectionTitleLabel.Text = "SCF Payment";
+        dashboardPanel.ColumnCount = 1;
+        dashboardPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        dashboardPanel.Controls.Add(metricsLayoutPanel, 0, 0);
+        dashboardPanel.Controls.Add(reportsTabControl, 0, 1);
+        dashboardPanel.Dock = DockStyle.Fill;
+        dashboardPanel.Location = new Point(0, 59);
+        dashboardPanel.Margin = new Padding(0);
+        dashboardPanel.Name = "dashboardPanel";
+        dashboardPanel.RowCount = 2;
+        dashboardPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 56F));
+        dashboardPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        dashboardPanel.Size = new Size(1120, 509);
+        dashboardPanel.TabIndex = 3;
         // 
-        // recordsCardPanel
+        // metricsLayoutPanel
         // 
-        recordsCardPanel.Controls.Add(recordsBodyLabel);
-        recordsCardPanel.Controls.Add(recordsTitleLabel);
-        recordsCardPanel.Location = new Point(636, 0);
-        recordsCardPanel.Margin = new Padding(0, 0, 18, 18);
-        recordsCardPanel.Name = "recordsCardPanel";
-        recordsCardPanel.Size = new Size(300, 170);
-        recordsCardPanel.TabIndex = 2;
+        metricsLayoutPanel.ColumnCount = 4;
+        metricsLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+        metricsLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+        metricsLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+        metricsLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
+        metricsLayoutPanel.Controls.Add(totalCollectedCardPanel, 0, 0);
+        metricsLayoutPanel.Controls.Add(receiptCountCardPanel, 1, 0);
+        metricsLayoutPanel.Controls.Add(scfCollectedCardPanel, 2, 0);
+        metricsLayoutPanel.Controls.Add(outstandingAccountsCardPanel, 3, 0);
+        metricsLayoutPanel.Dock = DockStyle.Fill;
+        metricsLayoutPanel.Location = new Point(0, 0);
+        metricsLayoutPanel.Margin = new Padding(0);
+        metricsLayoutPanel.Name = "metricsLayoutPanel";
+        metricsLayoutPanel.RowCount = 1;
+        metricsLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        metricsLayoutPanel.Size = new Size(1120, 56);
+        metricsLayoutPanel.TabIndex = 0;
         // 
-        // recordsBodyLabel
+        // totalCollectedCardPanel
         // 
-        recordsBodyLabel.AutoSize = true;
-        recordsBodyLabel.Location = new Point(24, 62);
-        recordsBodyLabel.MaximumSize = new Size(240, 0);
-        recordsBodyLabel.Name = "recordsBodyLabel";
-        recordsBodyLabel.Size = new Size(236, 57);
-        recordsBodyLabel.TabIndex = 1;
-        recordsBodyLabel.Text = "Review collection history, preserve void support, and keep cashier reporting accessible.";
+        totalCollectedCardPanel.Controls.Add(totalCollectedValueLabel);
+        totalCollectedCardPanel.Controls.Add(totalCollectedCaptionLabel);
+        totalCollectedCardPanel.Dock = DockStyle.Top;
+        totalCollectedCardPanel.Location = new Point(0, 0);
+        totalCollectedCardPanel.Margin = new Padding(0);
+        totalCollectedCardPanel.Name = "totalCollectedCardPanel";
+        totalCollectedCardPanel.Padding = new Padding(3);
+        totalCollectedCardPanel.Size = new Size(280, 56);
+        totalCollectedCardPanel.TabIndex = 0;
         // 
-        // recordsTitleLabel
+        // totalCollectedValueLabel
         // 
-        recordsTitleLabel.AutoSize = true;
-        recordsTitleLabel.Location = new Point(24, 24);
-        recordsTitleLabel.Name = "recordsTitleLabel";
-        recordsTitleLabel.Size = new Size(118, 19);
-        recordsTitleLabel.TabIndex = 0;
-        recordsTitleLabel.Text = "Collection Records";
+        totalCollectedValueLabel.AutoSize = true;
+        totalCollectedValueLabel.Dock = DockStyle.Top;
+        totalCollectedValueLabel.Location = new Point(3, 18);
+        totalCollectedValueLabel.Name = "totalCollectedValueLabel";
+        totalCollectedValueLabel.Size = new Size(54, 15);
+        totalCollectedValueLabel.TabIndex = 1;
+        totalCollectedValueLabel.Text = "PHP 0.00";
+        // 
+        // totalCollectedCaptionLabel
+        // 
+        totalCollectedCaptionLabel.AutoSize = true;
+        totalCollectedCaptionLabel.Dock = DockStyle.Top;
+        totalCollectedCaptionLabel.Location = new Point(3, 3);
+        totalCollectedCaptionLabel.Name = "totalCollectedCaptionLabel";
+        totalCollectedCaptionLabel.Size = new Size(91, 15);
+        totalCollectedCaptionLabel.TabIndex = 0;
+        totalCollectedCaptionLabel.Text = "Collected Today";
+        // 
+        // receiptCountCardPanel
+        // 
+        receiptCountCardPanel.Controls.Add(receiptCountValueLabel);
+        receiptCountCardPanel.Controls.Add(receiptCountCaptionLabel);
+        receiptCountCardPanel.Dock = DockStyle.Top;
+        receiptCountCardPanel.Location = new Point(280, 0);
+        receiptCountCardPanel.Margin = new Padding(0);
+        receiptCountCardPanel.Name = "receiptCountCardPanel";
+        receiptCountCardPanel.Padding = new Padding(3);
+        receiptCountCardPanel.Size = new Size(280, 56);
+        receiptCountCardPanel.TabIndex = 1;
+        // 
+        // receiptCountValueLabel
+        // 
+        receiptCountValueLabel.AutoSize = true;
+        receiptCountValueLabel.Dock = DockStyle.Top;
+        receiptCountValueLabel.Location = new Point(3, 18);
+        receiptCountValueLabel.Name = "receiptCountValueLabel";
+        receiptCountValueLabel.Size = new Size(13, 15);
+        receiptCountValueLabel.TabIndex = 1;
+        receiptCountValueLabel.Text = "0";
+        // 
+        // receiptCountCaptionLabel
+        // 
+        receiptCountCaptionLabel.AutoSize = true;
+        receiptCountCaptionLabel.Dock = DockStyle.Top;
+        receiptCountCaptionLabel.Location = new Point(3, 3);
+        receiptCountCaptionLabel.Name = "receiptCountCaptionLabel";
+        receiptCountCaptionLabel.Size = new Size(67, 15);
+        receiptCountCaptionLabel.TabIndex = 0;
+        receiptCountCaptionLabel.Text = "ORs Posted";
+        // 
+        // scfCollectedCardPanel
+        // 
+        scfCollectedCardPanel.Controls.Add(scfCollectedValueLabel);
+        scfCollectedCardPanel.Controls.Add(scfCollectedCaptionLabel);
+        scfCollectedCardPanel.Dock = DockStyle.Top;
+        scfCollectedCardPanel.Location = new Point(560, 0);
+        scfCollectedCardPanel.Margin = new Padding(0);
+        scfCollectedCardPanel.Name = "scfCollectedCardPanel";
+        scfCollectedCardPanel.Padding = new Padding(3);
+        scfCollectedCardPanel.Size = new Size(280, 56);
+        scfCollectedCardPanel.TabIndex = 2;
+        // 
+        // scfCollectedValueLabel
+        // 
+        scfCollectedValueLabel.AutoSize = true;
+        scfCollectedValueLabel.Dock = DockStyle.Top;
+        scfCollectedValueLabel.Location = new Point(3, 18);
+        scfCollectedValueLabel.Name = "scfCollectedValueLabel";
+        scfCollectedValueLabel.Size = new Size(54, 15);
+        scfCollectedValueLabel.TabIndex = 1;
+        scfCollectedValueLabel.Text = "PHP 0.00";
+        // 
+        // scfCollectedCaptionLabel
+        // 
+        scfCollectedCaptionLabel.AutoSize = true;
+        scfCollectedCaptionLabel.Dock = DockStyle.Top;
+        scfCollectedCaptionLabel.Location = new Point(3, 3);
+        scfCollectedCaptionLabel.Name = "scfCollectedCaptionLabel";
+        scfCollectedCaptionLabel.Size = new Size(80, 15);
+        scfCollectedCaptionLabel.TabIndex = 0;
+        scfCollectedCaptionLabel.Text = "SCF Collected";
+        // 
+        // outstandingAccountsCardPanel
+        // 
+        outstandingAccountsCardPanel.Controls.Add(outstandingAccountsValueLabel);
+        outstandingAccountsCardPanel.Controls.Add(outstandingAccountsCaptionLabel);
+        outstandingAccountsCardPanel.Dock = DockStyle.Top;
+        outstandingAccountsCardPanel.Location = new Point(840, 0);
+        outstandingAccountsCardPanel.Margin = new Padding(0);
+        outstandingAccountsCardPanel.Name = "outstandingAccountsCardPanel";
+        outstandingAccountsCardPanel.Padding = new Padding(3);
+        outstandingAccountsCardPanel.Size = new Size(280, 56);
+        outstandingAccountsCardPanel.TabIndex = 3;
+        // 
+        // outstandingAccountsValueLabel
+        // 
+        outstandingAccountsValueLabel.AutoSize = true;
+        outstandingAccountsValueLabel.Dock = DockStyle.Top;
+        outstandingAccountsValueLabel.Location = new Point(3, 18);
+        outstandingAccountsValueLabel.Name = "outstandingAccountsValueLabel";
+        outstandingAccountsValueLabel.Size = new Size(13, 15);
+        outstandingAccountsValueLabel.TabIndex = 1;
+        outstandingAccountsValueLabel.Text = "0";
+        // 
+        // outstandingAccountsCaptionLabel
+        // 
+        outstandingAccountsCaptionLabel.AutoSize = true;
+        outstandingAccountsCaptionLabel.Dock = DockStyle.Top;
+        outstandingAccountsCaptionLabel.Location = new Point(3, 3);
+        outstandingAccountsCaptionLabel.Name = "outstandingAccountsCaptionLabel";
+        outstandingAccountsCaptionLabel.Size = new Size(126, 15);
+        outstandingAccountsCaptionLabel.TabIndex = 0;
+        outstandingAccountsCaptionLabel.Text = "Outstanding Accounts";
+        // 
+        // reportsTabControl
+        // 
+        reportsTabControl.Controls.Add(collectionTrendTabPage);
+        reportsTabControl.Controls.Add(paymentTypesTabPage);
+        reportsTabControl.Controls.Add(topAccountsTabPage);
+        reportsTabControl.Controls.Add(recentCollectionsTabPage);
+        reportsTabControl.Dock = DockStyle.Fill;
+        reportsTabControl.Location = new Point(0, 65);
+        reportsTabControl.Margin = new Padding(0, 9, 0, 0);
+        reportsTabControl.Name = "reportsTabControl";
+        reportsTabControl.SelectedIndex = 0;
+        reportsTabControl.Size = new Size(1120, 444);
+        reportsTabControl.TabIndex = 1;
+        // 
+        // collectionTrendTabPage
+        // 
+        collectionTrendTabPage.Controls.Add(collectionTrendSplitContainer);
+        collectionTrendTabPage.Location = new Point(4, 24);
+        collectionTrendTabPage.Name = "collectionTrendTabPage";
+        collectionTrendTabPage.Padding = new Padding(8, 6, 8, 6);
+        collectionTrendTabPage.Size = new Size(1112, 416);
+        collectionTrendTabPage.TabIndex = 0;
+        collectionTrendTabPage.Text = "Daily Collection Comparison";
+        collectionTrendTabPage.UseVisualStyleBackColor = true;
+        // 
+        // collectionTrendSplitContainer
+        // 
+        collectionTrendSplitContainer.Dock = DockStyle.Fill;
+        collectionTrendSplitContainer.Location = new Point(8, 6);
+        collectionTrendSplitContainer.Name = "collectionTrendSplitContainer";
+        collectionTrendSplitContainer.Orientation = Orientation.Horizontal;
+        // 
+        // collectionTrendSplitContainer.Panel1
+        // 
+        collectionTrendSplitContainer.Panel1.Controls.Add(collectionTrendCardPanel);
+        collectionTrendSplitContainer.Panel1MinSize = 160;
+        // 
+        // collectionTrendSplitContainer.Panel2
+        // 
+        collectionTrendSplitContainer.Panel2.Controls.Add(collectionTrendTablePanel);
+        collectionTrendSplitContainer.Size = new Size(1096, 404);
+        collectionTrendSplitContainer.SplitterDistance = 252;
+        collectionTrendSplitContainer.TabIndex = 0;
+        // 
+        // collectionTrendCardPanel
+        // 
+        collectionTrendCardPanel.Controls.Add(collectionTrendTitleLabel);
+        collectionTrendCardPanel.Dock = DockStyle.Fill;
+        collectionTrendCardPanel.Location = new Point(0, 0);
+        collectionTrendCardPanel.Name = "collectionTrendCardPanel";
+        collectionTrendCardPanel.Padding = new Padding(16, 9, 16, 11);
+        collectionTrendCardPanel.Size = new Size(1096, 252);
+        collectionTrendCardPanel.TabIndex = 0;
+        // 
+        // collectionTrendTitleLabel
+        // 
+        collectionTrendTitleLabel.Dock = DockStyle.Top;
+        collectionTrendTitleLabel.Location = new Point(16, 9);
+        collectionTrendTitleLabel.Name = "collectionTrendTitleLabel";
+        collectionTrendTitleLabel.Size = new Size(1064, 21);
+        collectionTrendTitleLabel.TabIndex = 0;
+        collectionTrendTitleLabel.Text = "Collection Trend";
+        collectionTrendTitleLabel.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // collectionTrendTablePanel
+        // 
+        collectionTrendTablePanel.ColumnCount = 1;
+        collectionTrendTablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        collectionTrendTablePanel.Controls.Add(collectionTrendTableTitleLabel, 0, 0);
+        collectionTrendTablePanel.Controls.Add(collectionTrendGrid, 0, 1);
+        collectionTrendTablePanel.Dock = DockStyle.Fill;
+        collectionTrendTablePanel.Location = new Point(0, 0);
+        collectionTrendTablePanel.Name = "collectionTrendTablePanel";
+        collectionTrendTablePanel.RowCount = 2;
+        collectionTrendTablePanel.RowStyles.Add(new RowStyle());
+        collectionTrendTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        collectionTrendTablePanel.Size = new Size(1096, 148);
+        collectionTrendTablePanel.TabIndex = 0;
+        // 
+        // collectionTrendTableTitleLabel
+        // 
+        collectionTrendTableTitleLabel.AutoSize = true;
+        collectionTrendTableTitleLabel.Location = new Point(0, 0);
+        collectionTrendTableTitleLabel.Margin = new Padding(0, 0, 0, 6);
+        collectionTrendTableTitleLabel.Name = "collectionTrendTableTitleLabel";
+        collectionTrendTableTitleLabel.Size = new Size(166, 15);
+        collectionTrendTableTitleLabel.TabIndex = 0;
+        collectionTrendTableTitleLabel.Text = "Daily Collected vs Uncollected";
+        // 
+        // collectionTrendGrid
+        // 
+        collectionTrendGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        collectionTrendGrid.Dock = DockStyle.Fill;
+        collectionTrendGrid.Location = new Point(0, 21);
+        collectionTrendGrid.Margin = new Padding(0);
+        collectionTrendGrid.Name = "collectionTrendGrid";
+        collectionTrendGrid.Size = new Size(1096, 127);
+        collectionTrendGrid.TabIndex = 1;
+        // 
+        // paymentTypesTabPage
+        // 
+        paymentTypesTabPage.Controls.Add(paymentTypesSplitContainer);
+        paymentTypesTabPage.Location = new Point(4, 24);
+        paymentTypesTabPage.Name = "paymentTypesTabPage";
+        paymentTypesTabPage.Padding = new Padding(8, 6, 8, 6);
+        paymentTypesTabPage.Size = new Size(1112, 416);
+        paymentTypesTabPage.TabIndex = 1;
+        paymentTypesTabPage.Text = "Payment Types";
+        paymentTypesTabPage.UseVisualStyleBackColor = true;
+        // 
+        // paymentTypesSplitContainer
+        // 
+        paymentTypesSplitContainer.Dock = DockStyle.Fill;
+        paymentTypesSplitContainer.Location = new Point(8, 6);
+        paymentTypesSplitContainer.Name = "paymentTypesSplitContainer";
+        paymentTypesSplitContainer.Orientation = Orientation.Horizontal;
+        // 
+        // paymentTypesSplitContainer.Panel1
+        // 
+        paymentTypesSplitContainer.Panel1.Controls.Add(paymentTypesCardPanel);
+        paymentTypesSplitContainer.Panel1MinSize = 160;
+        // 
+        // paymentTypesSplitContainer.Panel2
+        // 
+        paymentTypesSplitContainer.Panel2.Controls.Add(paymentTypesTablePanel);
+        paymentTypesSplitContainer.Size = new Size(1096, 404);
+        paymentTypesSplitContainer.SplitterDistance = 252;
+        paymentTypesSplitContainer.TabIndex = 0;
+        // 
+        // paymentTypesCardPanel
+        // 
+        paymentTypesCardPanel.Controls.Add(paymentTypesTitleLabel);
+        paymentTypesCardPanel.Dock = DockStyle.Fill;
+        paymentTypesCardPanel.Location = new Point(0, 0);
+        paymentTypesCardPanel.Name = "paymentTypesCardPanel";
+        paymentTypesCardPanel.Padding = new Padding(16, 9, 16, 11);
+        paymentTypesCardPanel.Size = new Size(1096, 252);
+        paymentTypesCardPanel.TabIndex = 0;
+        // 
+        // paymentTypesTitleLabel
+        // 
+        paymentTypesTitleLabel.Dock = DockStyle.Top;
+        paymentTypesTitleLabel.Location = new Point(16, 9);
+        paymentTypesTitleLabel.Name = "paymentTypesTitleLabel";
+        paymentTypesTitleLabel.Size = new Size(1064, 21);
+        paymentTypesTitleLabel.TabIndex = 0;
+        paymentTypesTitleLabel.Text = "Payment Type Mix";
+        paymentTypesTitleLabel.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // paymentTypesTablePanel
+        // 
+        paymentTypesTablePanel.ColumnCount = 1;
+        paymentTypesTablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        paymentTypesTablePanel.Controls.Add(paymentTypesTableTitleLabel, 0, 0);
+        paymentTypesTablePanel.Controls.Add(paymentTypesGrid, 0, 1);
+        paymentTypesTablePanel.Dock = DockStyle.Fill;
+        paymentTypesTablePanel.Location = new Point(0, 0);
+        paymentTypesTablePanel.Name = "paymentTypesTablePanel";
+        paymentTypesTablePanel.RowCount = 2;
+        paymentTypesTablePanel.RowStyles.Add(new RowStyle());
+        paymentTypesTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        paymentTypesTablePanel.Size = new Size(1096, 148);
+        paymentTypesTablePanel.TabIndex = 0;
+        // 
+        // paymentTypesTableTitleLabel
+        // 
+        paymentTypesTableTitleLabel.AutoSize = true;
+        paymentTypesTableTitleLabel.Location = new Point(0, 0);
+        paymentTypesTableTitleLabel.Margin = new Padding(0, 0, 0, 6);
+        paymentTypesTableTitleLabel.Name = "paymentTypesTableTitleLabel";
+        paymentTypesTableTitleLabel.Size = new Size(164, 15);
+        paymentTypesTableTitleLabel.TabIndex = 0;
+        paymentTypesTableTitleLabel.Text = "Payment Method Distribution";
+        // 
+        // paymentTypesGrid
+        // 
+        paymentTypesGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        paymentTypesGrid.Dock = DockStyle.Fill;
+        paymentTypesGrid.Location = new Point(0, 21);
+        paymentTypesGrid.Margin = new Padding(0);
+        paymentTypesGrid.Name = "paymentTypesGrid";
+        paymentTypesGrid.Size = new Size(1096, 127);
+        paymentTypesGrid.TabIndex = 1;
+        // 
+        // topAccountsTabPage
+        // 
+        topAccountsTabPage.Controls.Add(topAccountsSplitContainer);
+        topAccountsTabPage.Location = new Point(4, 24);
+        topAccountsTabPage.Name = "topAccountsTabPage";
+        topAccountsTabPage.Padding = new Padding(8, 6, 8, 6);
+        topAccountsTabPage.Size = new Size(1112, 416);
+        topAccountsTabPage.TabIndex = 2;
+        topAccountsTabPage.Text = "Top Accounts";
+        topAccountsTabPage.UseVisualStyleBackColor = true;
+        // 
+        // topAccountsSplitContainer
+        // 
+        topAccountsSplitContainer.Dock = DockStyle.Fill;
+        topAccountsSplitContainer.Location = new Point(8, 6);
+        topAccountsSplitContainer.Name = "topAccountsSplitContainer";
+        topAccountsSplitContainer.Orientation = Orientation.Horizontal;
+        // 
+        // topAccountsSplitContainer.Panel1
+        // 
+        topAccountsSplitContainer.Panel1.Controls.Add(topAccountsCardPanel);
+        topAccountsSplitContainer.Panel1MinSize = 160;
+        // 
+        // topAccountsSplitContainer.Panel2
+        // 
+        topAccountsSplitContainer.Panel2.Controls.Add(topAccountsTablePanel);
+        topAccountsSplitContainer.Size = new Size(1096, 404);
+        topAccountsSplitContainer.SplitterDistance = 252;
+        topAccountsSplitContainer.TabIndex = 0;
+        // 
+        // topAccountsCardPanel
+        // 
+        topAccountsCardPanel.Controls.Add(topAccountsTitleLabel);
+        topAccountsCardPanel.Dock = DockStyle.Fill;
+        topAccountsCardPanel.Location = new Point(0, 0);
+        topAccountsCardPanel.Name = "topAccountsCardPanel";
+        topAccountsCardPanel.Padding = new Padding(16, 9, 16, 11);
+        topAccountsCardPanel.Size = new Size(1096, 252);
+        topAccountsCardPanel.TabIndex = 0;
+        // 
+        // topAccountsTitleLabel
+        // 
+        topAccountsTitleLabel.Dock = DockStyle.Top;
+        topAccountsTitleLabel.Location = new Point(16, 9);
+        topAccountsTitleLabel.Name = "topAccountsTitleLabel";
+        topAccountsTitleLabel.Size = new Size(1064, 21);
+        topAccountsTitleLabel.TabIndex = 0;
+        topAccountsTitleLabel.Text = "Top Collected Accounts";
+        topAccountsTitleLabel.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // topAccountsTablePanel
+        // 
+        topAccountsTablePanel.ColumnCount = 1;
+        topAccountsTablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        topAccountsTablePanel.Controls.Add(topAccountsTableTitleLabel, 0, 0);
+        topAccountsTablePanel.Controls.Add(topAccountsGrid, 0, 1);
+        topAccountsTablePanel.Dock = DockStyle.Fill;
+        topAccountsTablePanel.Location = new Point(0, 0);
+        topAccountsTablePanel.Name = "topAccountsTablePanel";
+        topAccountsTablePanel.RowCount = 2;
+        topAccountsTablePanel.RowStyles.Add(new RowStyle());
+        topAccountsTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        topAccountsTablePanel.Size = new Size(1096, 148);
+        topAccountsTablePanel.TabIndex = 0;
+        // 
+        // topAccountsTableTitleLabel
+        // 
+        topAccountsTableTitleLabel.AutoSize = true;
+        topAccountsTableTitleLabel.Location = new Point(0, 0);
+        topAccountsTableTitleLabel.Margin = new Padding(0, 0, 0, 6);
+        topAccountsTableTitleLabel.Name = "topAccountsTableTitleLabel";
+        topAccountsTableTitleLabel.Size = new Size(189, 15);
+        topAccountsTableTitleLabel.TabIndex = 0;
+        topAccountsTableTitleLabel.Text = "Highest Collected Concessionaires";
+        // 
+        // topAccountsGrid
+        // 
+        topAccountsGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        topAccountsGrid.Dock = DockStyle.Fill;
+        topAccountsGrid.Location = new Point(0, 21);
+        topAccountsGrid.Margin = new Padding(0);
+        topAccountsGrid.Name = "topAccountsGrid";
+        topAccountsGrid.Size = new Size(1096, 127);
+        topAccountsGrid.TabIndex = 1;
+        // 
+        // recentCollectionsTabPage
+        // 
+        recentCollectionsTabPage.Controls.Add(recentCollectionsSplitContainer);
+        recentCollectionsTabPage.Location = new Point(4, 24);
+        recentCollectionsTabPage.Name = "recentCollectionsTabPage";
+        recentCollectionsTabPage.Padding = new Padding(8, 6, 8, 6);
+        recentCollectionsTabPage.Size = new Size(1112, 416);
+        recentCollectionsTabPage.TabIndex = 3;
+        recentCollectionsTabPage.Text = "Recent Collections";
+        recentCollectionsTabPage.UseVisualStyleBackColor = true;
+        // 
+        // recentCollectionsSplitContainer
+        // 
+        recentCollectionsSplitContainer.Dock = DockStyle.Fill;
+        recentCollectionsSplitContainer.Location = new Point(8, 6);
+        recentCollectionsSplitContainer.Name = "recentCollectionsSplitContainer";
+        recentCollectionsSplitContainer.Orientation = Orientation.Horizontal;
+        // 
+        // recentCollectionsSplitContainer.Panel1
+        // 
+        recentCollectionsSplitContainer.Panel1.Controls.Add(recentCollectionsCardPanel);
+        recentCollectionsSplitContainer.Panel1MinSize = 120;
+        // 
+        // recentCollectionsSplitContainer.Panel2
+        // 
+        recentCollectionsSplitContainer.Panel2.Controls.Add(recentCollectionsTablePanel);
+        recentCollectionsSplitContainer.Size = new Size(1096, 404);
+        recentCollectionsSplitContainer.SplitterDistance = 147;
+        recentCollectionsSplitContainer.TabIndex = 0;
+        // 
+        // recentCollectionsCardPanel
+        // 
+        recentCollectionsCardPanel.Controls.Add(recentCollectionsSummaryLabel);
+        recentCollectionsCardPanel.Controls.Add(recentCollectionsTitleLabel);
+        recentCollectionsCardPanel.Dock = DockStyle.Fill;
+        recentCollectionsCardPanel.Location = new Point(0, 0);
+        recentCollectionsCardPanel.Name = "recentCollectionsCardPanel";
+        recentCollectionsCardPanel.Padding = new Padding(16, 12, 16, 12);
+        recentCollectionsCardPanel.Size = new Size(1096, 147);
+        recentCollectionsCardPanel.TabIndex = 0;
+        // 
+        // recentCollectionsSummaryLabel
+        // 
+        recentCollectionsSummaryLabel.Dock = DockStyle.Fill;
+        recentCollectionsSummaryLabel.Location = new Point(16, 33);
+        recentCollectionsSummaryLabel.Name = "recentCollectionsSummaryLabel";
+        recentCollectionsSummaryLabel.Size = new Size(1064, 102);
+        recentCollectionsSummaryLabel.TabIndex = 1;
+        recentCollectionsSummaryLabel.Text = "Cashier activity summary";
+        // 
+        // recentCollectionsTitleLabel
+        // 
+        recentCollectionsTitleLabel.Dock = DockStyle.Top;
+        recentCollectionsTitleLabel.Location = new Point(16, 12);
+        recentCollectionsTitleLabel.Name = "recentCollectionsTitleLabel";
+        recentCollectionsTitleLabel.Size = new Size(1064, 21);
+        recentCollectionsTitleLabel.TabIndex = 0;
+        recentCollectionsTitleLabel.Text = "Recent Collections";
+        recentCollectionsTitleLabel.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // recentCollectionsTablePanel
+        // 
+        recentCollectionsTablePanel.ColumnCount = 1;
+        recentCollectionsTablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        recentCollectionsTablePanel.Controls.Add(recentCollectionsTableTitleLabel, 0, 0);
+        recentCollectionsTablePanel.Controls.Add(recentCollectionsGrid, 0, 1);
+        recentCollectionsTablePanel.Dock = DockStyle.Fill;
+        recentCollectionsTablePanel.Location = new Point(0, 0);
+        recentCollectionsTablePanel.Name = "recentCollectionsTablePanel";
+        recentCollectionsTablePanel.RowCount = 2;
+        recentCollectionsTablePanel.RowStyles.Add(new RowStyle());
+        recentCollectionsTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        recentCollectionsTablePanel.Size = new Size(1096, 253);
+        recentCollectionsTablePanel.TabIndex = 0;
+        // 
+        // recentCollectionsTableTitleLabel
+        // 
+        recentCollectionsTableTitleLabel.AutoSize = true;
+        recentCollectionsTableTitleLabel.Location = new Point(0, 0);
+        recentCollectionsTableTitleLabel.Margin = new Padding(0, 0, 0, 6);
+        recentCollectionsTableTitleLabel.Name = "recentCollectionsTableTitleLabel";
+        recentCollectionsTableTitleLabel.Size = new Size(123, 15);
+        recentCollectionsTableTitleLabel.TabIndex = 0;
+        recentCollectionsTableTitleLabel.Text = "Latest Cashier Activity";
+        // 
+        // recentCollectionsGrid
+        // 
+        recentCollectionsGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        recentCollectionsGrid.Dock = DockStyle.Fill;
+        recentCollectionsGrid.Location = new Point(0, 21);
+        recentCollectionsGrid.Margin = new Padding(0);
+        recentCollectionsGrid.Name = "recentCollectionsGrid";
+        recentCollectionsGrid.Size = new Size(1096, 232);
+        recentCollectionsGrid.TabIndex = 1;
         // 
         // CashierDashboardControl
         // 
-        AutoScaleDimensions = new SizeF(7F, 19F);
+        AutoScaleDimensions = new SizeF(7F, 15F);
         AutoScaleMode = AutoScaleMode.Font;
         Controls.Add(layoutPanel);
         Name = "CashierDashboardControl";
-        Size = new Size(1046, 618);
+        Size = new Size(1120, 568);
         layoutPanel.ResumeLayout(false);
         layoutPanel.PerformLayout();
-        cardsFlowLayoutPanel.ResumeLayout(false);
-        collectionCardPanel.ResumeLayout(false);
-        collectionCardPanel.PerformLayout();
-        scfCollectionCardPanel.ResumeLayout(false);
-        scfCollectionCardPanel.PerformLayout();
-        recordsCardPanel.ResumeLayout(false);
-        recordsCardPanel.PerformLayout();
+        toolbarPanel.ResumeLayout(false);
+        toolbarPanel.PerformLayout();
+        dashboardPanel.ResumeLayout(false);
+        metricsLayoutPanel.ResumeLayout(false);
+        totalCollectedCardPanel.ResumeLayout(false);
+        totalCollectedCardPanel.PerformLayout();
+        receiptCountCardPanel.ResumeLayout(false);
+        receiptCountCardPanel.PerformLayout();
+        scfCollectedCardPanel.ResumeLayout(false);
+        scfCollectedCardPanel.PerformLayout();
+        outstandingAccountsCardPanel.ResumeLayout(false);
+        outstandingAccountsCardPanel.PerformLayout();
+        reportsTabControl.ResumeLayout(false);
+        collectionTrendTabPage.ResumeLayout(false);
+        collectionTrendSplitContainer.Panel1.ResumeLayout(false);
+        collectionTrendSplitContainer.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)collectionTrendSplitContainer).EndInit();
+        collectionTrendSplitContainer.ResumeLayout(false);
+        collectionTrendCardPanel.ResumeLayout(false);
+        collectionTrendTablePanel.ResumeLayout(false);
+        collectionTrendTablePanel.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)collectionTrendGrid).EndInit();
+        paymentTypesTabPage.ResumeLayout(false);
+        paymentTypesSplitContainer.Panel1.ResumeLayout(false);
+        paymentTypesSplitContainer.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)paymentTypesSplitContainer).EndInit();
+        paymentTypesSplitContainer.ResumeLayout(false);
+        paymentTypesCardPanel.ResumeLayout(false);
+        paymentTypesTablePanel.ResumeLayout(false);
+        paymentTypesTablePanel.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)paymentTypesGrid).EndInit();
+        topAccountsTabPage.ResumeLayout(false);
+        topAccountsSplitContainer.Panel1.ResumeLayout(false);
+        topAccountsSplitContainer.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)topAccountsSplitContainer).EndInit();
+        topAccountsSplitContainer.ResumeLayout(false);
+        topAccountsCardPanel.ResumeLayout(false);
+        topAccountsTablePanel.ResumeLayout(false);
+        topAccountsTablePanel.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)topAccountsGrid).EndInit();
+        recentCollectionsTabPage.ResumeLayout(false);
+        recentCollectionsSplitContainer.Panel1.ResumeLayout(false);
+        recentCollectionsSplitContainer.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)recentCollectionsSplitContainer).EndInit();
+        recentCollectionsSplitContainer.ResumeLayout(false);
+        recentCollectionsCardPanel.ResumeLayout(false);
+        recentCollectionsTablePanel.ResumeLayout(false);
+        recentCollectionsTablePanel.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)recentCollectionsGrid).EndInit();
         ResumeLayout(false);
     }
 
@@ -198,15 +804,57 @@ partial class CashierDashboardControl
 
     private TableLayoutPanel layoutPanel;
     private Label headingLabel;
-    private Label subtitleLabel;
-    private FlowLayoutPanel cardsFlowLayoutPanel;
-    private Panel collectionCardPanel;
-    private Label collectionTitleLabel;
-    private Label collectionBodyLabel;
-    private Panel scfCollectionCardPanel;
-    private Label scfCollectionTitleLabel;
-    private Label scfCollectionBodyLabel;
-    private Panel recordsCardPanel;
-    private Label recordsTitleLabel;
-    private Label recordsBodyLabel;
+    private Panel toolbarPanel;
+    private Button prevDayButton;
+    private Label selectedDateLabel;
+    private Button nextDayButton;
+    private Label dashboardStatusLabel;
+    private Button refreshButton;
+    private TableLayoutPanel dashboardPanel;
+    private TableLayoutPanel metricsLayoutPanel;
+    private Panel totalCollectedCardPanel;
+    private Label totalCollectedValueLabel;
+    private Label totalCollectedCaptionLabel;
+    private Panel receiptCountCardPanel;
+    private Label receiptCountValueLabel;
+    private Label receiptCountCaptionLabel;
+    private Panel scfCollectedCardPanel;
+    private Label scfCollectedValueLabel;
+    private Label scfCollectedCaptionLabel;
+    private Panel outstandingAccountsCardPanel;
+    private Label outstandingAccountsValueLabel;
+    private Label outstandingAccountsCaptionLabel;
+    private TabControl reportsTabControl;
+    private TabPage collectionTrendTabPage;
+    private SplitContainer collectionTrendSplitContainer;
+    private Panel collectionTrendCardPanel;
+    private System.Windows.Forms.DataVisualization.Charting.Chart collectionTrendChart;
+    private Label collectionTrendTitleLabel;
+    private TableLayoutPanel collectionTrendTablePanel;
+    private Label collectionTrendTableTitleLabel;
+    private DataGridView collectionTrendGrid;
+    private TabPage paymentTypesTabPage;
+    private SplitContainer paymentTypesSplitContainer;
+    private Panel paymentTypesCardPanel;
+    private System.Windows.Forms.DataVisualization.Charting.Chart paymentTypesChart;
+    private Label paymentTypesTitleLabel;
+    private TableLayoutPanel paymentTypesTablePanel;
+    private Label paymentTypesTableTitleLabel;
+    private DataGridView paymentTypesGrid;
+    private TabPage topAccountsTabPage;
+    private SplitContainer topAccountsSplitContainer;
+    private Panel topAccountsCardPanel;
+    private System.Windows.Forms.DataVisualization.Charting.Chart topAccountsChart;
+    private Label topAccountsTitleLabel;
+    private TableLayoutPanel topAccountsTablePanel;
+    private Label topAccountsTableTitleLabel;
+    private DataGridView topAccountsGrid;
+    private TabPage recentCollectionsTabPage;
+    private SplitContainer recentCollectionsSplitContainer;
+    private Panel recentCollectionsCardPanel;
+    private Label recentCollectionsSummaryLabel;
+    private Label recentCollectionsTitleLabel;
+    private TableLayoutPanel recentCollectionsTablePanel;
+    private Label recentCollectionsTableTitleLabel;
+    private DataGridView recentCollectionsGrid;
 }

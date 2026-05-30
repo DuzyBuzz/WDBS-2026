@@ -175,10 +175,10 @@ ORDER BY status_count DESC, status_name ASC;";
     {
         const string sql = @"
 SELECT
-    COALESCE(NULLIF(TRIM(v.Zone_Name), ''), 'UNASSIGNED') AS zone_name,
+    COALESCE(NULLIF(TRIM(v.Zone), ''), 'UNASSIGNED') AS zone_name,
     COUNT(*) AS zone_count
 FROM v_concessionaire_details v
-GROUP BY COALESCE(NULLIF(TRIM(v.Zone_Name), ''), 'UNASSIGNED')
+GROUP BY COALESCE(NULLIF(TRIM(v.Zone), ''), 'UNASSIGNED')
 ORDER BY zone_count DESC, zone_name ASC;";
 
         await using var command = new MySqlCommand(sql, connection);

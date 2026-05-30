@@ -17,6 +17,7 @@ public partial class MainShellForm : Form
     private readonly Dictionary<Button, NavigationButtonMetadata> _navigationButtonMetadata = new();
 
     private AuthenticatedUserDto _currentUser;
+    private bool _isCloseConfirmed;
 
     public MainShellForm(AuthenticatedUserDto user, IUserProfileService userProfileService)
     {
@@ -26,6 +27,7 @@ public partial class MainShellForm : Form
         ApplyTheme();
         InitializeShell();
         Resize += mainShellForm_Resize;
+        FormClosing += mainShellForm_FormClosing;
     }
 
     private void ApplyTheme()
@@ -70,7 +72,7 @@ public partial class MainShellForm : Form
         IEnumerable<string> roleModules = _currentUser.Role switch
         {
             UserRole.Biller => new[] { "Concessionaire", "Reading", "Billing" },
-            UserRole.Cashier => new[] { "Cashier", "Collections", "Report" },
+            UserRole.Cashier => new[] { "Cashier", "Collections", "Aging", "Aging SCF" },
             UserRole.Admin => new[] { "Users", "System Settings", "Billing", "Collection", "Reports" },
             _ => Array.Empty<string>()
         };
@@ -192,6 +194,60 @@ public partial class MainShellForm : Form
             return;
         }
 
+        if (_currentUser.Role == UserRole.Cashier && string.Equals(moduleName, "Cashier", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new CashierUserControl(_currentUser), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Cashier && string.Equals(moduleName, "Collections", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new CollectionUserControl(_currentUser), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Cashier && string.Equals(moduleName, "Aging", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new AgingOfAccountsUserControl(_currentUser), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Cashier && string.Equals(moduleName, "Aging SCF", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new SCFAgingOfAccountsUserControl(_currentUser), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Reports", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new AdminReportUserControl(_currentUser), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Users", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new AdminUsersUserControl(_currentUser), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "System Settings", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new AdminSystemSettingsUserControl(_currentUser), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Collection", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new CashierUserControl(CreateRoleScopedUser(UserRole.Cashier)), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Billing", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new MeterReadingUserControl(CreateRoleScopedUser(UserRole.Biller)), moduleName);
+            return;
+        }
+
         MessageBox.Show(
             this,
             $"{moduleName} page will open here.",
@@ -277,6 +333,30 @@ public partial class MainShellForm : Form
         Close();
     }
 
+    private void mainShellForm_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        if (_isCloseConfirmed || e.CloseReason == CloseReason.WindowsShutDown)
+        {
+            return;
+        }
+
+        DialogResult confirmation = MessageBox.Show(
+            this,
+            "Are you sure you want to close the application?",
+            "Confirm Exit",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Question,
+            MessageBoxDefaultButton.Button2);
+
+        if (confirmation != DialogResult.Yes)
+        {
+            e.Cancel = true;
+            return;
+        }
+
+        _isCloseConfirmed = true;
+    }
+
     private void mainShellForm_Resize(object? sender, EventArgs e)
     {
         UpdateResponsiveNavigation();
@@ -358,21 +438,34 @@ public partial class MainShellForm : Form
     {
         return module switch
         {
-            "Concessionaire" => "🧾",
+            "Concessionaire" => "👥",
             "Reading" => "📟",
-            "Billing" => "💵",
+            "Billing" => "🧾",
             "Reports" => "📊",
             "Cashier" => "💰",
-            "Collections" => "📥",
-            "Report" => "📈",
+            "Collections" => "💳",
+            "Aging" => "📈",
+            "Aging SCF" => "🕒",
+            "Report" => "📊",
             "Users" => "👥",
             "System Settings" => "⚙️",
-            "Collection" => "📦",
+            "Collection" => "💳",
             _ => "📁"
         };
     }
 
     private sealed record NavigationButtonMetadata(string Label, string Emoji);
+
+    private AuthenticatedUserDto CreateRoleScopedUser(UserRole role)
+    {
+        return new AuthenticatedUserDto
+        {
+            UserId = _currentUser.UserId,
+            Username = _currentUser.Username,
+            FullName = _currentUser.FullName,
+            Role = role
+        };
+    }
 }
 
 internal static class DictionaryExtensions

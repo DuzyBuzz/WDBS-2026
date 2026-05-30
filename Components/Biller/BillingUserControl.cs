@@ -90,6 +90,7 @@ public partial class BillingUserControl : UserControl
         billingGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.None;
         billingGrid.DataBindingComplete += billingGrid_DataBindingComplete;
         billingGrid.CellFormatting += billingGrid_CellFormatting;
+        billingGrid.CellDoubleClick += billingGrid_CellDoubleClick;
     }
 
     private async Task LoadBillingAsync()
@@ -516,6 +517,132 @@ public partial class BillingUserControl : UserControl
         billingGrid.ClearSelection();
     }
 
+    private async void billingGrid_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.RowIndex >= billingGrid.Rows.Count)
+        {
+            return;
+        }
+
+        billingGrid.ClearSelection();
+        DataGridViewRow row = billingGrid.Rows[e.RowIndex];
+        row.Selected = true;
+
+        DataGridViewCell? firstVisibleCell = row.Cells
+            .Cast<DataGridViewCell>()
+            .FirstOrDefault(cell => cell.Visible);
+
+        if (firstVisibleCell is not null)
+        {
+            billingGrid.CurrentCell = firstVisibleCell;
+        }
+
+        await PrintSelectedBillAsync();
+    }
+
+    private async Task PrintSelectedBillAsync()
+    {
+        if (!TryGetSelectedBilling(out int billingId, out string billNumber))
+        {
+            MessageBox.Show(
+                this,
+                "Select a billing row first.",
+                "Print Bill",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information);
+            return;
+        }
+
+        try
+        {
+            SetBusyState(true, $"Loading invoice for bill {billNumber}...");
+
+            BillingInvoiceDocumentData document = await BillingInvoiceDataService.LoadAsync(_user.Role, billingId, _user.FullName);
+
+            statusLabel.ForeColor = AppTheme.MutedTextColor;
+            statusLabel.Text = $"Invoice preview ready for bill {billNumber}.";
+
+            var previewForm = new PrintPreviewForm(
+                "Billing Invoice",
+                $"Invoice No. {document.BillNumber}",
+                new PrintBillInvoice(document),
+                $"Billing_Invoice_{document.BillNumber}");
+
+            previewForm.Show(this);
+        }
+        catch (Exception ex)
+        {
+            statusLabel.ForeColor = AppTheme.DangerColor;
+            statusLabel.Text = "Failed to load invoice preview.";
+            MessageBox.Show(this, ex.Message, "Print Bill Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            SetBusyState(false);
+        }
+    }
+
+    private bool TryGetSelectedBilling(out int billingId, out string billNumber)
+    {
+        billingId = 0;
+        billNumber = string.Empty;
+
+        if (billingGrid.CurrentRow is not { } row || row.IsNewRow)
+        {
+            return false;
+        }
+
+        if (!TryGetIntCellValue(row, out billingId, "billing_id", "Billing_Id"))
+        {
+            return false;
+        }
+
+        billNumber =
+            GetStringCellValue(row, "bill_number") ??
+            GetStringCellValue(row, "Invoice_Number") ??
+            GetStringCellValue(row, "Bill_Number") ??
+            billingId.ToString(CultureInfo.InvariantCulture);
+
+        return true;
+    }
+
+    private static bool TryGetIntCellValue(DataGridViewRow row, out int value, params string[] columnNames)
+    {
+        value = 0;
+
+        foreach (string columnName in columnNames)
+        {
+            if (row.DataGridView?.Columns.Contains(columnName) != true)
+            {
+                continue;
+            }
+
+            object? cellValue = row.Cells[columnName].Value;
+            if (cellValue is null || cellValue == DBNull.Value)
+            {
+                continue;
+            }
+
+            if (int.TryParse(Convert.ToString(cellValue, CultureInfo.InvariantCulture), NumberStyles.Integer, CultureInfo.InvariantCulture, out int parsed))
+            {
+                value = parsed;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static string? GetStringCellValue(DataGridViewRow row, string columnName)
+    {
+        if (row.DataGridView?.Columns.Contains(columnName) != true)
+        {
+            return null;
+        }
+
+        return Convert.ToString(row.Cells[columnName].Value, CultureInfo.CurrentCulture);
+    }
+
     private void billingGrid_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
     {
         if (e.RowIndex < 0 || e.ColumnIndex < 0)
@@ -635,11 +762,11 @@ public partial class BillingUserControl : UserControl
                 DateTime.Now,
                 rows);
 
-            using var previewForm = new PrintPreviewForm(
+            var previewForm = new PrintPreviewForm(
                 document.ReportTitle,
                 document.PeriodCaption,
                 new BillingReportPrintHelper(document));
-            previewForm.ShowDialog(this);
+            previewForm.Show(this);
         }
         catch (Exception ex)
         {

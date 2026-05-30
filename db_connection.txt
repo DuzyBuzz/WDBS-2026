@@ -1,5 +1,5 @@
 # Update these connection strings if your local MySQL credentials differ.
 
-CashierConnection=server=192.168.0.100;user=lanuser;password=password;database=water_district_billing_system_db_text_upgrade_aging_breakdown;
+CashierConnection=server=localhost;user=root;password=password;database=water_district_billing_system_db_text_upgrade_aging_breakdown;
 BillerConnection=server=localhost;user=root;password=password;database=water_district_billing_system_db_text_upgrade_aging_breakdown;
 AdminConnection=server=localhost;user=root;password=password;database=water_district_billing_system_db_text_upgrade_aging_breakdown;

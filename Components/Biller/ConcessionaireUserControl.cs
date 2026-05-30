@@ -151,7 +151,7 @@ SELECT
     v.Tax_Exempted,
     v.Due_Exempted,
     v.Discounted,
-    v.Zone_Name,
+    v.Zone,
     v.Service_Type,
     v.Pipe_Size,
     v.SCF_Total_Amount,
@@ -186,6 +186,11 @@ LIMIT @limit OFFSET @offset;";
         foreach (DataGridViewColumn column in concessionaireGrid.Columns)
         {
             column.HeaderText = GetFriendlyHeader(column.Name);
+        }
+
+        if (concessionaireGrid.Columns["Concessionaire_ID"] is { } idColumn)
+        {
+            idColumn.Visible = false;
         }
     }
 
@@ -251,8 +256,17 @@ LIMIT @limit OFFSET @offset;";
         }
 
         concessionaireGrid.ClearSelection();
-        concessionaireGrid.Rows[e.RowIndex].Selected = true;
-        concessionaireGrid.CurrentCell = concessionaireGrid.Rows[e.RowIndex].Cells[0];
+        DataGridViewRow row = concessionaireGrid.Rows[e.RowIndex];
+        row.Selected = true;
+
+        DataGridViewCell? firstVisibleCell = row.Cells
+            .Cast<DataGridViewCell>()
+            .FirstOrDefault(cell => cell.Visible);
+
+        if (firstVisibleCell is not null)
+        {
+            concessionaireGrid.CurrentCell = firstVisibleCell;
+        }
 
         _contextConcessionaireId = TryGetConcessionaireId(e.RowIndex, out int concessionaireId)
             ? concessionaireId
