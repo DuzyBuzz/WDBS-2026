@@ -50,6 +50,7 @@ ORDER BY concessionaire_id DESC;";
     {
         const string sql = @"
 SELECT
+    collection_id,
     or_number,
     collection_date,
     bill_numbers,

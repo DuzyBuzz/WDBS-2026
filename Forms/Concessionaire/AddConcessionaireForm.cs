@@ -64,6 +64,7 @@ public partial class UpsertConcessionaireForm : Form
         taxExemptedCheckBox.Font = AppTheme.BodyFont;
         dueExemptedCheckBox.Font = AppTheme.BodyFont;
         discountedCheckBox.Font = AppTheme.BodyFont;
+        notBillableCheckBox.Font = AppTheme.BodyFont;
 
         AppTheme.ApplyPrimaryButton(saveButton);
         AppTheme.ApplySeverityButton(cancelButton, ButtonSeverity.Neutral);
@@ -155,6 +156,7 @@ SELECT
     c.is_tax_exempt,
     c.is_due_exempt,
     c.is_discounted,
+    c.is_not_billable,
     COALESCE(sb.total_amount, 0) AS scf_total_amount,
     COALESCE(sb.balance, 0) AS scf_balance_amount,
     COALESCE(sb.monthly, 0) AS scf_monthly_amount
@@ -186,7 +188,8 @@ LIMIT 1;";
             reader.GetDecimal("scf_monthly_amount"),
             reader.GetBoolean("is_tax_exempt"),
             reader.GetBoolean("is_due_exempt"),
-            reader.GetBoolean("is_discounted"));
+            reader.GetBoolean("is_discounted"),
+            reader.GetBoolean("is_not_billable"));
     }
 
     private void PopulateForm(ExistingConcessionaireRecord record)
@@ -202,6 +205,7 @@ LIMIT 1;";
         taxExemptedCheckBox.Checked = record.IsTaxExempt;
         dueExemptedCheckBox.Checked = record.IsDueExempt;
         discountedCheckBox.Checked = record.IsDiscounted;
+        notBillableCheckBox.Checked = record.IsNotBillable;
 
         if (record.ZoneId > 0)
         {
@@ -354,6 +358,7 @@ INSERT INTO concessionaire
     is_tax_exempt,
     is_due_exempt,
     is_discounted,
+    is_not_billable,
     status,
     tin_number
 )
@@ -369,6 +374,7 @@ VALUES
     @isTaxExempt,
     @isDueExempt,
     @isDiscounted,
+    @isNotBillable,
     @status,
     @tin
 );";
@@ -384,6 +390,7 @@ VALUES
         command.Parameters.AddWithValue("@isTaxExempt", request.IsTaxExempt);
         command.Parameters.AddWithValue("@isDueExempt", request.IsDueExempt);
         command.Parameters.AddWithValue("@isDiscounted", request.IsDiscounted);
+        command.Parameters.AddWithValue("@isNotBillable", request.IsNotBillable);
         command.Parameters.AddWithValue("@status", "Active");
         command.Parameters.AddWithValue("@tin", request.TinNumber);
 
@@ -410,6 +417,7 @@ SET
     is_tax_exempt = @isTaxExempt,
     is_due_exempt = @isDueExempt,
     is_discounted = @isDiscounted,
+    is_not_billable = @isNotBillable,
     tin_number = @tin
 WHERE concessionaire_id = @concessionaireId;";
 
@@ -425,6 +433,7 @@ WHERE concessionaire_id = @concessionaireId;";
         command.Parameters.AddWithValue("@isTaxExempt", request.IsTaxExempt);
         command.Parameters.AddWithValue("@isDueExempt", request.IsDueExempt);
         command.Parameters.AddWithValue("@isDiscounted", request.IsDiscounted);
+        command.Parameters.AddWithValue("@isNotBillable", request.IsNotBillable);
         command.Parameters.AddWithValue("@tin", request.TinNumber);
 
         await command.ExecuteNonQueryAsync();
@@ -534,7 +543,8 @@ ON DUPLICATE KEY UPDATE
             scfMonthly,
             taxExemptedCheckBox.Checked,
             dueExemptedCheckBox.Checked,
-            discountedCheckBox.Checked);
+            discountedCheckBox.Checked,
+            notBillableCheckBox.Checked);
 
         return true;
     }
@@ -588,6 +598,7 @@ ON DUPLICATE KEY UPDATE
         taxExemptedCheckBox.Enabled = !isBusy;
         dueExemptedCheckBox.Enabled = !isBusy;
         discountedCheckBox.Enabled = !isBusy;
+        notBillableCheckBox.Enabled = !isBusy;
         saveButton.Enabled = !isBusy;
         cancelButton.Enabled = !isBusy;
 
@@ -617,7 +628,8 @@ ON DUPLICATE KEY UPDATE
         decimal ScfMonthlyAmount,
         bool IsTaxExempt,
         bool IsDueExempt,
-        bool IsDiscounted);
+        bool IsDiscounted,
+        bool IsNotBillable);
 
     private readonly record struct UpsertConcessionaireRequest(
         string AccountNo,
@@ -632,5 +644,6 @@ ON DUPLICATE KEY UPDATE
         decimal ScfMonthlyAmount,
         bool IsTaxExempt,
         bool IsDueExempt,
-        bool IsDiscounted);
+        bool IsDiscounted,
+        bool IsNotBillable);
 }

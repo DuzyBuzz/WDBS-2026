@@ -11,14 +11,6 @@ public partial class CashierDashboardControl : UserControl
 {
     private readonly AuthenticatedUserDto _user;
     private CashierDashboardSnapshot? _snapshot;
-    private TabPage? _monthlyComparisonTabPage;
-    private SplitContainer? _monthlyTrendSplitContainer;
-    private Panel? _monthlyTrendCardPanel;
-    private Label? _monthlyTrendTitleLabel;
-    private TableLayoutPanel? _monthlyTrendTablePanel;
-    private Label? _monthlyTrendTableTitleLabel;
-    private DataGridView? _monthlyTrendGrid;
-    private Chart? _monthlyTrendChart;
     private DateTime _selectedMonth = new(DateTime.Today.Year, DateTime.Today.Month, 1);
     private bool _isLoading;
     private bool _isChartRebindQueued;
@@ -38,7 +30,6 @@ public partial class CashierDashboardControl : UserControl
     {
         _user = user;
         InitializeComponent();
-        InitializeMonthlyComparisonTab();
         ApplyTheme();
         ConfigureGrids();
         ConfigureCharts();
@@ -132,15 +123,10 @@ public partial class CashierDashboardControl : UserControl
                      collectionTrendCardPanel,
                      paymentTypesCardPanel,
                      topAccountsCardPanel,
-                     recentCollectionsCardPanel
+                     monthlyTrendCardPanel,
                  })
         {
             AppTheme.ApplyCard(card);
-        }
-
-        if (_monthlyTrendCardPanel is not null)
-        {
-            AppTheme.ApplyCard(_monthlyTrendCardPanel);
         }
 
         foreach (Label label in new[]
@@ -148,27 +134,16 @@ public partial class CashierDashboardControl : UserControl
                      collectionTrendTitleLabel,
                      paymentTypesTitleLabel,
                      topAccountsTitleLabel,
-                     recentCollectionsTitleLabel,
                      collectionTrendTableTitleLabel,
                      paymentTypesTableTitleLabel,
                      topAccountsTableTitleLabel,
-                     recentCollectionsTableTitleLabel
+                     recentCollectionsTableTitleLabel,
+                     monthlyTrendTitleLabel,
+                     monthlyTrendTableTitleLabel,
                  })
         {
             label.Font = AppTheme.SectionFont;
             label.ForeColor = AppTheme.BodyTextColor;
-        }
-
-        if (_monthlyTrendTitleLabel is not null)
-        {
-            _monthlyTrendTitleLabel.Font = AppTheme.SectionFont;
-            _monthlyTrendTitleLabel.ForeColor = AppTheme.BodyTextColor;
-        }
-
-        if (_monthlyTrendTableTitleLabel is not null)
-        {
-            _monthlyTrendTableTitleLabel.Font = AppTheme.SectionFont;
-            _monthlyTrendTableTitleLabel.ForeColor = AppTheme.BodyTextColor;
         }
 
         foreach (Label label in new[]
@@ -177,11 +152,9 @@ public partial class CashierDashboardControl : UserControl
                      receiptCountCaptionLabel,
                      scfCollectedCaptionLabel,
                      outstandingAccountsCaptionLabel,
-                     recentCollectionsSummaryLabel
                  })
         {
             label.Font = new Font("Segoe UI", 8F, FontStyle.Regular);
-            label.ForeColor = label == recentCollectionsSummaryLabel ? AppTheme.MutedTextColor : AppTheme.MutedTextColor;
         }
 
         totalCollectedCaptionLabel.Text = "Collected (Monthly)";
@@ -236,13 +209,9 @@ public partial class CashierDashboardControl : UserControl
             collectionTrendGrid,
             paymentTypesGrid,
             topAccountsGrid,
-            recentCollectionsGrid
+            recentCollectionsGrid,
+            monthlyTrendGrid,
         };
-
-        if (_monthlyTrendGrid is not null)
-        {
-            grids.Add(_monthlyTrendGrid);
-        }
 
         foreach (DataGridView grid in grids)
         {
@@ -291,129 +260,19 @@ public partial class CashierDashboardControl : UserControl
             topAccountsTitleLabel,
             nameof(topAccountsChart));
 
-        if (_monthlyTrendCardPanel is not null && _monthlyTrendTitleLabel is not null)
-        {
-            _monthlyTrendChart = EnsureChart(
-                _monthlyTrendChart,
-                _monthlyTrendCardPanel,
-                _monthlyTrendTitleLabel,
-                nameof(_monthlyTrendChart));
-        }
+        monthlyTrendChart = EnsureChart(
+            monthlyTrendChart,
+            monthlyTrendCardPanel,
+            monthlyTrendTitleLabel,
+            nameof(monthlyTrendChart));
 
         collectionTrendChart.SuppressExceptions = true;
         paymentTypesChart.SuppressExceptions = true;
         topAccountsChart.SuppressExceptions = true;
-
-        if (_monthlyTrendChart is not null)
-        {
-            _monthlyTrendChart.SuppressExceptions = true;
-        }
+        monthlyTrendChart.SuppressExceptions = true;
     }
 
-    private void InitializeMonthlyComparisonTab()
-    {
-        if (_monthlyComparisonTabPage is not null)
-        {
-            return;
-        }
 
-        _monthlyComparisonTabPage = new TabPage
-        {
-            Name = "monthlyComparisonTabPage",
-            Text = "Monthly Collection Comparison",
-            Padding = new Padding(8, 6, 8, 6),
-            UseVisualStyleBackColor = true
-        };
-
-        _monthlyTrendSplitContainer = new SplitContainer
-        {
-            Name = "monthlyTrendSplitContainer",
-            Dock = DockStyle.Fill,
-            Orientation = Orientation.Horizontal,
-            SplitterDistance = 240,
-            Panel1MinSize = 160
-        };
-
-        _monthlyTrendCardPanel = new Panel
-        {
-            Name = "monthlyTrendCardPanel",
-            Dock = DockStyle.Fill,
-            Padding = new Padding(16, 9, 16, 11)
-        };
-
-        _monthlyTrendTitleLabel = new Label
-        {
-            Name = "monthlyTrendTitleLabel",
-            Dock = DockStyle.Top,
-            Height = 21,
-            TextAlign = ContentAlignment.MiddleLeft,
-            Text = "Monthly Collection Comparison"
-        };
-
-        _monthlyTrendChart = new Chart
-        {
-            Name = "monthlyTrendChart",
-            Dock = DockStyle.Fill,
-            Margin = Padding.Empty,
-            BackColor = Color.White
-        };
-
-        _monthlyTrendCardPanel.Controls.Add(_monthlyTrendChart);
-        _monthlyTrendCardPanel.Controls.Add(_monthlyTrendTitleLabel);
-        _monthlyTrendTitleLabel.BringToFront();
-
-        _monthlyTrendTablePanel = new TableLayoutPanel
-        {
-            Name = "monthlyTrendTablePanel",
-            ColumnCount = 1,
-            Dock = DockStyle.Fill,
-            RowCount = 2
-        };
-        _monthlyTrendTablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        _monthlyTrendTablePanel.RowStyles.Add(new RowStyle());
-        _monthlyTrendTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-
-        _monthlyTrendTableTitleLabel = new Label
-        {
-            Name = "monthlyTrendTableTitleLabel",
-            AutoSize = true,
-            Margin = new Padding(0, 0, 0, 6),
-            Text = "Monthly Collected vs Uncollected"
-        };
-
-        _monthlyTrendGrid = new DataGridView
-        {
-            Name = "monthlyTrendGrid",
-            Dock = DockStyle.Fill,
-            Margin = Padding.Empty,
-            ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        };
-
-        _monthlyTrendTablePanel.Controls.Add(_monthlyTrendTableTitleLabel, 0, 0);
-        _monthlyTrendTablePanel.Controls.Add(_monthlyTrendGrid, 0, 1);
-
-        _monthlyTrendSplitContainer.Panel1.Controls.Add(_monthlyTrendCardPanel);
-        _monthlyTrendSplitContainer.Panel2.Controls.Add(_monthlyTrendTablePanel);
-        _monthlyComparisonTabPage.Controls.Add(_monthlyTrendSplitContainer);
-
-        reportsTabControl.Controls.Add(_monthlyComparisonTabPage);
-        EnsureReportTabSequence();
-    }
-
-    private void EnsureReportTabSequence()
-    {
-        if (_monthlyComparisonTabPage is null)
-        {
-            return;
-        }
-
-        reportsTabControl.TabPages.Clear();
-        reportsTabControl.TabPages.Add(collectionTrendTabPage);
-        reportsTabControl.TabPages.Add(_monthlyComparisonTabPage);
-        reportsTabControl.TabPages.Add(topAccountsTabPage);
-        reportsTabControl.TabPages.Add(paymentTypesTabPage);
-        reportsTabControl.TabPages.Add(recentCollectionsTabPage);
-    }
 
     private static Chart EnsureChart(Chart? chart, Panel hostPanel, Label titleLabel, string chartName)
     {
@@ -528,7 +387,6 @@ public partial class CashierDashboardControl : UserControl
         receiptCountValueLabel.Text = snapshot.OfficialReceiptCount.ToString("N0", CultureInfo.InvariantCulture);
         scfCollectedValueLabel.Text = snapshot.ScfCollectedAmount.ToString("C2", CultureInfo.GetCultureInfo("en-PH"));
         outstandingAccountsValueLabel.Text = $"{snapshot.MonthlyCollectionRate:N2}%";
-        recentCollectionsSummaryLabel.Text = "Showing latest cashier activity entries from the collection log.";
     }
 
     private void UpdateReportTitles(CashierDashboardSnapshot snapshot)
@@ -539,31 +397,20 @@ public partial class CashierDashboardControl : UserControl
 
         collectionTrendTitleLabel.Text = $"Rolling Daily Collection Trend ({trendStart:MMM dd} to {trendEnd:MMM dd, yyyy})";
         collectionTrendTableTitleLabel.Text = "Rolling Daily Collection";
-        if (_monthlyTrendTitleLabel is not null)
-        {
-            _monthlyTrendTitleLabel.Text = $"Rolling Monthly Collection Trend ({monthlyTrendStart:MMM yyyy} to {snapshot.PeriodStart:MMM yyyy})";
-        }
-
-        if (_monthlyTrendTableTitleLabel is not null)
-        {
-            _monthlyTrendTableTitleLabel.Text = "Rolling Monthly Collection";
-        }
+        monthlyTrendTitleLabel.Text = $"Rolling Monthly Collection Trend ({monthlyTrendStart:MMM yyyy} to {snapshot.PeriodStart:MMM yyyy})";
+        monthlyTrendTableTitleLabel.Text = "Rolling Monthly Collection with Rate";
 
         paymentTypesTitleLabel.Text = $"Payment Type Mix ({snapshot.PeriodStart:MMM yyyy})";
         paymentTypesTableTitleLabel.Text = "Payment Method Distribution";
         topAccountsTitleLabel.Text = $"Top 10 Collected Accounts ({snapshot.PeriodStart:MMM yyyy})";
         topAccountsTableTitleLabel.Text = "Top 10 Highest Collected Concessionaires";
-        recentCollectionsTitleLabel.Text = "Recent Cashier Activity";
         recentCollectionsTableTitleLabel.Text = "Latest Cashier Activity";
     }
 
     private void BindTables(CashierDashboardSnapshot snapshot)
     {
         collectionTrendGrid.DataSource = BuildTrendRows(snapshot.CollectionTrend, snapshot.UncollectedTrend);
-        if (_monthlyTrendGrid is not null)
-        {
-            _monthlyTrendGrid.DataSource = BuildTrendRows(snapshot.MonthlyCollectionTrend, snapshot.MonthlyUncollectedTrend);
-        }
+        monthlyTrendGrid.DataSource = BuildTrendRows(snapshot.MonthlyCollectionTrend, snapshot.MonthlyUncollectedTrend);
         paymentTypesGrid.DataSource = BuildValueRows(snapshot.PaymentTypeBreakdown, "Payment Type");
         topAccountsGrid.DataSource = BuildTopAccountsRows(snapshot.TopCollectedAccounts);
         recentCollectionsGrid.DataSource = BuildRecentCollectionRows(snapshot.RecentCollections);
@@ -582,15 +429,14 @@ public partial class CashierDashboardControl : UserControl
         hasChartErrors |= !BindCollectionComparisonChart(
             collectionTrendChart,
             snapshot.CollectionTrend,
-            snapshot.UncollectedTrend);
+            snapshot.UncollectedTrend,
+            includeCollectionRate: false);
 
-        if (_monthlyTrendChart is not null)
-        {
-            hasChartErrors |= !BindCollectionComparisonChart(
-                _monthlyTrendChart,
-                snapshot.MonthlyCollectionTrend,
-                snapshot.MonthlyUncollectedTrend);
-        }
+        hasChartErrors |= !BindCollectionComparisonChart(
+            monthlyTrendChart,
+            snapshot.MonthlyCollectionTrend,
+            snapshot.MonthlyUncollectedTrend,
+            includeCollectionRate: true);
 
         hasChartErrors |= !BindChart(
             paymentTypesChart,
@@ -618,7 +464,8 @@ public partial class CashierDashboardControl : UserControl
     private bool BindCollectionComparisonChart(
         Chart chart,
         IReadOnlyList<CashierDashboardPoint> collectedPoints,
-        IReadOnlyList<CashierDashboardPoint> uncollectedPoints)
+        IReadOnlyList<CashierDashboardPoint> uncollectedPoints,
+        bool includeCollectionRate)
     {
         if (!CanRenderChart(chart))
         {
@@ -647,6 +494,13 @@ public partial class CashierDashboardControl : UserControl
             area.AxisY.LabelStyle.Font = AppTheme.CaptionFont;
             area.AxisY.LabelStyle.Format = "\u20B1#,##0.##";
             area.AxisY.IsStartedFromZero = true;
+
+            area.AxisY2.Enabled = includeCollectionRate ? AxisEnabled.True : AxisEnabled.False;
+            area.AxisY2.MajorGrid.Enabled = false;
+            area.AxisY2.LabelStyle.ForeColor = AppTheme.MutedTextColor;
+            area.AxisY2.LabelStyle.Font = AppTheme.CaptionFont;
+            area.AxisY2.LabelStyle.Format = "0.##'%'";
+            area.AxisY2.IsStartedFromZero = true;
 
             chart.ChartAreas.Add(area);
 
@@ -681,6 +535,22 @@ public partial class CashierDashboardControl : UserControl
                 MarkerSize = 6
             };
 
+            Series? collectionRateSeries = null;
+            if (includeCollectionRate)
+            {
+                collectionRateSeries = new Series("Collection Rate (%)")
+                {
+                    ChartArea = area.Name,
+                    ChartType = SeriesChartType.Line,
+                    BorderWidth = 2,
+                    Color = AppTheme.InfoColor,
+                    IsValueShownAsLabel = false,
+                    MarkerStyle = MarkerStyle.Square,
+                    MarkerSize = 5,
+                    YAxisType = AxisType.Secondary
+                };
+            }
+
             int pointCount = Math.Max(collectedPoints.Count, uncollectedPoints.Count);
             for (int index = 0; index < pointCount; index++)
             {
@@ -691,16 +561,29 @@ public partial class CashierDashboardControl : UserControl
                 string displayLabel = FormatPointLabel(rawLabel);
                 decimal collectedValue = collected?.Value ?? 0M;
                 decimal uncollectedValue = uncollected?.Value ?? 0M;
+                decimal billedValue = collectedValue + uncollectedValue;
+                decimal collectionRatePercent = billedValue <= 0M ? 0M : (collectedValue / billedValue) * 100M;
 
                 int collectedPointIndex = collectedSeries.Points.AddXY(displayLabel, Convert.ToDouble(collectedValue));
                 collectedSeries.Points[collectedPointIndex].ToolTip = $"{rawLabel} | Collected: {FormatPointValue(collectedValue, currency: true)}";
 
                 int uncollectedPointIndex = uncollectedSeries.Points.AddXY(displayLabel, Convert.ToDouble(uncollectedValue));
                 uncollectedSeries.Points[uncollectedPointIndex].ToolTip = $"{rawLabel} | Uncollected: {FormatPointValue(uncollectedValue, currency: true)}";
+
+                if (collectionRateSeries is not null)
+                {
+                    int ratePointIndex = collectionRateSeries.Points.AddXY(displayLabel, Convert.ToDouble(collectionRatePercent));
+                    collectionRateSeries.Points[ratePointIndex].ToolTip =
+                        $"{rawLabel} | Collection Rate: {collectionRatePercent:N2}% (Collected {FormatPointValue(collectedValue, currency: true)} / Billed {FormatPointValue(billedValue, currency: true)})";
+                }
             }
 
             chart.Series.Add(collectedSeries);
             chart.Series.Add(uncollectedSeries);
+            if (collectionRateSeries is not null)
+            {
+                chart.Series.Add(collectionRateSeries);
+            }
 
             if (pointCount == 0)
             {
@@ -778,7 +661,8 @@ public partial class CashierDashboardControl : UserControl
 
             var legend = new Legend("DefaultLegend")
             {
-                Docking = Docking.Right,
+                Docking = Docking.Bottom,
+                Alignment = StringAlignment.Center,
                 Font = AppTheme.CaptionFont,
                 ForeColor = AppTheme.BodyTextColor
             };
@@ -881,7 +765,6 @@ public partial class CashierDashboardControl : UserControl
         IReadOnlyList<CashierDashboardPoint> uncollectedPoints)
     {
         var rows = new List<TrendRow>();
-        decimal previousCollected = 0M;
 
         int rowCount = Math.Max(collectedPoints.Count, uncollectedPoints.Count);
 
@@ -894,8 +777,8 @@ public partial class CashierDashboardControl : UserControl
             decimal collectedAmount = collected?.Value ?? 0M;
             decimal uncollectedAmount = uncollected?.Value ?? 0M;
             decimal netAmount = collectedAmount - uncollectedAmount;
-            decimal delta = index == 0 ? 0M : collectedAmount - previousCollected;
-            decimal deltaPercent = index == 0 || previousCollected == 0M ? 0M : (delta / previousCollected) * 100M;
+            decimal billedAmount = collectedAmount + uncollectedAmount;
+            decimal collectionRatePercent = billedAmount <= 0M ? 0M : (collectedAmount / billedAmount) * 100M;
 
             rows.Add(new TrendRow
             {
@@ -903,11 +786,10 @@ public partial class CashierDashboardControl : UserControl
                 CollectedAmount = collectedAmount,
                 UncollectedAmount = uncollectedAmount,
                 NetAmount = netAmount,
-                CollectedDelta = delta,
-                DeltaPercent = deltaPercent
+                CollectedDelta = 0M,
+                DeltaPercent = 0M,
+                CollectionRatePercent = collectionRatePercent
             });
-
-            previousCollected = collectedAmount;
         }
 
         return rows;
@@ -999,13 +881,15 @@ public partial class CashierDashboardControl : UserControl
         DataGridViewColumn? netColumn = collectionTrendGrid.Columns[nameof(TrendRow.NetAmount)];
         DataGridViewColumn? deltaColumn = collectionTrendGrid.Columns[nameof(TrendRow.CollectedDelta)];
         DataGridViewColumn? deltaPercentColumn = collectionTrendGrid.Columns[nameof(TrendRow.DeltaPercent)];
+        DataGridViewColumn? collectionRateColumn = collectionTrendGrid.Columns[nameof(TrendRow.CollectionRatePercent)];
 
         if (periodColumn is null
             || collectedColumn is null
             || uncollectedColumn is null
             || netColumn is null
             || deltaColumn is null
-            || deltaPercentColumn is null)
+            || deltaPercentColumn is null
+            || collectionRateColumn is null)
         {
             return;
         }
@@ -1014,8 +898,9 @@ public partial class CashierDashboardControl : UserControl
         collectedColumn.HeaderText = "Collected";
         uncollectedColumn.HeaderText = "Uncollected";
         netColumn.HeaderText = "Net";
-        deltaColumn.HeaderText = "Collected Change";
-        deltaPercentColumn.HeaderText = "Change (%)";
+        deltaColumn.Visible = false;
+        deltaPercentColumn.Visible = false;
+        collectionRateColumn.Visible = false;
 
         CultureInfo phpCulture = CultureInfo.GetCultureInfo("en-PH");
         collectedColumn.DefaultCellStyle.Format = "C2";
@@ -1043,24 +928,21 @@ public partial class CashierDashboardControl : UserControl
 
     private void FormatMonthlyTrendGrid()
     {
-        if (_monthlyTrendGrid is null)
-        {
-            return;
-        }
-
-        DataGridViewColumn? periodColumn = _monthlyTrendGrid.Columns[nameof(TrendRow.Period)];
-        DataGridViewColumn? collectedColumn = _monthlyTrendGrid.Columns[nameof(TrendRow.CollectedAmount)];
-        DataGridViewColumn? uncollectedColumn = _monthlyTrendGrid.Columns[nameof(TrendRow.UncollectedAmount)];
-        DataGridViewColumn? netColumn = _monthlyTrendGrid.Columns[nameof(TrendRow.NetAmount)];
-        DataGridViewColumn? deltaColumn = _monthlyTrendGrid.Columns[nameof(TrendRow.CollectedDelta)];
-        DataGridViewColumn? deltaPercentColumn = _monthlyTrendGrid.Columns[nameof(TrendRow.DeltaPercent)];
+        DataGridViewColumn? periodColumn = monthlyTrendGrid.Columns[nameof(TrendRow.Period)];
+        DataGridViewColumn? collectedColumn = monthlyTrendGrid.Columns[nameof(TrendRow.CollectedAmount)];
+        DataGridViewColumn? uncollectedColumn = monthlyTrendGrid.Columns[nameof(TrendRow.UncollectedAmount)];
+        DataGridViewColumn? netColumn = monthlyTrendGrid.Columns[nameof(TrendRow.NetAmount)];
+        DataGridViewColumn? deltaColumn = monthlyTrendGrid.Columns[nameof(TrendRow.CollectedDelta)];
+        DataGridViewColumn? deltaPercentColumn = monthlyTrendGrid.Columns[nameof(TrendRow.DeltaPercent)];
+        DataGridViewColumn? collectionRateColumn = monthlyTrendGrid.Columns[nameof(TrendRow.CollectionRatePercent)];
 
         if (periodColumn is null
             || collectedColumn is null
             || uncollectedColumn is null
             || netColumn is null
             || deltaColumn is null
-            || deltaPercentColumn is null)
+            || deltaPercentColumn is null
+            || collectionRateColumn is null)
         {
             return;
         }
@@ -1069,8 +951,9 @@ public partial class CashierDashboardControl : UserControl
         collectedColumn.HeaderText = "Collected";
         uncollectedColumn.HeaderText = "Uncollected";
         netColumn.HeaderText = "Net";
-        deltaColumn.HeaderText = "Collected Change";
-        deltaPercentColumn.HeaderText = "Change (%)";
+        collectionRateColumn.HeaderText = "Collection Rate (%)";
+        deltaColumn.Visible = false;
+        deltaPercentColumn.Visible = false;
 
         CultureInfo phpCulture = CultureInfo.GetCultureInfo("en-PH");
         collectedColumn.DefaultCellStyle.Format = "C2";
@@ -1081,17 +964,20 @@ public partial class CashierDashboardControl : UserControl
         uncollectedColumn.DefaultCellStyle.FormatProvider = phpCulture;
         netColumn.DefaultCellStyle.FormatProvider = phpCulture;
         deltaColumn.DefaultCellStyle.FormatProvider = phpCulture;
+        collectionRateColumn.DefaultCellStyle.Format = "N2";
         deltaPercentColumn.DefaultCellStyle.Format = "N2";
         collectedColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         uncollectedColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         netColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         deltaColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         deltaPercentColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        collectionRateColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
 
         periodColumn.FillWeight = 85F;
         collectedColumn.FillWeight = 110F;
         uncollectedColumn.FillWeight = 115F;
         netColumn.FillWeight = 95F;
+        collectionRateColumn.FillWeight = 90F;
         deltaColumn.FillWeight = 130F;
         deltaPercentColumn.FillWeight = 75F;
     }
@@ -1279,6 +1165,8 @@ public partial class CashierDashboardControl : UserControl
         public decimal CollectedDelta { get; init; }
 
         public decimal DeltaPercent { get; init; }
+
+        public decimal CollectionRatePercent { get; init; }
     }
 
     private sealed class ValueRow

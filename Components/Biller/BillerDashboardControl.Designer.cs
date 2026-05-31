@@ -41,13 +41,6 @@ partial class BillerDashboardControl
         activeConcessionairesValueLabel = new Label();
         activeConcessionairesCaptionLabel = new Label();
         reportsTabControl = new TabControl();
-        topConcessionairesTabPage = new TabPage();
-        topConcessionairesSplitContainer = new SplitContainer();
-        topConcessionairesCardPanel = new Panel();
-        topConcessionairesTitleLabel = new Label();
-        topConcessionairesTablePanel = new TableLayoutPanel();
-        topConcessionairesTableTitleLabel = new Label();
-        topConcessionairesGrid = new DataGridView();
         billedTrendTabPage = new TabPage();
         billedTrendSplitContainer = new SplitContainer();
         billedTrendCardPanel = new Panel();
@@ -55,6 +48,20 @@ partial class BillerDashboardControl
         billedTrendTablePanel = new TableLayoutPanel();
         billedTrendTableTitleLabel = new Label();
         billedTrendGrid = new DataGridView();
+        topConcessionairesTabPage = new TabPage();
+        topConcessionairesSplitContainer = new SplitContainer();
+        topConcessionairesCardPanel = new Panel();
+        topConcessionairesTitleLabel = new Label();
+        topConcessionairesTablePanel = new TableLayoutPanel();
+        topConcessionairesTableTitleLabel = new Label();
+        topConcessionairesGrid = new DataGridView();
+        serviceSummaryTabPage = new TabPage();
+        serviceSummarySplitContainer = new SplitContainer();
+        serviceSummaryCardPanel = new Panel();
+        serviceSummaryTitleLabel = new Label();
+        serviceSummaryTablePanel = new TableLayoutPanel();
+        serviceSummaryTableTitleLabel = new Label();
+        serviceSummaryGrid = new DataGridView();
         billingStatusTabPage = new TabPage();
         billingStatusSplitContainer = new SplitContainer();
         billingStatusCardPanel = new Panel();
@@ -85,14 +92,6 @@ partial class BillerDashboardControl
         unpaidBillsCardPanel.SuspendLayout();
         activeConcessionairesCardPanel.SuspendLayout();
         reportsTabControl.SuspendLayout();
-        topConcessionairesTabPage.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)topConcessionairesSplitContainer).BeginInit();
-        topConcessionairesSplitContainer.Panel1.SuspendLayout();
-        topConcessionairesSplitContainer.Panel2.SuspendLayout();
-        topConcessionairesSplitContainer.SuspendLayout();
-        topConcessionairesCardPanel.SuspendLayout();
-        topConcessionairesTablePanel.SuspendLayout();
-        ((System.ComponentModel.ISupportInitialize)topConcessionairesGrid).BeginInit();
         billedTrendTabPage.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)billedTrendSplitContainer).BeginInit();
         billedTrendSplitContainer.Panel1.SuspendLayout();
@@ -101,6 +100,22 @@ partial class BillerDashboardControl
         billedTrendCardPanel.SuspendLayout();
         billedTrendTablePanel.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)billedTrendGrid).BeginInit();
+        topConcessionairesTabPage.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)topConcessionairesSplitContainer).BeginInit();
+        topConcessionairesSplitContainer.Panel1.SuspendLayout();
+        topConcessionairesSplitContainer.Panel2.SuspendLayout();
+        topConcessionairesSplitContainer.SuspendLayout();
+        topConcessionairesCardPanel.SuspendLayout();
+        topConcessionairesTablePanel.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)topConcessionairesGrid).BeginInit();
+        serviceSummaryTabPage.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)serviceSummarySplitContainer).BeginInit();
+        serviceSummarySplitContainer.Panel1.SuspendLayout();
+        serviceSummarySplitContainer.Panel2.SuspendLayout();
+        serviceSummarySplitContainer.SuspendLayout();
+        serviceSummaryCardPanel.SuspendLayout();
+        serviceSummaryTablePanel.SuspendLayout();
+        ((System.ComponentModel.ISupportInitialize)serviceSummaryGrid).BeginInit();
         billingStatusTabPage.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)billingStatusSplitContainer).BeginInit();
         billingStatusSplitContainer.Panel1.SuspendLayout();
@@ -152,9 +167,9 @@ partial class BillerDashboardControl
         headingLabel.AutoSize = true;
         headingLabel.Location = new Point(3, 3);
         headingLabel.Name = "headingLabel";
-        headingLabel.Size = new Size(135, 15);
+        headingLabel.Size = new Size(111, 15);
         headingLabel.TabIndex = 0;
-        headingLabel.Text = "Water Bill Data Analytics";
+        headingLabel.Text = "Biller Data Analytics";
         // 
         // toolbarPanel
         // 
@@ -236,7 +251,7 @@ partial class BillerDashboardControl
         dashboardPanel.Margin = new Padding(0);
         dashboardPanel.Name = "dashboardPanel";
         dashboardPanel.RowCount = 2;
-        dashboardPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 56F));
+        dashboardPanel.RowStyles.Add(new RowStyle(SizeType.Absolute, 64F));
         dashboardPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
         dashboardPanel.Size = new Size(1120, 509);
         dashboardPanel.TabIndex = 3;
@@ -258,19 +273,19 @@ partial class BillerDashboardControl
         metricsLayoutPanel.Name = "metricsLayoutPanel";
         metricsLayoutPanel.RowCount = 1;
         metricsLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        metricsLayoutPanel.Size = new Size(1120, 56);
+        metricsLayoutPanel.Size = new Size(1120, 64);
         metricsLayoutPanel.TabIndex = 0;
         // 
         // totalBilledCardPanel
         // 
         totalBilledCardPanel.Controls.Add(totalBilledValueLabel);
         totalBilledCardPanel.Controls.Add(totalBilledCaptionLabel);
-        totalBilledCardPanel.Dock = DockStyle.Top;
+        totalBilledCardPanel.Dock = DockStyle.Fill;
         totalBilledCardPanel.Location = new Point(0, 0);
         totalBilledCardPanel.Margin = new Padding(0);
         totalBilledCardPanel.Name = "totalBilledCardPanel";
         totalBilledCardPanel.Padding = new Padding(3);
-        totalBilledCardPanel.Size = new Size(280, 56);
+        totalBilledCardPanel.Size = new Size(280, 64);
         totalBilledCardPanel.TabIndex = 0;
         // 
         // totalBilledValueLabel
@@ -297,12 +312,12 @@ partial class BillerDashboardControl
         // 
         billCountCardPanel.Controls.Add(billCountValueLabel);
         billCountCardPanel.Controls.Add(billCountCaptionLabel);
-        billCountCardPanel.Dock = DockStyle.Top;
+        billCountCardPanel.Dock = DockStyle.Fill;
         billCountCardPanel.Location = new Point(280, 0);
         billCountCardPanel.Margin = new Padding(0);
         billCountCardPanel.Name = "billCountCardPanel";
         billCountCardPanel.Padding = new Padding(3);
-        billCountCardPanel.Size = new Size(280, 56);
+        billCountCardPanel.Size = new Size(280, 64);
         billCountCardPanel.TabIndex = 1;
         // 
         // billCountValueLabel
@@ -329,12 +344,12 @@ partial class BillerDashboardControl
         // 
         unpaidBillsCardPanel.Controls.Add(unpaidBillsValueLabel);
         unpaidBillsCardPanel.Controls.Add(unpaidBillsCaptionLabel);
-        unpaidBillsCardPanel.Dock = DockStyle.Top;
+        unpaidBillsCardPanel.Dock = DockStyle.Fill;
         unpaidBillsCardPanel.Location = new Point(560, 0);
         unpaidBillsCardPanel.Margin = new Padding(0);
         unpaidBillsCardPanel.Name = "unpaidBillsCardPanel";
         unpaidBillsCardPanel.Padding = new Padding(3);
-        unpaidBillsCardPanel.Size = new Size(280, 56);
+        unpaidBillsCardPanel.Size = new Size(280, 64);
         unpaidBillsCardPanel.TabIndex = 2;
         // 
         // unpaidBillsValueLabel
@@ -361,12 +376,12 @@ partial class BillerDashboardControl
         // 
         activeConcessionairesCardPanel.Controls.Add(activeConcessionairesValueLabel);
         activeConcessionairesCardPanel.Controls.Add(activeConcessionairesCaptionLabel);
-        activeConcessionairesCardPanel.Dock = DockStyle.Top;
+        activeConcessionairesCardPanel.Dock = DockStyle.Fill;
         activeConcessionairesCardPanel.Location = new Point(840, 0);
         activeConcessionairesCardPanel.Margin = new Padding(0);
         activeConcessionairesCardPanel.Name = "activeConcessionairesCardPanel";
         activeConcessionairesCardPanel.Padding = new Padding(3);
-        activeConcessionairesCardPanel.Size = new Size(280, 56);
+        activeConcessionairesCardPanel.Size = new Size(280, 64);
         activeConcessionairesCardPanel.TabIndex = 3;
         // 
         // activeConcessionairesValueLabel
@@ -393,105 +408,17 @@ partial class BillerDashboardControl
         // 
         reportsTabControl.Controls.Add(billedTrendTabPage);
         reportsTabControl.Controls.Add(topConcessionairesTabPage);
+        reportsTabControl.Controls.Add(serviceSummaryTabPage);
         reportsTabControl.Controls.Add(billingStatusTabPage);
         reportsTabControl.Controls.Add(concessionairesByZoneTabPage);
         reportsTabControl.Controls.Add(concessionaireStatusTabPage);
         reportsTabControl.Dock = DockStyle.Fill;
-        reportsTabControl.Location = new Point(0, 65);
+        reportsTabControl.Location = new Point(0, 73);
         reportsTabControl.Margin = new Padding(0, 9, 0, 0);
         reportsTabControl.Name = "reportsTabControl";
         reportsTabControl.SelectedIndex = 0;
-        reportsTabControl.Size = new Size(1120, 444);
+        reportsTabControl.Size = new Size(1120, 436);
         reportsTabControl.TabIndex = 1;
-        // 
-        // topConcessionairesTabPage
-        // 
-        topConcessionairesTabPage.Controls.Add(topConcessionairesSplitContainer);
-        topConcessionairesTabPage.Location = new Point(4, 24);
-        topConcessionairesTabPage.Margin = new Padding(3, 2, 3, 2);
-        topConcessionairesTabPage.Name = "topConcessionairesTabPage";
-        topConcessionairesTabPage.Padding = new Padding(8, 6, 8, 6);
-        topConcessionairesTabPage.Size = new Size(1112, 416);
-        topConcessionairesTabPage.TabIndex = 4;
-        topConcessionairesTabPage.Text = "Top Concessionaires";
-        topConcessionairesTabPage.UseVisualStyleBackColor = true;
-        // 
-        // topConcessionairesSplitContainer
-        // 
-        topConcessionairesSplitContainer.Dock = DockStyle.Fill;
-        topConcessionairesSplitContainer.Location = new Point(8, 6);
-        topConcessionairesSplitContainer.Margin = new Padding(3, 2, 3, 2);
-        topConcessionairesSplitContainer.Name = "topConcessionairesSplitContainer";
-        topConcessionairesSplitContainer.Orientation = Orientation.Horizontal;
-        // 
-        // topConcessionairesSplitContainer.Panel1
-        // 
-        topConcessionairesSplitContainer.Panel1.Controls.Add(topConcessionairesCardPanel);
-        topConcessionairesSplitContainer.Panel1MinSize = 160;
-        // 
-        // topConcessionairesSplitContainer.Panel2
-        // 
-        topConcessionairesSplitContainer.Panel2.Controls.Add(topConcessionairesTablePanel);
-        topConcessionairesSplitContainer.Size = new Size(1096, 404);
-        topConcessionairesSplitContainer.SplitterDistance = 300;
-        topConcessionairesSplitContainer.TabIndex = 0;
-        // 
-        // topConcessionairesCardPanel
-        // 
-        topConcessionairesCardPanel.Controls.Add(topConcessionairesTitleLabel);
-        topConcessionairesCardPanel.Dock = DockStyle.Fill;
-        topConcessionairesCardPanel.Location = new Point(0, 0);
-        topConcessionairesCardPanel.Margin = new Padding(3, 2, 3, 2);
-        topConcessionairesCardPanel.Name = "topConcessionairesCardPanel";
-        topConcessionairesCardPanel.Padding = new Padding(16, 9, 16, 11);
-        topConcessionairesCardPanel.Size = new Size(1096, 300);
-        topConcessionairesCardPanel.TabIndex = 0;
-        // 
-        // topConcessionairesTitleLabel
-        // 
-        topConcessionairesTitleLabel.Dock = DockStyle.Top;
-        topConcessionairesTitleLabel.Location = new Point(16, 9);
-        topConcessionairesTitleLabel.Name = "topConcessionairesTitleLabel";
-        topConcessionairesTitleLabel.Size = new Size(1064, 21);
-        topConcessionairesTitleLabel.TabIndex = 0;
-        topConcessionairesTitleLabel.Text = "Top 10 Concessionaires by Billed Amount (Current Month)";
-        topConcessionairesTitleLabel.TextAlign = ContentAlignment.MiddleLeft;
-        // 
-        // topConcessionairesTablePanel
-        // 
-        topConcessionairesTablePanel.ColumnCount = 1;
-        topConcessionairesTablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        topConcessionairesTablePanel.Controls.Add(topConcessionairesTableTitleLabel, 0, 0);
-        topConcessionairesTablePanel.Controls.Add(topConcessionairesGrid, 0, 1);
-        topConcessionairesTablePanel.Dock = DockStyle.Fill;
-        topConcessionairesTablePanel.Location = new Point(0, 0);
-        topConcessionairesTablePanel.Margin = new Padding(3, 2, 3, 2);
-        topConcessionairesTablePanel.Name = "topConcessionairesTablePanel";
-        topConcessionairesTablePanel.RowCount = 2;
-        topConcessionairesTablePanel.RowStyles.Add(new RowStyle());
-        topConcessionairesTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        topConcessionairesTablePanel.Size = new Size(1096, 100);
-        topConcessionairesTablePanel.TabIndex = 0;
-        // 
-        // topConcessionairesTableTitleLabel
-        // 
-        topConcessionairesTableTitleLabel.AutoSize = true;
-        topConcessionairesTableTitleLabel.Location = new Point(0, 0);
-        topConcessionairesTableTitleLabel.Margin = new Padding(0, 0, 0, 6);
-        topConcessionairesTableTitleLabel.Name = "topConcessionairesTableTitleLabel";
-        topConcessionairesTableTitleLabel.Size = new Size(160, 15);
-        topConcessionairesTableTitleLabel.TabIndex = 0;
-        topConcessionairesTableTitleLabel.Text = "Top Concessionaires Analysis";
-        // 
-        // topConcessionairesGrid
-        // 
-        topConcessionairesGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-        topConcessionairesGrid.Dock = DockStyle.Fill;
-        topConcessionairesGrid.Location = new Point(0, 21);
-        topConcessionairesGrid.Margin = new Padding(0);
-        topConcessionairesGrid.Name = "topConcessionairesGrid";
-        topConcessionairesGrid.Size = new Size(1096, 79);
-        topConcessionairesGrid.TabIndex = 1;
         // 
         // billedTrendTabPage
         // 
@@ -500,9 +427,9 @@ partial class BillerDashboardControl
         billedTrendTabPage.Margin = new Padding(3, 2, 3, 2);
         billedTrendTabPage.Name = "billedTrendTabPage";
         billedTrendTabPage.Padding = new Padding(8, 6, 8, 6);
-        billedTrendTabPage.Size = new Size(1112, 416);
+        billedTrendTabPage.Size = new Size(1112, 408);
         billedTrendTabPage.TabIndex = 0;
-        billedTrendTabPage.Text = "Billed Trend";
+        billedTrendTabPage.Text = "Billed Amount Trend";
         billedTrendTabPage.UseVisualStyleBackColor = true;
         // 
         // billedTrendSplitContainer
@@ -521,7 +448,7 @@ partial class BillerDashboardControl
         // billedTrendSplitContainer.Panel2
         // 
         billedTrendSplitContainer.Panel2.Controls.Add(billedTrendTablePanel);
-        billedTrendSplitContainer.Size = new Size(1096, 404);
+        billedTrendSplitContainer.Size = new Size(1096, 396);
         billedTrendSplitContainer.SplitterDistance = 300;
         billedTrendSplitContainer.TabIndex = 0;
         // 
@@ -559,7 +486,7 @@ partial class BillerDashboardControl
         billedTrendTablePanel.RowCount = 2;
         billedTrendTablePanel.RowStyles.Add(new RowStyle());
         billedTrendTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        billedTrendTablePanel.Size = new Size(1096, 100);
+        billedTrendTablePanel.Size = new Size(1096, 92);
         billedTrendTablePanel.TabIndex = 0;
         // 
         // billedTrendTableTitleLabel
@@ -568,9 +495,9 @@ partial class BillerDashboardControl
         billedTrendTableTitleLabel.Location = new Point(0, 0);
         billedTrendTableTitleLabel.Margin = new Padding(0, 0, 0, 6);
         billedTrendTableTitleLabel.Name = "billedTrendTableTitleLabel";
-        billedTrendTableTitleLabel.Size = new Size(112, 15);
+        billedTrendTableTitleLabel.Size = new Size(153, 15);
         billedTrendTableTitleLabel.TabIndex = 0;
-        billedTrendTableTitleLabel.Text = "Trend Report Details";
+        billedTrendTableTitleLabel.Text = "Billed Amount Trend Details";
         // 
         // billedTrendGrid
         // 
@@ -579,8 +506,186 @@ partial class BillerDashboardControl
         billedTrendGrid.Location = new Point(0, 21);
         billedTrendGrid.Margin = new Padding(0);
         billedTrendGrid.Name = "billedTrendGrid";
-        billedTrendGrid.Size = new Size(1096, 79);
+        billedTrendGrid.Size = new Size(1096, 71);
         billedTrendGrid.TabIndex = 1;
+        // 
+        // topConcessionairesTabPage
+        // 
+        topConcessionairesTabPage.Controls.Add(topConcessionairesSplitContainer);
+        topConcessionairesTabPage.Location = new Point(4, 24);
+        topConcessionairesTabPage.Margin = new Padding(3, 2, 3, 2);
+        topConcessionairesTabPage.Name = "topConcessionairesTabPage";
+        topConcessionairesTabPage.Padding = new Padding(8, 6, 8, 6);
+        topConcessionairesTabPage.Size = new Size(1112, 408);
+        topConcessionairesTabPage.TabIndex = 4;
+        topConcessionairesTabPage.Text = "Top Concessionaires";
+        topConcessionairesTabPage.UseVisualStyleBackColor = true;
+        // 
+        // topConcessionairesSplitContainer
+        // 
+        topConcessionairesSplitContainer.Dock = DockStyle.Fill;
+        topConcessionairesSplitContainer.Location = new Point(8, 6);
+        topConcessionairesSplitContainer.Margin = new Padding(3, 2, 3, 2);
+        topConcessionairesSplitContainer.Name = "topConcessionairesSplitContainer";
+        topConcessionairesSplitContainer.Orientation = Orientation.Horizontal;
+        // 
+        // topConcessionairesSplitContainer.Panel1
+        // 
+        topConcessionairesSplitContainer.Panel1.Controls.Add(topConcessionairesCardPanel);
+        topConcessionairesSplitContainer.Panel1MinSize = 160;
+        // 
+        // topConcessionairesSplitContainer.Panel2
+        // 
+        topConcessionairesSplitContainer.Panel2.Controls.Add(topConcessionairesTablePanel);
+        topConcessionairesSplitContainer.Size = new Size(1096, 396);
+        topConcessionairesSplitContainer.SplitterDistance = 300;
+        topConcessionairesSplitContainer.TabIndex = 0;
+        // 
+        // topConcessionairesCardPanel
+        // 
+        topConcessionairesCardPanel.Controls.Add(topConcessionairesTitleLabel);
+        topConcessionairesCardPanel.Dock = DockStyle.Fill;
+        topConcessionairesCardPanel.Location = new Point(0, 0);
+        topConcessionairesCardPanel.Margin = new Padding(3, 2, 3, 2);
+        topConcessionairesCardPanel.Name = "topConcessionairesCardPanel";
+        topConcessionairesCardPanel.Padding = new Padding(16, 9, 16, 11);
+        topConcessionairesCardPanel.Size = new Size(1096, 300);
+        topConcessionairesCardPanel.TabIndex = 0;
+        // 
+        // topConcessionairesTitleLabel
+        // 
+        topConcessionairesTitleLabel.Dock = DockStyle.Top;
+        topConcessionairesTitleLabel.Location = new Point(16, 9);
+        topConcessionairesTitleLabel.Name = "topConcessionairesTitleLabel";
+        topConcessionairesTitleLabel.Size = new Size(1064, 21);
+        topConcessionairesTitleLabel.TabIndex = 0;
+        topConcessionairesTitleLabel.Text = "Top 10 Concessionaires by Billed Amount (Current Month)";
+        topConcessionairesTitleLabel.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // topConcessionairesTablePanel
+        // 
+        topConcessionairesTablePanel.ColumnCount = 1;
+        topConcessionairesTablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        topConcessionairesTablePanel.Controls.Add(topConcessionairesTableTitleLabel, 0, 0);
+        topConcessionairesTablePanel.Controls.Add(topConcessionairesGrid, 0, 1);
+        topConcessionairesTablePanel.Dock = DockStyle.Fill;
+        topConcessionairesTablePanel.Location = new Point(0, 0);
+        topConcessionairesTablePanel.Margin = new Padding(3, 2, 3, 2);
+        topConcessionairesTablePanel.Name = "topConcessionairesTablePanel";
+        topConcessionairesTablePanel.RowCount = 2;
+        topConcessionairesTablePanel.RowStyles.Add(new RowStyle());
+        topConcessionairesTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        topConcessionairesTablePanel.Size = new Size(1096, 92);
+        topConcessionairesTablePanel.TabIndex = 0;
+        // 
+        // topConcessionairesTableTitleLabel
+        // 
+        topConcessionairesTableTitleLabel.AutoSize = true;
+        topConcessionairesTableTitleLabel.Location = new Point(0, 0);
+        topConcessionairesTableTitleLabel.Margin = new Padding(0, 0, 0, 6);
+        topConcessionairesTableTitleLabel.Name = "topConcessionairesTableTitleLabel";
+        topConcessionairesTableTitleLabel.Size = new Size(160, 15);
+        topConcessionairesTableTitleLabel.TabIndex = 0;
+        topConcessionairesTableTitleLabel.Text = "Top Concessionaires Analysis";
+        // 
+        // topConcessionairesGrid
+        // 
+        topConcessionairesGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        topConcessionairesGrid.Dock = DockStyle.Fill;
+        topConcessionairesGrid.Location = new Point(0, 21);
+        topConcessionairesGrid.Margin = new Padding(0);
+        topConcessionairesGrid.Name = "topConcessionairesGrid";
+        topConcessionairesGrid.Size = new Size(1096, 71);
+        topConcessionairesGrid.TabIndex = 1;
+        // 
+        // serviceSummaryTabPage
+        // 
+        serviceSummaryTabPage.Controls.Add(serviceSummarySplitContainer);
+        serviceSummaryTabPage.Location = new Point(4, 24);
+        serviceSummaryTabPage.Margin = new Padding(3, 2, 3, 2);
+        serviceSummaryTabPage.Name = "serviceSummaryTabPage";
+        serviceSummaryTabPage.Padding = new Padding(8, 6, 8, 6);
+        serviceSummaryTabPage.Size = new Size(1112, 408);
+        serviceSummaryTabPage.TabIndex = 5;
+        serviceSummaryTabPage.Text = "Service Summary";
+        serviceSummaryTabPage.UseVisualStyleBackColor = true;
+        // 
+        // serviceSummarySplitContainer
+        // 
+        serviceSummarySplitContainer.Dock = DockStyle.Fill;
+        serviceSummarySplitContainer.Location = new Point(8, 6);
+        serviceSummarySplitContainer.Margin = new Padding(3, 2, 3, 2);
+        serviceSummarySplitContainer.Name = "serviceSummarySplitContainer";
+        serviceSummarySplitContainer.Orientation = Orientation.Horizontal;
+        // 
+        // serviceSummarySplitContainer.Panel1
+        // 
+        serviceSummarySplitContainer.Panel1.Controls.Add(serviceSummaryCardPanel);
+        serviceSummarySplitContainer.Panel1MinSize = 160;
+        // 
+        // serviceSummarySplitContainer.Panel2
+        // 
+        serviceSummarySplitContainer.Panel2.Controls.Add(serviceSummaryTablePanel);
+        serviceSummarySplitContainer.Size = new Size(1096, 396);
+        serviceSummarySplitContainer.SplitterDistance = 300;
+        serviceSummarySplitContainer.TabIndex = 0;
+        // 
+        // serviceSummaryCardPanel
+        // 
+        serviceSummaryCardPanel.Controls.Add(serviceSummaryTitleLabel);
+        serviceSummaryCardPanel.Dock = DockStyle.Fill;
+        serviceSummaryCardPanel.Location = new Point(0, 0);
+        serviceSummaryCardPanel.Margin = new Padding(3, 2, 3, 2);
+        serviceSummaryCardPanel.Name = "serviceSummaryCardPanel";
+        serviceSummaryCardPanel.Padding = new Padding(16, 9, 16, 11);
+        serviceSummaryCardPanel.Size = new Size(1096, 300);
+        serviceSummaryCardPanel.TabIndex = 0;
+        // 
+        // serviceSummaryTitleLabel
+        // 
+        serviceSummaryTitleLabel.Dock = DockStyle.Top;
+        serviceSummaryTitleLabel.Location = new Point(16, 9);
+        serviceSummaryTitleLabel.Name = "serviceSummaryTitleLabel";
+        serviceSummaryTitleLabel.Size = new Size(1064, 21);
+        serviceSummaryTitleLabel.TabIndex = 0;
+        serviceSummaryTitleLabel.Text = "Service Type Coverage";
+        serviceSummaryTitleLabel.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // serviceSummaryTablePanel
+        // 
+        serviceSummaryTablePanel.ColumnCount = 1;
+        serviceSummaryTablePanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        serviceSummaryTablePanel.Controls.Add(serviceSummaryTableTitleLabel, 0, 0);
+        serviceSummaryTablePanel.Controls.Add(serviceSummaryGrid, 0, 1);
+        serviceSummaryTablePanel.Dock = DockStyle.Fill;
+        serviceSummaryTablePanel.Location = new Point(0, 0);
+        serviceSummaryTablePanel.Margin = new Padding(3, 2, 3, 2);
+        serviceSummaryTablePanel.Name = "serviceSummaryTablePanel";
+        serviceSummaryTablePanel.RowCount = 2;
+        serviceSummaryTablePanel.RowStyles.Add(new RowStyle());
+        serviceSummaryTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+        serviceSummaryTablePanel.Size = new Size(1096, 92);
+        serviceSummaryTablePanel.TabIndex = 0;
+        // 
+        // serviceSummaryTableTitleLabel
+        // 
+        serviceSummaryTableTitleLabel.AutoSize = true;
+        serviceSummaryTableTitleLabel.Location = new Point(0, 0);
+        serviceSummaryTableTitleLabel.Margin = new Padding(0, 0, 0, 6);
+        serviceSummaryTableTitleLabel.Name = "serviceSummaryTableTitleLabel";
+        serviceSummaryTableTitleLabel.Size = new Size(136, 15);
+        serviceSummaryTableTitleLabel.TabIndex = 0;
+        serviceSummaryTableTitleLabel.Text = "Service Summary Details";
+        // 
+        // serviceSummaryGrid
+        // 
+        serviceSummaryGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+        serviceSummaryGrid.Dock = DockStyle.Fill;
+        serviceSummaryGrid.Location = new Point(0, 21);
+        serviceSummaryGrid.Margin = new Padding(0);
+        serviceSummaryGrid.Name = "serviceSummaryGrid";
+        serviceSummaryGrid.Size = new Size(1096, 71);
+        serviceSummaryGrid.TabIndex = 1;
         // 
         // billingStatusTabPage
         // 
@@ -589,7 +694,7 @@ partial class BillerDashboardControl
         billingStatusTabPage.Margin = new Padding(3, 2, 3, 2);
         billingStatusTabPage.Name = "billingStatusTabPage";
         billingStatusTabPage.Padding = new Padding(8, 6, 8, 6);
-        billingStatusTabPage.Size = new Size(1112, 416);
+        billingStatusTabPage.Size = new Size(1112, 408);
         billingStatusTabPage.TabIndex = 1;
         billingStatusTabPage.Text = "Billing Status";
         billingStatusTabPage.UseVisualStyleBackColor = true;
@@ -610,7 +715,7 @@ partial class BillerDashboardControl
         // billingStatusSplitContainer.Panel2
         // 
         billingStatusSplitContainer.Panel2.Controls.Add(billingStatusTablePanel);
-        billingStatusSplitContainer.Size = new Size(1096, 404);
+        billingStatusSplitContainer.Size = new Size(1096, 396);
         billingStatusSplitContainer.SplitterDistance = 300;
         billingStatusSplitContainer.TabIndex = 0;
         // 
@@ -648,7 +753,7 @@ partial class BillerDashboardControl
         billingStatusTablePanel.RowCount = 2;
         billingStatusTablePanel.RowStyles.Add(new RowStyle());
         billingStatusTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        billingStatusTablePanel.Size = new Size(1096, 100);
+        billingStatusTablePanel.Size = new Size(1096, 92);
         billingStatusTablePanel.TabIndex = 0;
         // 
         // billingStatusTableTitleLabel
@@ -668,7 +773,7 @@ partial class BillerDashboardControl
         billingStatusGrid.Location = new Point(0, 21);
         billingStatusGrid.Margin = new Padding(0);
         billingStatusGrid.Name = "billingStatusGrid";
-        billingStatusGrid.Size = new Size(1096, 79);
+        billingStatusGrid.Size = new Size(1096, 71);
         billingStatusGrid.TabIndex = 1;
         // 
         // concessionairesByZoneTabPage
@@ -678,7 +783,7 @@ partial class BillerDashboardControl
         concessionairesByZoneTabPage.Margin = new Padding(3, 2, 3, 2);
         concessionairesByZoneTabPage.Name = "concessionairesByZoneTabPage";
         concessionairesByZoneTabPage.Padding = new Padding(8, 6, 8, 6);
-        concessionairesByZoneTabPage.Size = new Size(1112, 416);
+        concessionairesByZoneTabPage.Size = new Size(1112, 408);
         concessionairesByZoneTabPage.TabIndex = 2;
         concessionairesByZoneTabPage.Text = "By Zone";
         concessionairesByZoneTabPage.UseVisualStyleBackColor = true;
@@ -699,7 +804,7 @@ partial class BillerDashboardControl
         // concessionairesByZoneSplitContainer.Panel2
         // 
         concessionairesByZoneSplitContainer.Panel2.Controls.Add(concessionairesByZoneTablePanel);
-        concessionairesByZoneSplitContainer.Size = new Size(1096, 404);
+        concessionairesByZoneSplitContainer.Size = new Size(1096, 396);
         concessionairesByZoneSplitContainer.SplitterDistance = 300;
         concessionairesByZoneSplitContainer.TabIndex = 0;
         // 
@@ -737,7 +842,7 @@ partial class BillerDashboardControl
         concessionairesByZoneTablePanel.RowCount = 2;
         concessionairesByZoneTablePanel.RowStyles.Add(new RowStyle());
         concessionairesByZoneTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        concessionairesByZoneTablePanel.Size = new Size(1096, 100);
+        concessionairesByZoneTablePanel.Size = new Size(1096, 92);
         concessionairesByZoneTablePanel.TabIndex = 0;
         // 
         // concessionairesByZoneTableTitleLabel
@@ -757,7 +862,7 @@ partial class BillerDashboardControl
         concessionairesByZoneGrid.Location = new Point(0, 21);
         concessionairesByZoneGrid.Margin = new Padding(0);
         concessionairesByZoneGrid.Name = "concessionairesByZoneGrid";
-        concessionairesByZoneGrid.Size = new Size(1096, 79);
+        concessionairesByZoneGrid.Size = new Size(1096, 71);
         concessionairesByZoneGrid.TabIndex = 1;
         // 
         // concessionaireStatusTabPage
@@ -767,7 +872,7 @@ partial class BillerDashboardControl
         concessionaireStatusTabPage.Margin = new Padding(3, 2, 3, 2);
         concessionaireStatusTabPage.Name = "concessionaireStatusTabPage";
         concessionaireStatusTabPage.Padding = new Padding(8, 6, 8, 6);
-        concessionaireStatusTabPage.Size = new Size(1112, 416);
+        concessionaireStatusTabPage.Size = new Size(1112, 408);
         concessionaireStatusTabPage.TabIndex = 3;
         concessionaireStatusTabPage.Text = "Concessionaire Status";
         concessionaireStatusTabPage.UseVisualStyleBackColor = true;
@@ -788,7 +893,7 @@ partial class BillerDashboardControl
         // concessionaireStatusSplitContainer.Panel2
         // 
         concessionaireStatusSplitContainer.Panel2.Controls.Add(concessionaireStatusTablePanel);
-        concessionaireStatusSplitContainer.Size = new Size(1096, 404);
+        concessionaireStatusSplitContainer.Size = new Size(1096, 396);
         concessionaireStatusSplitContainer.SplitterDistance = 300;
         concessionaireStatusSplitContainer.TabIndex = 0;
         // 
@@ -826,7 +931,7 @@ partial class BillerDashboardControl
         concessionaireStatusTablePanel.RowCount = 2;
         concessionaireStatusTablePanel.RowStyles.Add(new RowStyle());
         concessionaireStatusTablePanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-        concessionaireStatusTablePanel.Size = new Size(1096, 100);
+        concessionaireStatusTablePanel.Size = new Size(1096, 92);
         concessionaireStatusTablePanel.TabIndex = 0;
         // 
         // concessionaireStatusTableTitleLabel
@@ -846,7 +951,7 @@ partial class BillerDashboardControl
         concessionaireStatusGrid.Location = new Point(0, 21);
         concessionaireStatusGrid.Margin = new Padding(0);
         concessionaireStatusGrid.Name = "concessionaireStatusGrid";
-        concessionaireStatusGrid.Size = new Size(1096, 79);
+        concessionaireStatusGrid.Size = new Size(1096, 71);
         concessionaireStatusGrid.TabIndex = 1;
         // 
         // BillerDashboardControl
@@ -872,15 +977,6 @@ partial class BillerDashboardControl
         activeConcessionairesCardPanel.ResumeLayout(false);
         activeConcessionairesCardPanel.PerformLayout();
         reportsTabControl.ResumeLayout(false);
-        topConcessionairesTabPage.ResumeLayout(false);
-        topConcessionairesSplitContainer.Panel1.ResumeLayout(false);
-        topConcessionairesSplitContainer.Panel2.ResumeLayout(false);
-        ((System.ComponentModel.ISupportInitialize)topConcessionairesSplitContainer).EndInit();
-        topConcessionairesSplitContainer.ResumeLayout(false);
-        topConcessionairesCardPanel.ResumeLayout(false);
-        topConcessionairesTablePanel.ResumeLayout(false);
-        topConcessionairesTablePanel.PerformLayout();
-        ((System.ComponentModel.ISupportInitialize)topConcessionairesGrid).EndInit();
         billedTrendTabPage.ResumeLayout(false);
         billedTrendSplitContainer.Panel1.ResumeLayout(false);
         billedTrendSplitContainer.Panel2.ResumeLayout(false);
@@ -890,6 +986,24 @@ partial class BillerDashboardControl
         billedTrendTablePanel.ResumeLayout(false);
         billedTrendTablePanel.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)billedTrendGrid).EndInit();
+        topConcessionairesTabPage.ResumeLayout(false);
+        topConcessionairesSplitContainer.Panel1.ResumeLayout(false);
+        topConcessionairesSplitContainer.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)topConcessionairesSplitContainer).EndInit();
+        topConcessionairesSplitContainer.ResumeLayout(false);
+        topConcessionairesCardPanel.ResumeLayout(false);
+        topConcessionairesTablePanel.ResumeLayout(false);
+        topConcessionairesTablePanel.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)topConcessionairesGrid).EndInit();
+        serviceSummaryTabPage.ResumeLayout(false);
+        serviceSummarySplitContainer.Panel1.ResumeLayout(false);
+        serviceSummarySplitContainer.Panel2.ResumeLayout(false);
+        ((System.ComponentModel.ISupportInitialize)serviceSummarySplitContainer).EndInit();
+        serviceSummarySplitContainer.ResumeLayout(false);
+        serviceSummaryCardPanel.ResumeLayout(false);
+        serviceSummaryTablePanel.ResumeLayout(false);
+        serviceSummaryTablePanel.PerformLayout();
+        ((System.ComponentModel.ISupportInitialize)serviceSummaryGrid).EndInit();
         billingStatusTabPage.ResumeLayout(false);
         billingStatusSplitContainer.Panel1.ResumeLayout(false);
         billingStatusSplitContainer.Panel2.ResumeLayout(false);
@@ -953,6 +1067,14 @@ partial class BillerDashboardControl
     private TableLayoutPanel billedTrendTablePanel;
     private Label billedTrendTableTitleLabel;
     private DataGridView billedTrendGrid;
+    private TabPage serviceSummaryTabPage;
+    private SplitContainer serviceSummarySplitContainer;
+    private Panel serviceSummaryCardPanel;
+    private System.Windows.Forms.DataVisualization.Charting.Chart serviceSummaryChart;
+    private Label serviceSummaryTitleLabel;
+    private TableLayoutPanel serviceSummaryTablePanel;
+    private Label serviceSummaryTableTitleLabel;
+    private DataGridView serviceSummaryGrid;
     private TabPage billingStatusTabPage;
     private SplitContainer billingStatusSplitContainer;
     private Panel billingStatusCardPanel;

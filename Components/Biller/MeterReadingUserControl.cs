@@ -48,7 +48,7 @@ public partial class MeterReadingUserControl : UserControl
     };
 
     private readonly ContextMenuStrip _generatedBillsRowMenu = new();
-    private readonly ToolStripMenuItem _deleteGeneratedBillMenuItem = new("Delete Bill");
+    private readonly ToolStripMenuItem _deleteGeneratedBillMenuItem = new("Void Bill");
 
     private bool _isInitializing;
     private bool _isCompactLayout;
@@ -800,7 +800,7 @@ ORDER BY created_at DESC, bill_number DESC;";
             MessageBox.Show(
                 this,
                 "Select a generated bill first.",
-                "Delete Billing",
+                "Void Bill",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Information);
             return;
@@ -808,8 +808,8 @@ ORDER BY created_at DESC, bill_number DESC;";
 
         DialogResult confirmation = MessageBox.Show(
             this,
-            $"Delete billing {billNumber}?\n\nWarning: This action cannot be undone.",
-            "Confirm Delete Billing",
+            $"Void bill {billNumber}?\n\nWarning: This action cannot be undone.",
+            "Confirm Void Bill",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Warning,
             MessageBoxDefaultButton.Button2);
@@ -819,24 +819,33 @@ ORDER BY created_at DESC, bill_number DESC;";
             return;
         }
 
+        if (!VoidReasonPromptDialog.TryGetReason(
+                this,
+                "Void Bill",
+                $"Enter reason for voiding bill {billNumber}:",
+                out string voidReason))
+        {
+            return;
+        }
+
         try
         {
-            SetGeneratedBillsBusyState(true, $"Deleting billing {billNumber}...");
+            SetGeneratedBillsBusyState(true, $"Voiding bill {billNumber}...");
 
             DBConfig.SetConnectionString(_user.Role);
             await using MySqlConnection connection = DBConfig.GetConnection();
             await connection.OpenAsync();
 
-            await ExecuteDeleteGeneratedBillAsync(connection, billingId);
+            await ExecuteDeleteGeneratedBillAsync(connection, billingId, voidReason);
 
             rightStatusLabel.ForeColor = AppTheme.SuccessColor;
-            rightStatusLabel.Text = $"Billing {billNumber} was deleted successfully.";
+            rightStatusLabel.Text = $"Bill {billNumber} was voided successfully.";
         }
         catch (Exception ex)
         {
             rightStatusLabel.ForeColor = AppTheme.DangerColor;
-            rightStatusLabel.Text = "Failed to delete the selected billing.";
-            MessageBox.Show(this, ex.Message, "Delete Billing Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            rightStatusLabel.Text = "Failed to void the selected bill.";
+            MessageBox.Show(this, ex.Message, "Void Bill Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             return;
         }
         finally
@@ -848,7 +857,7 @@ ORDER BY created_at DESC, bill_number DESC;";
         await LoadMeterReadingsAsync();
     }
 
-    private async Task ExecuteDeleteGeneratedBillAsync(MySqlConnection connection, int billingId)
+    private async Task ExecuteDeleteGeneratedBillAsync(MySqlConnection connection, int billingId, string voidReason)
     {
         const string sql = @"
 CALL sp_void_billing_v1(
@@ -860,12 +869,12 @@ CALL sp_void_billing_v1(
         await using var command = new MySqlCommand(sql, connection);
         command.Parameters.AddWithValue("@billingId", billingId);
         command.Parameters.AddWithValue("@voidedByUserId", _user.UserId);
-        command.Parameters.AddWithValue("@voidRemarks", "Deleted from generated bills in meter reading.");
+        command.Parameters.AddWithValue("@voidRemarks", voidReason);
 
         await using var reader = (MySqlDataReader)await command.ExecuteReaderAsync();
         if (!await reader.ReadAsync())
         {
-            throw new InvalidOperationException("The selected billing could not be deleted.");
+            throw new InvalidOperationException("The selected bill could not be voided.");
         }
     }
 

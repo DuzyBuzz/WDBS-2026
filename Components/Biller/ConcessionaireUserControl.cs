@@ -151,6 +151,7 @@ SELECT
     v.Tax_Exempted,
     v.Due_Exempted,
     v.Discounted,
+    v.Not_Billable,
     v.Zone,
     v.Service_Type,
     v.Pipe_Size,

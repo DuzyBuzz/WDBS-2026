@@ -5,6 +5,7 @@ using MySql.Data.MySqlClient;
 using WDBS_2026.Database;
 using WDBS_2026.DTOs.Auth;
 using WDBS_2026.Forms.Collection;
+using WDBS_2026.Forms.Pickers;
 using WDBS_2026.Services.Cashier;
 using WDBS_2026.Services.Printing;
 
@@ -1090,13 +1091,18 @@ namespace WDBS_2026.Components.Cashier
                 return;
             }
 
+            if (!VoidReasonPromptDialog.TryGetReason(
+                    this,
+                    "Void Collection",
+                    $"Enter reason for voiding collection #{collectionId}:",
+                    out string voidRemarks))
+            {
+                return;
+            }
+
             try
             {
                 SetBusyState(true, "Voiding collection...");
-                string voidRemarks = string.IsNullOrWhiteSpace(remarksTextBox.Text)
-                    ? "Voided from cashier collection grid"
-                    : remarksTextBox.Text.Trim();
-
                 await CollectionService.VoidCollectionAsync(_user.Role, collectionId, _user.UserId, voidRemarks);
 
                 await LoadCollectionsAsync();

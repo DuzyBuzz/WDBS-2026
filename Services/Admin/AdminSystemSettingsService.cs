@@ -127,11 +127,15 @@ ORDER BY zone_id ASC;";
 
     public static async Task SaveServiceChangesAsync(UserRole role, DataTable servicesTable)
     {
-        DataTable? changes = servicesTable.GetChanges(DataRowState.Added | DataRowState.Modified);
+        DataTable? changes = servicesTable.GetChanges(DataRowState.Added | DataRowState.Modified | DataRowState.Deleted);
         if (changes is null || changes.Rows.Count == 0)
         {
             return;
         }
+
+        const string deleteSql = @"
+DELETE FROM services
+WHERE service_id = @serviceId;";
 
         const string updateSql = @"
 UPDATE services
@@ -175,6 +179,14 @@ VALUES
         {
             foreach (DataRow row in changes.Rows)
             {
+                if (row.RowState == DataRowState.Deleted)
+                {
+                    await using var deleteCommand = new MySqlCommand(deleteSql, connection, transaction);
+                    deleteCommand.Parameters.AddWithValue("@serviceId", row["service_id", DataRowVersion.Original]);
+                    await deleteCommand.ExecuteNonQueryAsync();
+                    continue;
+                }
+
                 string sql = row.RowState == DataRowState.Added ? insertSql : updateSql;
                 await using var command = new MySqlCommand(sql, connection, transaction);
                 command.Parameters.AddWithValue("@serviceId", row["service_id"]);
@@ -200,11 +212,15 @@ VALUES
 
     public static async Task SaveZoneChangesAsync(UserRole role, DataTable zonesTable)
     {
-        DataTable? changes = zonesTable.GetChanges(DataRowState.Added | DataRowState.Modified);
+        DataTable? changes = zonesTable.GetChanges(DataRowState.Added | DataRowState.Modified | DataRowState.Deleted);
         if (changes is null || changes.Rows.Count == 0)
         {
             return;
         }
+
+        const string deleteSql = @"
+DELETE FROM zone
+WHERE zone_id = @zoneId;";
 
         const string updateSql = @"
 UPDATE zone
@@ -229,6 +245,14 @@ VALUES
         {
             foreach (DataRow row in changes.Rows)
             {
+                if (row.RowState == DataRowState.Deleted)
+                {
+                    await using var deleteCommand = new MySqlCommand(deleteSql, connection, transaction);
+                    deleteCommand.Parameters.AddWithValue("@zoneId", row["zone_id", DataRowVersion.Original]);
+                    await deleteCommand.ExecuteNonQueryAsync();
+                    continue;
+                }
+
                 string sql = row.RowState == DataRowState.Added ? insertSql : updateSql;
                 await using var command = new MySqlCommand(sql, connection, transaction);
                 command.Parameters.AddWithValue("@zoneId", row["zone_id"]);

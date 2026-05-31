@@ -261,6 +261,7 @@ public partial class BillerDashboardControl : UserControl
                      unpaidBillsCardPanel,
                      activeConcessionairesCardPanel,
                      billedTrendCardPanel,
+                     serviceSummaryCardPanel,
                      billingStatusCardPanel,
                      concessionairesByZoneCardPanel,
                      concessionaireStatusCardPanel,
@@ -285,11 +286,13 @@ public partial class BillerDashboardControl : UserControl
         foreach (Label caption in new[]
                  {
                      billedTrendTitleLabel,
+                     serviceSummaryTitleLabel,
                      billingStatusTitleLabel,
                      concessionairesByZoneTitleLabel,
                      concessionaireStatusTitleLabel,
                      topConcessionairesTitleLabel,
                      billedTrendTableTitleLabel,
+                     serviceSummaryTableTitleLabel,
                      billingStatusTableTitleLabel,
                      concessionairesByZoneTableTitleLabel,
                      concessionaireStatusTableTitleLabel,
@@ -344,6 +347,7 @@ public partial class BillerDashboardControl : UserControl
         foreach (DataGridView grid in new[]
                  {
                      billedTrendGrid,
+                     serviceSummaryGrid,
                      billingStatusGrid,
                      concessionairesByZoneGrid,
                      concessionaireStatusGrid,
@@ -383,6 +387,12 @@ public partial class BillerDashboardControl : UserControl
             billedTrendTitleLabel,
             nameof(billedTrendChart));
 
+        serviceSummaryChart = EnsureChart(
+            serviceSummaryChart,
+            serviceSummaryCardPanel,
+            serviceSummaryTitleLabel,
+            nameof(serviceSummaryChart));
+
         billingStatusChart = EnsureChart(
             billingStatusChart,
             billingStatusCardPanel,
@@ -408,6 +418,7 @@ public partial class BillerDashboardControl : UserControl
             nameof(topConcessionairesChart));
 
         billedTrendChart.SuppressExceptions = true;
+        serviceSummaryChart.SuppressExceptions = true;
         billingStatusChart.SuppressExceptions = true;
         concessionairesByZoneChart.SuppressExceptions = true;
         concessionaireStatusChart.SuppressExceptions = true;
@@ -443,7 +454,10 @@ public partial class BillerDashboardControl : UserControl
             42,
             124,
             new[] { new BillerDashboardPoint("2026-05", 482150.40M) },
-            new[] { new BillerDashboardPoint("PAID", 300), new BillerDashboardPoint("UNPAID", 89) },
+            new[]
+            {
+                new BillerBillingStatusMonthly("2026-05", 389, 300, 50, 20, 19, 77.12M, 12.85M, 5.14M, 4.88M)
+            },
             new[] { new BillerDashboardPoint("Zone 1", 42), new BillerDashboardPoint("Zone 2", 31), new BillerDashboardPoint("Zone 3", 51) },
             new[] { new BillerDashboardPoint("ACTIVE", 124), new BillerDashboardPoint("INACTIVE", 11) },
             new[]
@@ -451,6 +465,12 @@ public partial class BillerDashboardControl : UserControl
                 new BillerDashboardPoint("101-0001 - Juan Dela Cruz", 45620.22M),
                 new BillerDashboardPoint("101-0002 - Maria Santos", 32114.67M),
                 new BillerDashboardPoint("101-0003 - Rizal Trading", 28091.14M)
+            },
+            new[]
+            {
+                new BillerServiceBillingMonthly("2026-05", 1, "RESIDENTIAL", "1/2", 128, 45620.50M, 42150.25M, 8430.05M, 1040.20M, 51620.50M, 5200.40M, 54.25M),
+                new BillerServiceBillingMonthly("2026-05", 2, "COMMERCIAL", "3/4", 37, 12814.25M, 11920.50M, 2384.10M, 375.65M, 14680.25M, 1240.30M, 30.35M),
+                new BillerServiceBillingMonthly("2026-05", 3, "INDUSTRIAL", "1", 12, 8540.75M, 7990.15M, 1598.03M, 450.10M, 10038.28M, 1850.40M, 10.40M)
             });
 
         _snapshot = sample;
@@ -487,20 +507,24 @@ public partial class BillerDashboardControl : UserControl
         DateTime trendEnd = snapshot.PeriodStart;
 
         billedTrendTitleLabel.Text = $"Billed Amount Trend ({trendStart:MMM yyyy} to {trendEnd:MMM yyyy})";
-        billedTrendTableTitleLabel.Text = "Rolling 12-Month Billed Trend";
+        billedTrendTableTitleLabel.Text = "Billed Amount Trend Details (Rolling 12 Months)";
+        serviceSummaryTitleLabel.Text = "Service Type Coverage (Concessionaire Count)";
+        serviceSummaryTableTitleLabel.Text = "Service Summary Breakdown";
         topConcessionairesTitleLabel.Text = $"Top 10 Concessionaires by Billed Amount ({snapshot.PeriodStart:MMM yyyy})";
     }
 
     private void BindTables(BillerDashboardSnapshot snapshot)
     {
         billedTrendGrid.DataSource = BuildTrendRows(snapshot.BilledTrend);
-        billingStatusGrid.DataSource = BuildValueRows(snapshot.BillingStatusBreakdown, "Status");
+        serviceSummaryGrid.DataSource = BuildServiceBillingMonthlyRows(snapshot.ServiceBillingMonthly);
+        billingStatusGrid.DataSource = BuildBillingStatusMonthlyRows(snapshot.BillingStatusMonthly);
         concessionairesByZoneGrid.DataSource = BuildValueRows(snapshot.ConcessionairesByZone, "Zone");
         concessionaireStatusGrid.DataSource = BuildValueRows(snapshot.ConcessionaireStatusMix, "Status");
         topConcessionairesGrid.DataSource = BuildTopConcessionaireRows(snapshot.TopConcessionairesByAmount);
 
         FormatTrendGrid();
-        FormatDistributionGrid(billingStatusGrid, "Status");
+        FormatServiceBillingMonthlyGrid();
+        FormatBillingStatusMonthlyGrid();
         FormatDistributionGrid(concessionairesByZoneGrid, "Zone");
         FormatDistributionGrid(concessionaireStatusGrid, "Status");
         FormatTopConcessionairesGrid();
@@ -519,8 +543,16 @@ public partial class BillerDashboardControl : UserControl
             true);
 
         hasChartErrors |= !BindChart(
+            serviceSummaryChart,
+            BuildServiceBillingMonthlyChartPoints(snapshot.ServiceBillingMonthly),
+            "Billing Share %",
+            SeriesChartType.Pie,
+            AppTheme.PrimaryDarkColor,
+            false);
+
+        hasChartErrors |= !BindChart(
             billingStatusChart,
-            snapshot.BillingStatusBreakdown,
+            BuildBillingStatusMonthlyChartPoints(snapshot.BillingStatusMonthly),
             "Bills",
             SeriesChartType.Doughnut,
             AppTheme.PrimaryColor,
@@ -570,6 +602,9 @@ public partial class BillerDashboardControl : UserControl
             return true;
         }
 
+        bool isBilledAmountTrend = ReferenceEquals(chart, billedTrendChart)
+            || string.Equals(seriesName, "Monthly Billed Amount", StringComparison.Ordinal);
+
         chart.SuspendLayout();
 
         try
@@ -597,6 +632,16 @@ public partial class BillerDashboardControl : UserControl
                 area.AxisY.LabelStyle.Format = "#,##0.##";
             }
 
+            if (isBilledAmountTrend && points.Count > 0)
+            {
+                decimal maxValue = points.Max(point => point.Value);
+                if (maxValue > 0M)
+                {
+                    // Give the billed trend extra top headroom so bars and labels do not crowd the chart ceiling.
+                    area.AxisY.Maximum = Convert.ToDouble(maxValue * 1.1M);
+                }
+            }
+
             if (chartType is SeriesChartType.Pie or SeriesChartType.Doughnut)
             {
                 area.AxisX.Enabled = AxisEnabled.False;
@@ -607,7 +652,8 @@ public partial class BillerDashboardControl : UserControl
 
             var legend = new Legend("DefaultLegend")
             {
-                Docking = Docking.Right,
+                Docking = Docking.Bottom,
+                Alignment = StringAlignment.Center,
                 Font = AppTheme.CaptionFont,
                 ForeColor = AppTheme.BodyTextColor
             };
@@ -773,8 +819,112 @@ public partial class BillerDashboardControl : UserControl
         return rows;
     }
 
+    private static List<ServiceSummaryRow> BuildServiceSummaryRows(IReadOnlyList<BillerServiceSummaryItem> items)
+    {
+        return items
+            .Select(item => new ServiceSummaryRow
+            {
+                ServiceId = item.ServiceId,
+                ServiceType = item.ServiceType,
+                PipeSize = item.PipeSize,
+                TotalConcessionaires = item.TotalConcessionaires,
+                TaxExemptCount = item.TaxExemptCount,
+                DueExemptCount = item.DueExemptCount,
+                DiscountedCount = item.DiscountedCount,
+                ActiveCount = item.ActiveCount,
+                InactiveCount = item.InactiveCount,
+                MetersAssigned = item.MetersAssigned,
+                MetersUnassigned = item.MetersUnassigned
+            })
+            .ToList();
+    }
+
+    private static List<ServiceBillingMonthlyRow> BuildServiceBillingMonthlyRows(IReadOnlyList<BillerServiceBillingMonthly> items)
+    {
+        return items
+            .Select(item => new ServiceBillingMonthlyRow
+            {
+                ServiceId = item.ServiceId,
+                ServiceType = item.ServiceType,
+                PipeSize = item.PipeSize,
+                TotalBills = item.TotalBills,
+                TotalConsumption = item.TotalConsumption,
+                TotalWaterCharge = item.TotalWaterCharge,
+                TotalTaxAmount = item.TotalTaxAmount,
+                TotalPenaltyAmount = item.TotalPenaltyAmount,
+                TotalBilledAmount = item.TotalBilledAmount,
+                TotalRemainingBalance = item.TotalRemainingBalance,
+                BillingSharePercent = item.BillingSharePercent
+            })
+            .ToList();
+    }
+
+    private static List<BillingStatusMonthlyRow> BuildBillingStatusMonthlyRows(IReadOnlyList<BillerBillingStatusMonthly> items)
+    {
+        return items
+            .Select(item => new BillingStatusMonthlyRow
+            {
+                TotalBills = item.TotalBills,
+                PaidCount = item.PaidCount,
+                PartiallyPaidCount = item.PartiallyPaidCount,
+                OverdueCount = item.OverdueCount,
+                UnpaidCount = item.UnpaidCount,
+                PaidPercent = item.PaidPercent,
+                PartiallyPaidPercent = item.PartiallyPaidPercent,
+                OverduePercent = item.OverduePercent,
+                UnpaidPercent = item.UnpaidPercent
+            })
+            .ToList();
+    }
+
+    private static IReadOnlyList<BillerDashboardPoint> BuildServiceBillingMonthlyChartPoints(IReadOnlyList<BillerServiceBillingMonthly> items)
+    {
+        return items
+            .Select(item => new BillerDashboardPoint(item.ServiceType, item.BillingSharePercent))
+            .ToList();
+    }
+
+    private static IReadOnlyList<BillerDashboardPoint> BuildBillingStatusMonthlyChartPoints(IReadOnlyList<BillerBillingStatusMonthly> items)
+    {
+        var points = new List<BillerDashboardPoint>();
+        
+        foreach (var item in items)
+        {
+            if (item.PaidCount > 0)
+                points.Add(new BillerDashboardPoint("Paid", item.PaidCount));
+            if (item.PartiallyPaidCount > 0)
+                points.Add(new BillerDashboardPoint("Partially Paid", item.PartiallyPaidCount));
+            if (item.OverdueCount > 0)
+                points.Add(new BillerDashboardPoint("Overdue", item.OverdueCount));
+            if (item.UnpaidCount > 0)
+                points.Add(new BillerDashboardPoint("Unpaid", item.UnpaidCount));
+        }
+
+        return points;
+    }
+
+    private static IReadOnlyList<BillerDashboardPoint> BuildServiceSummaryChartPoints(IReadOnlyList<BillerServiceSummaryItem> items)
+    {
+        var points = new List<BillerDashboardPoint>(items.Count);
+
+        foreach (BillerServiceSummaryItem item in items)
+        {
+            string label = $"{item.ServiceType} ({item.PipeSize})";
+            if (label.Length > 42)
+            {
+                label = label[..39] + "...";
+            }
+
+            points.Add(new BillerDashboardPoint(label, item.TotalConcessionaires));
+        }
+
+        return points;
+    }
+
     private void FormatTrendGrid()
     {
+        CultureInfo pesoCulture = CultureInfo.GetCultureInfo("en-PH");
+
         DataGridViewColumn? periodColumn = billedTrendGrid.Columns[nameof(TrendRow.Period)];
         DataGridViewColumn? amountColumn = billedTrendGrid.Columns[nameof(TrendRow.Amount)];
         DataGridViewColumn? deltaColumn = billedTrendGrid.Columns[nameof(TrendRow.Delta)];
@@ -787,15 +937,176 @@ public partial class BillerDashboardControl : UserControl
 
         periodColumn.HeaderText = "Period";
         amountColumn.HeaderText = "Amount";
-        deltaColumn.HeaderText = "Change";
-        deltaPercentColumn.HeaderText = "Change (%)";
+        deltaColumn.Visible = false;
+        deltaPercentColumn.Visible = false;
 
         amountColumn.DefaultCellStyle.Format = "C2";
+        amountColumn.DefaultCellStyle.FormatProvider = pesoCulture;
         deltaColumn.DefaultCellStyle.Format = "C2";
+        deltaColumn.DefaultCellStyle.FormatProvider = pesoCulture;
         deltaPercentColumn.DefaultCellStyle.Format = "N2";
         amountColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         deltaColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
         deltaPercentColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+    }
+
+    private void FormatServiceSummaryGrid()
+    {
+        DataGridViewColumn? serviceIdColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.ServiceId)];
+        DataGridViewColumn? serviceTypeColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.ServiceType)];
+        DataGridViewColumn? pipeSizeColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.PipeSize)];
+        DataGridViewColumn? totalConcessionairesColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.TotalConcessionaires)];
+        DataGridViewColumn? taxExemptColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.TaxExemptCount)];
+        DataGridViewColumn? dueExemptColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.DueExemptCount)];
+        DataGridViewColumn? discountedColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.DiscountedCount)];
+        DataGridViewColumn? activeColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.ActiveCount)];
+        DataGridViewColumn? inactiveColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.InactiveCount)];
+        DataGridViewColumn? metersAssignedColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.MetersAssigned)];
+        DataGridViewColumn? metersUnassignedColumn = serviceSummaryGrid.Columns[nameof(ServiceSummaryRow.MetersUnassigned)];
+
+        if (serviceIdColumn is null
+            || serviceTypeColumn is null
+            || pipeSizeColumn is null
+            || totalConcessionairesColumn is null
+            || taxExemptColumn is null
+            || dueExemptColumn is null
+            || discountedColumn is null
+            || activeColumn is null
+            || inactiveColumn is null
+            || metersAssignedColumn is null
+            || metersUnassignedColumn is null)
+        {
+            return;
+        }
+
+        serviceIdColumn.HeaderText = "Service ID";
+        serviceTypeColumn.HeaderText = "Service Type";
+        pipeSizeColumn.HeaderText = "Pipe Size";
+        totalConcessionairesColumn.HeaderText = "Total";
+        taxExemptColumn.HeaderText = "Tax Exempt";
+        dueExemptColumn.HeaderText = "Due Exempt";
+        discountedColumn.HeaderText = "Discounted";
+        activeColumn.HeaderText = "Active";
+        inactiveColumn.HeaderText = "Inactive";
+        metersAssignedColumn.HeaderText = "Meters Assigned";
+        metersUnassignedColumn.HeaderText = "Meters Unassigned";
+
+        serviceTypeColumn.FillWeight = 140F;
+        pipeSizeColumn.FillWeight = 75F;
+
+        foreach (DataGridViewColumn numericColumn in new[]
+                 {
+                     serviceIdColumn,
+                     totalConcessionairesColumn,
+                     taxExemptColumn,
+                     dueExemptColumn,
+                     discountedColumn,
+                     activeColumn,
+                     inactiveColumn,
+                     metersAssignedColumn,
+                     metersUnassignedColumn
+                 })
+        {
+            numericColumn.DefaultCellStyle.Format = "N0";
+            numericColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+        }
+    }
+
+    private void FormatServiceBillingMonthlyGrid()
+    {
+        serviceSummaryGrid.AutoGenerateColumns = false;
+        serviceSummaryGrid.Columns.Clear();
+
+        var columns = new[]
+        {
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.ServiceId), HeaderText = "Service ID", DataPropertyName = nameof(ServiceBillingMonthlyRow.ServiceId) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.ServiceType), HeaderText = "Service Type", DataPropertyName = nameof(ServiceBillingMonthlyRow.ServiceType) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.PipeSize), HeaderText = "Pipe Size", DataPropertyName = nameof(ServiceBillingMonthlyRow.PipeSize) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.TotalBills), HeaderText = "Bills", DataPropertyName = nameof(ServiceBillingMonthlyRow.TotalBills) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.TotalConsumption), HeaderText = "Consumption", DataPropertyName = nameof(ServiceBillingMonthlyRow.TotalConsumption) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.TotalWaterCharge), HeaderText = "Water Charge", DataPropertyName = nameof(ServiceBillingMonthlyRow.TotalWaterCharge) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.TotalTaxAmount), HeaderText = "Tax", DataPropertyName = nameof(ServiceBillingMonthlyRow.TotalTaxAmount) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.TotalPenaltyAmount), HeaderText = "Penalty", DataPropertyName = nameof(ServiceBillingMonthlyRow.TotalPenaltyAmount) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.TotalBilledAmount), HeaderText = "Total Billed", DataPropertyName = nameof(ServiceBillingMonthlyRow.TotalBilledAmount) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.TotalRemainingBalance), HeaderText = "Remaining", DataPropertyName = nameof(ServiceBillingMonthlyRow.TotalRemainingBalance) },
+            new DataGridViewTextBoxColumn { Name = nameof(ServiceBillingMonthlyRow.BillingSharePercent), HeaderText = "Share %", DataPropertyName = nameof(ServiceBillingMonthlyRow.BillingSharePercent) }
+        };
+
+        foreach (var column in columns)
+        {
+            serviceSummaryGrid.Columns.Add(column);
+        }
+
+        serviceSummaryGrid.Columns[nameof(ServiceBillingMonthlyRow.ServiceId)].Width = 75;
+        serviceSummaryGrid.Columns[nameof(ServiceBillingMonthlyRow.ServiceType)].Width = 100;
+        serviceSummaryGrid.Columns[nameof(ServiceBillingMonthlyRow.PipeSize)].Width = 80;
+
+        foreach (DataGridViewColumn column in serviceSummaryGrid.Columns)
+        {
+            if (column.Name is nameof(ServiceBillingMonthlyRow.TotalConsumption)
+                or nameof(ServiceBillingMonthlyRow.TotalWaterCharge)
+                or nameof(ServiceBillingMonthlyRow.TotalTaxAmount)
+                or nameof(ServiceBillingMonthlyRow.TotalPenaltyAmount)
+                or nameof(ServiceBillingMonthlyRow.TotalBilledAmount)
+                or nameof(ServiceBillingMonthlyRow.TotalRemainingBalance)
+                or nameof(ServiceBillingMonthlyRow.BillingSharePercent))
+            {
+                column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                column.DefaultCellStyle.Format = "N2";
+            }
+            else if (column.Name is nameof(ServiceBillingMonthlyRow.TotalBills))
+            {
+                column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                column.DefaultCellStyle.Format = "N0";
+            }
+            else
+            {
+                column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            }
+        }
+    }
+
+    private void FormatBillingStatusMonthlyGrid()
+    {
+        billingStatusGrid.AutoGenerateColumns = false;
+        billingStatusGrid.Columns.Clear();
+
+        var columns = new[]
+        {
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.TotalBills), HeaderText = "Total Bills", DataPropertyName = nameof(BillingStatusMonthlyRow.TotalBills) },
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.PaidCount), HeaderText = "Paid", DataPropertyName = nameof(BillingStatusMonthlyRow.PaidCount) },
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.PaidPercent), HeaderText = "Paid %", DataPropertyName = nameof(BillingStatusMonthlyRow.PaidPercent) },
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.PartiallyPaidCount), HeaderText = "Partially Paid", DataPropertyName = nameof(BillingStatusMonthlyRow.PartiallyPaidCount) },
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.PartiallyPaidPercent), HeaderText = "Partially %", DataPropertyName = nameof(BillingStatusMonthlyRow.PartiallyPaidPercent) },
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.OverdueCount), HeaderText = "Overdue", DataPropertyName = nameof(BillingStatusMonthlyRow.OverdueCount) },
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.OverduePercent), HeaderText = "Overdue %", DataPropertyName = nameof(BillingStatusMonthlyRow.OverduePercent) },
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.UnpaidCount), HeaderText = "Unpaid", DataPropertyName = nameof(BillingStatusMonthlyRow.UnpaidCount) },
+            new DataGridViewTextBoxColumn { Name = nameof(BillingStatusMonthlyRow.UnpaidPercent), HeaderText = "Unpaid %", DataPropertyName = nameof(BillingStatusMonthlyRow.UnpaidPercent) }
+        };
+
+        foreach (var column in columns)
+        {
+            billingStatusGrid.Columns.Add(column);
+        }
+
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.TotalBills)].Width = 75;
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.PaidCount)].Width = 60;
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.PaidPercent)].Width = 70;
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.PartiallyPaidCount)].Width = 90;
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.PartiallyPaidPercent)].Width = 80;
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.OverdueCount)].Width = 70;
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.OverduePercent)].Width = 75;
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.UnpaidCount)].Width = 70;
+        billingStatusGrid.Columns[nameof(BillingStatusMonthlyRow.UnpaidPercent)].Width = 75;
+
+        foreach (DataGridViewColumn column in billingStatusGrid.Columns)
+        {
+            if (column.Name.EndsWith("Percent") || column.Name.EndsWith("Count") || column.Name == nameof(BillingStatusMonthlyRow.TotalBills))
+            {
+                column.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleRight;
+                column.DefaultCellStyle.Format = column.Name.EndsWith("Percent") ? "N2" : "N0";
+            }
+        }
     }
 
     private static void FormatDistributionGrid(DataGridView grid, string labelColumnName)
@@ -988,4 +1299,76 @@ public partial class BillerDashboardControl : UserControl
 
         public decimal CumulativeSharePercent { get; init; }
     }
+
+    private sealed class ServiceSummaryRow
+    {
+        public int ServiceId { get; init; }
+
+        public string ServiceType { get; init; } = string.Empty;
+
+        public string PipeSize { get; init; } = string.Empty;
+
+        public int TotalConcessionaires { get; init; }
+
+        public int TaxExemptCount { get; init; }
+
+        public int DueExemptCount { get; init; }
+
+        public int DiscountedCount { get; init; }
+
+        public int ActiveCount { get; init; }
+
+        public int InactiveCount { get; init; }
+
+        public int MetersAssigned { get; init; }
+
+        public int MetersUnassigned { get; init; }
+    }
+
+    private sealed class ServiceBillingMonthlyRow
+    {
+        public int ServiceId { get; init; }
+
+        public string ServiceType { get; init; } = string.Empty;
+
+        public string PipeSize { get; init; } = string.Empty;
+
+        public int TotalBills { get; init; }
+
+        public decimal TotalConsumption { get; init; }
+
+        public decimal TotalWaterCharge { get; init; }
+
+        public decimal TotalTaxAmount { get; init; }
+
+        public decimal TotalPenaltyAmount { get; init; }
+
+        public decimal TotalBilledAmount { get; init; }
+
+        public decimal TotalRemainingBalance { get; init; }
+
+        public decimal BillingSharePercent { get; init; }
+    }
+
+    private sealed class BillingStatusMonthlyRow
+    {
+        public int TotalBills { get; init; }
+
+        public int PaidCount { get; init; }
+
+        public int PartiallyPaidCount { get; init; }
+
+        public int OverdueCount { get; init; }
+
+        public int UnpaidCount { get; init; }
+
+        public decimal PaidPercent { get; init; }
+
+        public decimal PartiallyPaidPercent { get; init; }
+
+        public decimal OverduePercent { get; init; }
+
+        public decimal UnpaidPercent { get; init; }
+    }
 }
+

@@ -31,8 +31,6 @@
             rootLayout = new TableLayoutPanel();
             titleLabel = new Label();
             reportsTabControl = new TabControl();
-            concessionaireTabPage = new TabPage();
-            concessionaireHostPanel = new Panel();
             billingTabPage = new TabPage();
             billingHostPanel = new Panel();
             collectionTabPage = new TabPage();
@@ -43,7 +41,6 @@
             agingScfHostPanel = new Panel();
             rootLayout.SuspendLayout();
             reportsTabControl.SuspendLayout();
-            concessionaireTabPage.SuspendLayout();
             billingTabPage.SuspendLayout();
             collectionTabPage.SuspendLayout();
             agingTabPage.SuspendLayout();
@@ -73,13 +70,12 @@
             titleLabel.Location = new Point(0, 4);
             titleLabel.Margin = new Padding(0);
             titleLabel.Name = "titleLabel";
-            titleLabel.Size = new Size(89, 15);
+            titleLabel.Size = new Size(47, 15);
             titleLabel.TabIndex = 0;
-            titleLabel.Text = "Admin Reports";
+            titleLabel.Text = "Reports";
             // 
             // reportsTabControl
             // 
-            reportsTabControl.Controls.Add(concessionaireTabPage);
             reportsTabControl.Controls.Add(billingTabPage);
             reportsTabControl.Controls.Add(collectionTabPage);
             reportsTabControl.Controls.Add(agingTabPage);
@@ -91,26 +87,6 @@
             reportsTabControl.SelectedIndex = 0;
             reportsTabControl.Size = new Size(1100, 669);
             reportsTabControl.TabIndex = 1;
-            // 
-            // concessionaireTabPage
-            // 
-            concessionaireTabPage.Controls.Add(concessionaireHostPanel);
-            concessionaireTabPage.Location = new Point(4, 24);
-            concessionaireTabPage.Name = "concessionaireTabPage";
-            concessionaireTabPage.Padding = new Padding(3);
-            concessionaireTabPage.Size = new Size(1092, 641);
-            concessionaireTabPage.TabIndex = 0;
-            concessionaireTabPage.Text = "Concessionaire";
-            concessionaireTabPage.UseVisualStyleBackColor = true;
-            // 
-            // concessionaireHostPanel
-            // 
-            concessionaireHostPanel.Dock = DockStyle.Fill;
-            concessionaireHostPanel.Location = new Point(3, 3);
-            concessionaireHostPanel.Margin = new Padding(0);
-            concessionaireHostPanel.Name = "concessionaireHostPanel";
-            concessionaireHostPanel.Size = new Size(1086, 635);
-            concessionaireHostPanel.TabIndex = 0;
             // 
             // billingTabPage
             // 
@@ -202,7 +178,6 @@
             rootLayout.ResumeLayout(false);
             rootLayout.PerformLayout();
             reportsTabControl.ResumeLayout(false);
-            concessionaireTabPage.ResumeLayout(false);
             billingTabPage.ResumeLayout(false);
             collectionTabPage.ResumeLayout(false);
             agingTabPage.ResumeLayout(false);
@@ -215,8 +190,6 @@
         private TableLayoutPanel rootLayout;
         private Label titleLabel;
         private TabControl reportsTabControl;
-        private TabPage concessionaireTabPage;
-        private Panel concessionaireHostPanel;
         private TabPage billingTabPage;
         private Panel billingHostPanel;
         private TabPage collectionTabPage;

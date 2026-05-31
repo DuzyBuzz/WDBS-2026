@@ -36,6 +36,8 @@ namespace WDBS_2026.Components.Admin
             ConfigureGrids();
             servicesGrid.DefaultValuesNeeded += servicesGrid_DefaultValuesNeeded;
             zonesGrid.DefaultValuesNeeded += zonesGrid_DefaultValuesNeeded;
+            servicesGrid.UserDeletingRow += servicesGrid_UserDeletingRow;
+            zonesGrid.UserDeletingRow += zonesGrid_UserDeletingRow;
         }
 
         protected override async void OnLoad(EventArgs e)
@@ -99,7 +101,7 @@ namespace WDBS_2026.Components.Admin
             foreach (DataGridView grid in new[] { servicesGrid, zonesGrid })
             {
                 grid.AllowUserToAddRows = true;
-                grid.AllowUserToDeleteRows = false;
+                grid.AllowUserToDeleteRows = true;
                 grid.AllowUserToResizeRows = false;
                 grid.MultiSelect = false;
                 grid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
@@ -412,6 +414,21 @@ namespace WDBS_2026.Components.Admin
                 return;
             }
 
+            DialogResult saveConfirmation = MessageBox.Show(
+                this,
+                "Save all pending changes to system settings, services, and zones?",
+                "Confirm Save",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Question,
+                MessageBoxDefaultButton.Button2);
+
+            if (saveConfirmation != DialogResult.Yes)
+            {
+                statusLabel.ForeColor = AppTheme.MutedTextColor;
+                statusLabel.Text = "Save cancelled.";
+                return;
+            }
+
             try
             {
                 SetBusyState(true, "Saving admin settings changes...");
@@ -515,11 +532,15 @@ namespace WDBS_2026.Components.Admin
                     throw new InvalidOperationException("Service type cannot be empty.");
                 }
 
+                row["service_type"] = serviceType.Trim().ToUpperInvariant();
+
                 string pipeSize = Convert.ToString(row["pipe_size"], CultureInfo.CurrentCulture) ?? string.Empty;
                 if (string.IsNullOrWhiteSpace(pipeSize))
                 {
                     throw new InvalidOperationException("Pipe size cannot be empty.");
                 }
+
+                row["pipe_size"] = pipeSize.Trim().ToUpperInvariant();
 
                 foreach (string columnName in new[] { "min_rate", "rate_11_20", "rate_21_30", "rate_31_40", "rate_41_above" })
                 {
@@ -558,6 +579,8 @@ namespace WDBS_2026.Components.Admin
                 {
                     throw new InvalidOperationException("Zone name cannot be empty.");
                 }
+
+                row["zone_name"] = zoneName.Trim().ToUpperInvariant();
             }
 
             EnsureUniqueIds(_zonesTable, "zone_id", "Zone ID");
@@ -623,6 +646,58 @@ namespace WDBS_2026.Components.Admin
 
             e.Row.Cells["zone_id"].Value = _nextZoneId;
             _nextZoneId++;
+        }
+
+        private void servicesGrid_UserDeletingRow(object? sender, DataGridViewRowCancelEventArgs e)
+        {
+            DataGridViewRow? row = e.Row;
+            if (row is null || row.IsNewRow)
+            {
+                return;
+            }
+
+            DataGridViewCell? serviceIdCell = servicesGrid.Columns["service_id"] is null
+                ? null
+                : row.Cells["service_id"];
+            object? serviceIdValue = serviceIdCell?.Value;
+
+            string serviceIdText = Convert.ToString(serviceIdValue, CultureInfo.CurrentCulture) ?? "(new)";
+
+            DialogResult confirmation = MessageBox.Show(
+                this,
+                $"Delete service row {serviceIdText}?",
+                "Confirm Delete Service",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);
+
+            e.Cancel = confirmation != DialogResult.Yes;
+        }
+
+        private void zonesGrid_UserDeletingRow(object? sender, DataGridViewRowCancelEventArgs e)
+        {
+            DataGridViewRow? row = e.Row;
+            if (row is null || row.IsNewRow)
+            {
+                return;
+            }
+
+            DataGridViewCell? zoneIdCell = zonesGrid.Columns["zone_id"] is null
+                ? null
+                : row.Cells["zone_id"];
+            object? zoneIdValue = zoneIdCell?.Value;
+
+            string zoneIdText = Convert.ToString(zoneIdValue, CultureInfo.CurrentCulture) ?? "(new)";
+
+            DialogResult confirmation = MessageBox.Show(
+                this,
+                $"Delete zone row {zoneIdText}?",
+                "Confirm Delete Zone",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning,
+                MessageBoxDefaultButton.Button2);
+
+            e.Cancel = confirmation != DialogResult.Yes;
         }
     }
 }

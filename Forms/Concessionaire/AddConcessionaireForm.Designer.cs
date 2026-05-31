@@ -28,6 +28,7 @@ partial class UpsertConcessionaireForm
         taxExemptedCheckBox = new CheckBox();
         dueExemptedCheckBox = new CheckBox();
         discountedCheckBox = new CheckBox();
+        notBillableCheckBox = new CheckBox();
         scfMonthlyTextBox = new TextBox();
         scfMonthlyLabel = new Label();
         scfTotalTextBox = new TextBox();
@@ -173,10 +174,11 @@ partial class UpsertConcessionaireForm
         optionsPanel.Controls.Add(taxExemptedCheckBox);
         optionsPanel.Controls.Add(dueExemptedCheckBox);
         optionsPanel.Controls.Add(discountedCheckBox);
+        optionsPanel.Controls.Add(notBillableCheckBox);
         optionsPanel.Location = new Point(0, 304);
         optionsPanel.Margin = new Padding(0, 14, 0, 0);
         optionsPanel.Name = "optionsPanel";
-        optionsPanel.Size = new Size(285, 19);
+        optionsPanel.Size = new Size(386, 19);
         optionsPanel.TabIndex = 22;
         // 
         // taxExemptedCheckBox
@@ -211,6 +213,17 @@ partial class UpsertConcessionaireForm
         discountedCheckBox.TabIndex = 2;
         discountedCheckBox.Text = "Disc.";
         discountedCheckBox.UseVisualStyleBackColor = true;
+        // 
+        // notBillableCheckBox
+        // 
+        notBillableCheckBox.AutoSize = true;
+        notBillableCheckBox.Location = new Point(301, 0);
+        notBillableCheckBox.Margin = new Padding(0);
+        notBillableCheckBox.Name = "notBillableCheckBox";
+        notBillableCheckBox.Size = new Size(85, 19);
+        notBillableCheckBox.TabIndex = 3;
+        notBillableCheckBox.Text = "Not Billable";
+        notBillableCheckBox.UseVisualStyleBackColor = true;
         // 
         // scfMonthlyTextBox
         // 
@@ -467,6 +480,7 @@ partial class UpsertConcessionaireForm
     private CheckBox taxExemptedCheckBox;
     private CheckBox dueExemptedCheckBox;
     private CheckBox discountedCheckBox;
+    private CheckBox notBillableCheckBox;
     private FlowLayoutPanel buttonPanel;
     private Button saveButton;
     private Button cancelButton;

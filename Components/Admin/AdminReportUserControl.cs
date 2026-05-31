@@ -59,7 +59,6 @@ namespace WDBS_2026.Components.Admin
 
             foreach (TabPage tab in new[]
                      {
-                         concessionaireTabPage,
                          billingTabPage,
                          collectionTabPage,
                          agingTabPage,
@@ -72,7 +71,6 @@ namespace WDBS_2026.Components.Admin
 
             foreach (Panel host in new[]
                      {
-                         concessionaireHostPanel,
                          billingHostPanel,
                          collectionHostPanel,
                          agingHostPanel,
@@ -85,7 +83,6 @@ namespace WDBS_2026.Components.Admin
 
         private void LoadReportPages()
         {
-            AddControlToHost(concessionaireHostPanel, new ConcessionaireUserControl(UserRole.Admin));
             AddControlToHost(billingHostPanel, new BillingUserControl(CreateRoleScopedUser(UserRole.Biller)));
             AddControlToHost(collectionHostPanel, new CollectionUserControl(CreateRoleScopedUser(UserRole.Cashier)));
             AddControlToHost(agingHostPanel, new AgingOfAccountsUserControl(CreateRoleScopedUser(UserRole.Cashier)));

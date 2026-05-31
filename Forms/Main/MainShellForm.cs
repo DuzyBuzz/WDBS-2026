@@ -71,9 +71,9 @@ public partial class MainShellForm : Form
 
         IEnumerable<string> roleModules = _currentUser.Role switch
         {
-            UserRole.Biller => new[] { "Concessionaire", "Reading", "Billing" },
-            UserRole.Cashier => new[] { "Cashier", "Collections", "Aging", "Aging SCF" },
-            UserRole.Admin => new[] { "Users", "System Settings", "Billing", "Collection", "Reports" },
+            UserRole.Biller => new[] { "Concessionaire", "Reading", "Reports" },
+            UserRole.Cashier => new[] { "Cashier", "Collections",  "Reports"  },
+            UserRole.Admin => new[] { "Users", "Audit Logs", "System Settings", "Concessionaire", "Billing", "Cashier", "Reports" },
             _ => Array.Empty<string>()
         };
 
@@ -174,6 +174,12 @@ public partial class MainShellForm : Form
             return;
         }
 
+        if (string.Equals(moduleName, "Reports", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new AdminReportUserControl(_currentUser), moduleName);
+            return;
+        }
+
         if (_currentUser.Role == UserRole.Biller && string.Equals(moduleName, "Concessionaire", StringComparison.OrdinalIgnoreCase))
         {
             TryLoadModuleControl(() => new ConcessionaireUserControl(_currentUser.Role), moduleName);
@@ -186,9 +192,7 @@ public partial class MainShellForm : Form
             return;
         }
 
-        if (_currentUser.Role == UserRole.Biller &&
-            (string.Equals(moduleName, "Billing", StringComparison.OrdinalIgnoreCase)
-             || string.Equals(moduleName, "Reports", StringComparison.OrdinalIgnoreCase)))
+        if (_currentUser.Role == UserRole.Biller && string.Equals(moduleName, "Billing", StringComparison.OrdinalIgnoreCase))
         {
             TryLoadModuleControl(() => new BillingUserControl(_currentUser), moduleName);
             return;
@@ -218,9 +222,21 @@ public partial class MainShellForm : Form
             return;
         }
 
-        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Reports", StringComparison.OrdinalIgnoreCase))
+        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Audit Logs", StringComparison.OrdinalIgnoreCase))
         {
-            TryLoadModuleControl(() => new AdminReportUserControl(_currentUser), moduleName);
+            TryLoadModuleControl(() => new UserAuditLogsUserControl(_currentUser), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Concessionaire", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new ConcessionaireUserControl(UserRole.Biller), moduleName);
+            return;
+        }
+
+        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Cashier", StringComparison.OrdinalIgnoreCase))
+        {
+            TryLoadModuleControl(() => new CashierUserControl(CreateRoleScopedUser(UserRole.Cashier)), moduleName);
             return;
         }
 
@@ -233,12 +249,6 @@ public partial class MainShellForm : Form
         if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "System Settings", StringComparison.OrdinalIgnoreCase))
         {
             TryLoadModuleControl(() => new AdminSystemSettingsUserControl(_currentUser), moduleName);
-            return;
-        }
-
-        if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Collection", StringComparison.OrdinalIgnoreCase))
-        {
-            TryLoadModuleControl(() => new CashierUserControl(CreateRoleScopedUser(UserRole.Cashier)), moduleName);
             return;
         }
 
@@ -442,6 +452,7 @@ public partial class MainShellForm : Form
             "Reading" => "📟",
             "Billing" => "🧾",
             "Reports" => "📊",
+            "Cashier Reports" => "📊",
             "Cashier" => "💰",
             "Collections" => "💳",
             "Aging" => "📈",
@@ -450,6 +461,7 @@ public partial class MainShellForm : Form
             "Users" => "👥",
             "System Settings" => "⚙️",
             "Collection" => "💳",
+            "Audit Logs" => "🕵️",
             _ => "📁"
         };
     }
