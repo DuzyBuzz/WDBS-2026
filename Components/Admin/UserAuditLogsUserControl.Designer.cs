@@ -1,4 +1,4 @@
-﻿namespace WDBS_2026.Components.Admin
+namespace WDBS_2026.Components.Admin
 {
     partial class UserAuditLogsUserControl
     {
@@ -31,16 +31,25 @@
             rootLayout = new TableLayoutPanel();
             titleLabel = new Label();
             filterLayout = new TableLayoutPanel();
-            searchLabel = new Label();
-            searchTextBox = new TextBox();
-            searchButton = new Button();
-            clearButton = new Button();
+            userSearchLabel = new Label();
+            userSearchTextBox = new TextBox();
+            roleFilterLabel = new Label();
+            roleFilterComboBox = new ComboBox();
+            actionTypeFilterLabel = new Label();
+            actionTypeFilterComboBox = new ComboBox();
+            moduleFilterLabel = new Label();
+            moduleFilterComboBox = new ComboBox();
+            severityFilterLabel = new Label();
+            severityFilterComboBox = new ComboBox();
             dateFromLabel = new Label();
             dateFromPicker = new DateTimePicker();
             dateToLabel = new Label();
             dateToPicker = new DateTimePicker();
-            printButton = new Button();
+            buttonPanel = new FlowLayoutPanel();
             refreshButton = new Button();
+            printButton = new Button();
+            clearButton = new Button();
+            searchButton = new Button();
             auditLogsGrid = new DataGridView();
             footerLayout = new TableLayoutPanel();
             statusLabel = new Label();
@@ -48,9 +57,9 @@
             previousPageButton = new Button();
             pageInfoLabel = new Label();
             nextPageButton = new Button();
-            
             rootLayout.SuspendLayout();
             filterLayout.SuspendLayout();
+            buttonPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)auditLogsGrid).BeginInit();
             footerLayout.SuspendLayout();
             paginationLayout.SuspendLayout();
@@ -76,7 +85,6 @@
             rootLayout.RowStyles.Add(new RowStyle());
             rootLayout.Size = new Size(1100, 700);
             rootLayout.TabIndex = 0;
-            
             // 
             // titleLabel
             // 
@@ -84,174 +92,275 @@
             titleLabel.Location = new Point(0, 4);
             titleLabel.Margin = new Padding(0);
             titleLabel.Name = "titleLabel";
-            titleLabel.Size = new Size(106, 15);
+            titleLabel.Size = new Size(90, 15);
             titleLabel.TabIndex = 0;
             titleLabel.Text = "User Audit Logs";
-            
             // 
             // filterLayout
             // 
-            filterLayout.ColumnCount = 10;
+            filterLayout.ColumnCount = 15;
             filterLayout.ColumnStyles.Add(new ColumnStyle());
+            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 170F));
             filterLayout.ColumnStyles.Add(new ColumnStyle());
+            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90F));
             filterLayout.ColumnStyles.Add(new ColumnStyle());
+            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
             filterLayout.ColumnStyles.Add(new ColumnStyle());
+            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90F));
             filterLayout.ColumnStyles.Add(new ColumnStyle());
+            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 90F));
             filterLayout.ColumnStyles.Add(new ColumnStyle());
+            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
             filterLayout.ColumnStyles.Add(new ColumnStyle());
-            filterLayout.ColumnStyles.Add(new ColumnStyle());
+            filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
             filterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            filterLayout.ColumnStyles.Add(new ColumnStyle());
-            filterLayout.Controls.Add(searchLabel, 0, 0);
-            filterLayout.Controls.Add(searchTextBox, 1, 0);
-            filterLayout.Controls.Add(searchButton, 2, 0);
-            filterLayout.Controls.Add(clearButton, 3, 0);
-            filterLayout.Controls.Add(dateFromLabel, 4, 0);
-            filterLayout.Controls.Add(dateFromPicker, 5, 0);
-            filterLayout.Controls.Add(dateToLabel, 6, 0);
-            filterLayout.Controls.Add(dateToPicker, 7, 0);
-            filterLayout.Controls.Add(printButton, 8, 0);
-            filterLayout.Controls.Add(refreshButton, 9, 0);
+            filterLayout.Controls.Add(userSearchLabel, 0, 0);
+            filterLayout.Controls.Add(userSearchTextBox, 1, 0);
+            filterLayout.Controls.Add(roleFilterLabel, 2, 0);
+            filterLayout.Controls.Add(roleFilterComboBox, 3, 0);
+            filterLayout.Controls.Add(actionTypeFilterLabel, 4, 0);
+            filterLayout.Controls.Add(actionTypeFilterComboBox, 5, 0);
+            filterLayout.Controls.Add(moduleFilterLabel, 6, 0);
+            filterLayout.Controls.Add(moduleFilterComboBox, 7, 0);
+            filterLayout.Controls.Add(severityFilterLabel, 8, 0);
+            filterLayout.Controls.Add(severityFilterComboBox, 9, 0);
+            filterLayout.Controls.Add(dateFromLabel, 10, 0);
+            filterLayout.Controls.Add(dateFromPicker, 11, 0);
+            filterLayout.Controls.Add(dateToLabel, 12, 0);
+            filterLayout.Controls.Add(dateToPicker, 13, 0);
+            filterLayout.Controls.Add(buttonPanel, 14, 0);
             filterLayout.Dock = DockStyle.Fill;
             filterLayout.Location = new Point(0, 27);
             filterLayout.Margin = new Padding(0, 8, 0, 0);
             filterLayout.Name = "filterLayout";
             filterLayout.RowCount = 1;
-            filterLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 35F));
-            filterLayout.Size = new Size(1100, 35);
+            filterLayout.RowStyles.Add(new RowStyle());
+            filterLayout.Size = new Size(1100, 30);
             filterLayout.TabIndex = 1;
-            
             // 
-            // searchLabel
+            // userSearchLabel
             // 
-            searchLabel.Anchor = AnchorStyles.Left;
-            searchLabel.AutoSize = true;
-            searchLabel.Location = new Point(0, 10);
-            searchLabel.Margin = new Padding(0, 0, 6, 0);
-            searchLabel.Name = "searchLabel";
-            searchLabel.Size = new Size(45, 15);
-            searchLabel.TabIndex = 0;
-            searchLabel.Text = "Search:";
-            
+            userSearchLabel.Anchor = AnchorStyles.Left;
+            userSearchLabel.AutoSize = true;
+            userSearchLabel.Location = new Point(0, 7);
+            userSearchLabel.Margin = new Padding(0, 0, 6, 0);
+            userSearchLabel.Name = "userSearchLabel";
+            userSearchLabel.Size = new Size(71, 15);
+            userSearchLabel.TabIndex = 0;
+            userSearchLabel.Text = "User Search";
             // 
-            // searchTextBox
+            // userSearchTextBox
             // 
-            searchTextBox.Location = new Point(51, 6);
-            searchTextBox.Margin = new Padding(0, 0, 6, 0);
-            searchTextBox.Name = "searchTextBox";
-            searchTextBox.Size = new Size(140, 23);
-            searchTextBox.TabIndex = 1;
-            
+            userSearchTextBox.Dock = DockStyle.Fill;
+            userSearchTextBox.Location = new Point(77, 0);
+            userSearchTextBox.Margin = new Padding(0, 0, 8, 0);
+            userSearchTextBox.Name = "userSearchTextBox";
+            userSearchTextBox.PlaceholderText = "Username or Full Name";
+            userSearchTextBox.Size = new Size(162, 23);
+            userSearchTextBox.TabIndex = 1;
             // 
-            // searchButton
+            // roleFilterLabel
             // 
-            searchButton.Location = new Point(197, 6);
-            searchButton.Margin = new Padding(0, 0, 6, 0);
-            searchButton.Name = "searchButton";
-            searchButton.Size = new Size(70, 23);
-            searchButton.TabIndex = 2;
-            searchButton.Text = "Search";
-            searchButton.UseVisualStyleBackColor = true;
-            
+            roleFilterLabel.Anchor = AnchorStyles.Left;
+            roleFilterLabel.AutoSize = true;
+            roleFilterLabel.Location = new Point(277, 7);
+            roleFilterLabel.Margin = new Padding(0, 0, 6, 0);
+            roleFilterLabel.Name = "roleFilterLabel";
+            roleFilterLabel.Size = new Size(30, 15);
+            roleFilterLabel.TabIndex = 2;
+            roleFilterLabel.Text = "Role";
             // 
-            // clearButton
+            // roleFilterComboBox
             // 
-            clearButton.Location = new Point(273, 6);
-            clearButton.Margin = new Padding(0, 0, 12, 0);
-            clearButton.Name = "clearButton";
-            clearButton.Size = new Size(60, 23);
-            clearButton.TabIndex = 3;
-            clearButton.Text = "Clear";
-            clearButton.UseVisualStyleBackColor = true;
-            
+            roleFilterComboBox.Dock = DockStyle.Fill;
+            roleFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            roleFilterComboBox.FormattingEnabled = true;
+            roleFilterComboBox.Location = new Point(313, 0);
+            roleFilterComboBox.Margin = new Padding(0, 0, 8, 0);
+            roleFilterComboBox.Name = "roleFilterComboBox";
+            roleFilterComboBox.Size = new Size(82, 23);
+            roleFilterComboBox.TabIndex = 3;
+            // 
+            // actionTypeFilterLabel
+            // 
+            actionTypeFilterLabel.Anchor = AnchorStyles.Left;
+            actionTypeFilterLabel.AutoSize = true;
+            actionTypeFilterLabel.Location = new Point(433, 7);
+            actionTypeFilterLabel.Margin = new Padding(0, 0, 6, 0);
+            actionTypeFilterLabel.Name = "actionTypeFilterLabel";
+            actionTypeFilterLabel.Size = new Size(70, 15);
+            actionTypeFilterLabel.TabIndex = 4;
+            actionTypeFilterLabel.Text = "Action Type";
+            // 
+            // actionTypeFilterComboBox
+            // 
+            actionTypeFilterComboBox.Dock = DockStyle.Fill;
+            actionTypeFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            actionTypeFilterComboBox.FormattingEnabled = true;
+            actionTypeFilterComboBox.Location = new Point(509, 0);
+            actionTypeFilterComboBox.Margin = new Padding(0, 0, 8, 0);
+            actionTypeFilterComboBox.Name = "actionTypeFilterComboBox";
+            actionTypeFilterComboBox.Size = new Size(92, 23);
+            actionTypeFilterComboBox.TabIndex = 5;
+            // 
+            // moduleFilterLabel
+            // 
+            moduleFilterLabel.Anchor = AnchorStyles.Left;
+            moduleFilterLabel.AutoSize = true;
+            moduleFilterLabel.Location = new Point(629, 7);
+            moduleFilterLabel.Margin = new Padding(0, 0, 6, 0);
+            moduleFilterLabel.Name = "moduleFilterLabel";
+            moduleFilterLabel.Size = new Size(48, 15);
+            moduleFilterLabel.TabIndex = 6;
+            moduleFilterLabel.Text = "Module";
+            // 
+            // moduleFilterComboBox
+            // 
+            moduleFilterComboBox.Dock = DockStyle.Fill;
+            moduleFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            moduleFilterComboBox.FormattingEnabled = true;
+            moduleFilterComboBox.Location = new Point(683, 0);
+            moduleFilterComboBox.Margin = new Padding(0, 0, 8, 0);
+            moduleFilterComboBox.Name = "moduleFilterComboBox";
+            moduleFilterComboBox.Size = new Size(82, 23);
+            moduleFilterComboBox.TabIndex = 7;
+            // 
+            // severityFilterLabel
+            // 
+            severityFilterLabel.Anchor = AnchorStyles.Left;
+            severityFilterLabel.AutoSize = true;
+            severityFilterLabel.Location = new Point(793, 7);
+            severityFilterLabel.Margin = new Padding(0, 0, 6, 0);
+            severityFilterLabel.Name = "severityFilterLabel";
+            severityFilterLabel.Size = new Size(46, 15);
+            severityFilterLabel.TabIndex = 10;
+            severityFilterLabel.Text = "Severity";
+            // 
+            // severityFilterComboBox
+            // 
+            severityFilterComboBox.Dock = DockStyle.Fill;
+            severityFilterComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+            severityFilterComboBox.FormattingEnabled = true;
+            severityFilterComboBox.Location = new Point(845, 0);
+            severityFilterComboBox.Margin = new Padding(0, 0, 8, 0);
+            severityFilterComboBox.Name = "severityFilterComboBox";
+            severityFilterComboBox.Size = new Size(82, 23);
+            severityFilterComboBox.TabIndex = 11;
             // 
             // dateFromLabel
             // 
             dateFromLabel.Anchor = AnchorStyles.Left;
             dateFromLabel.AutoSize = true;
-            dateFromLabel.Location = new Point(345, 10);
+            dateFromLabel.Location = new Point(935, 7);
             dateFromLabel.Margin = new Padding(0, 0, 6, 0);
             dateFromLabel.Name = "dateFromLabel";
             dateFromLabel.Size = new Size(38, 15);
-            dateFromLabel.TabIndex = 4;
+            dateFromLabel.TabIndex = 12;
             dateFromLabel.Text = "From:";
-            
             // 
             // dateFromPicker
             // 
             dateFromPicker.CustomFormat = "yyyy-MM-dd";
             dateFromPicker.Format = DateTimePickerFormat.Custom;
-            dateFromPicker.Location = new Point(389, 6);
-            dateFromPicker.Margin = new Padding(0, 0, 6, 0);
+            dateFromPicker.Location = new Point(979, 0);
+            dateFromPicker.Margin = new Padding(0, 0, 8, 0);
             dateFromPicker.Name = "dateFromPicker";
-            dateFromPicker.Size = new Size(110, 23);
-            dateFromPicker.TabIndex = 5;
-            
+            dateFromPicker.Size = new Size(100, 23);
+            dateFromPicker.TabIndex = 13;
             // 
             // dateToLabel
             // 
             dateToLabel.Anchor = AnchorStyles.Left;
             dateToLabel.AutoSize = true;
-            dateToLabel.Location = new Point(505, 10);
+            dateToLabel.Location = new Point(1087, 7);
             dateToLabel.Margin = new Padding(0, 0, 6, 0);
             dateToLabel.Name = "dateToLabel";
             dateToLabel.Size = new Size(22, 15);
-            dateToLabel.TabIndex = 6;
+            dateToLabel.TabIndex = 14;
             dateToLabel.Text = "To:";
-            
             // 
             // dateToPicker
             // 
             dateToPicker.CustomFormat = "yyyy-MM-dd";
             dateToPicker.Format = DateTimePickerFormat.Custom;
-            dateToPicker.Location = new Point(533, 6);
-            dateToPicker.Margin = new Padding(0, 0, 6, 0);
+            dateToPicker.Location = new Point(1115, 0);
+            dateToPicker.Margin = new Padding(0, 0, 8, 0);
             dateToPicker.Name = "dateToPicker";
-            dateToPicker.Size = new Size(110, 23);
-            dateToPicker.TabIndex = 7;
-            
+            dateToPicker.Size = new Size(100, 23);
+            dateToPicker.TabIndex = 15;
             // 
-            // printButton
+            // buttonPanel
             // 
-            printButton.Anchor = AnchorStyles.Right;
-            printButton.Location = new Point(972, 6);
-            printButton.Margin = new Padding(0, 0, 6, 0);
-            printButton.Name = "printButton";
-            printButton.Size = new Size(105, 23);
-            printButton.TabIndex = 8;
-            printButton.Text = "Print Report";
-            printButton.UseVisualStyleBackColor = true;
-            
+            buttonPanel.AutoSize = true;
+            buttonPanel.Controls.Add(refreshButton);
+            buttonPanel.Controls.Add(printButton);
+            buttonPanel.Controls.Add(clearButton);
+            buttonPanel.Controls.Add(searchButton);
+            buttonPanel.Dock = DockStyle.Right;
+            buttonPanel.FlowDirection = FlowDirection.RightToLeft;
+            buttonPanel.Location = new Point(1218, 0);
+            buttonPanel.Margin = new Padding(0, 0, 0, 0);
+            buttonPanel.Name = "buttonPanel";
+            buttonPanel.Size = new Size(312, 30);
+            buttonPanel.TabIndex = 16;
             // 
             // refreshButton
             // 
-            refreshButton.Anchor = AnchorStyles.Right;
-            refreshButton.Location = new Point(1020, 6);
+            refreshButton.Location = new Point(232, 0);
             refreshButton.Margin = new Padding(0);
             refreshButton.Name = "refreshButton";
-            refreshButton.Size = new Size(80, 23);
-            refreshButton.TabIndex = 9;
+            refreshButton.Size = new Size(80, 30);
+            refreshButton.TabIndex = 3;
             refreshButton.Text = "Refresh";
             refreshButton.UseVisualStyleBackColor = true;
-            
+            // 
+            // printButton
+            // 
+            printButton.Location = new Point(127, 0);
+            printButton.Margin = new Padding(0, 0, 8, 0);
+            printButton.Name = "printButton";
+            printButton.Size = new Size(97, 30);
+            printButton.TabIndex = 2;
+            printButton.Text = "Print Report";
+            printButton.UseVisualStyleBackColor = true;
+            // 
+            // clearButton
+            // 
+            clearButton.Location = new Point(59, 0);
+            clearButton.Margin = new Padding(0, 0, 8, 0);
+            clearButton.Name = "clearButton";
+            clearButton.Size = new Size(60, 30);
+            clearButton.TabIndex = 1;
+            clearButton.Text = "Clear";
+            clearButton.UseVisualStyleBackColor = true;
+            // 
+            // searchButton
+            // 
+            searchButton.Location = new Point(0, 0);
+            searchButton.Margin = new Padding(0, 0, 8, 0);
+            searchButton.Name = "searchButton";
+            searchButton.Size = new Size(70, 30);
+            searchButton.TabIndex = 0;
+            searchButton.Text = "Search";
+            searchButton.UseVisualStyleBackColor = true;
             // 
             // auditLogsGrid
             // 
             auditLogsGrid.AllowUserToAddRows = false;
             auditLogsGrid.AllowUserToDeleteRows = false;
             auditLogsGrid.AllowUserToResizeRows = false;
+            auditLogsGrid.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             auditLogsGrid.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             auditLogsGrid.Dock = DockStyle.Fill;
-            auditLogsGrid.Location = new Point(0, 62);
+            auditLogsGrid.Location = new Point(0, 57);
             auditLogsGrid.Margin = new Padding(0);
             auditLogsGrid.MultiSelect = false;
             auditLogsGrid.Name = "auditLogsGrid";
             auditLogsGrid.ReadOnly = true;
             auditLogsGrid.RowHeadersWidth = 51;
             auditLogsGrid.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-            auditLogsGrid.Size = new Size(1100, 604);
+            auditLogsGrid.Size = new Size(1100, 597);
             auditLogsGrid.TabIndex = 2;
-            
             // 
             // footerLayout
             // 
@@ -268,7 +377,6 @@
             footerLayout.RowStyles.Add(new RowStyle());
             footerLayout.Size = new Size(1100, 34);
             footerLayout.TabIndex = 3;
-            
             // 
             // statusLabel
             // 
@@ -276,10 +384,9 @@
             statusLabel.Location = new Point(0, 0);
             statusLabel.Margin = new Padding(0, 0, 0, 4);
             statusLabel.Name = "statusLabel";
-            statusLabel.Size = new Size(68, 15);
+            statusLabel.Size = new Size(39, 15);
             statusLabel.TabIndex = 0;
             statusLabel.Text = "Ready";
-            
             // 
             // paginationLayout
             // 
@@ -299,34 +406,31 @@
             paginationLayout.RowStyles.Add(new RowStyle());
             paginationLayout.Size = new Size(1100, 15);
             paginationLayout.TabIndex = 1;
-            
             // 
             // previousPageButton
             // 
-            previousPageButton.Location = new Point(853, 0);
+            previousPageButton.Location = new Point(908, 0);
             previousPageButton.Margin = new Padding(6, 0, 6, 0);
             previousPageButton.Name = "previousPageButton";
             previousPageButton.Size = new Size(80, 23);
             previousPageButton.TabIndex = 0;
             previousPageButton.Text = "< Previous";
             previousPageButton.UseVisualStyleBackColor = true;
-            
             // 
             // pageInfoLabel
             // 
             pageInfoLabel.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             pageInfoLabel.AutoSize = true;
-            pageInfoLabel.Location = new Point(945, 4);
+            pageInfoLabel.Location = new Point(1000, 4);
             pageInfoLabel.Margin = new Padding(6, 0, 6, 0);
             pageInfoLabel.Name = "pageInfoLabel";
             pageInfoLabel.Size = new Size(24, 15);
             pageInfoLabel.TabIndex = 1;
             pageInfoLabel.Text = "1/1";
-            
             // 
             // nextPageButton
             // 
-            nextPageButton.Location = new Point(977, 0);
+            nextPageButton.Location = new Point(1030, 0);
             nextPageButton.Margin = new Padding(0);
             nextPageButton.Name = "nextPageButton";
             nextPageButton.Size = new Size(70, 23);
@@ -342,11 +446,11 @@
             Margin = new Padding(3, 2, 3, 2);
             Name = "UserAuditLogsUserControl";
             Size = new Size(1100, 700);
-            
             rootLayout.ResumeLayout(false);
             rootLayout.PerformLayout();
             filterLayout.ResumeLayout(false);
             filterLayout.PerformLayout();
+            buttonPanel.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)auditLogsGrid).EndInit();
             footerLayout.ResumeLayout(false);
             footerLayout.PerformLayout();
@@ -360,14 +464,23 @@
         private TableLayoutPanel rootLayout;
         private Label titleLabel;
         private TableLayoutPanel filterLayout;
-        private Label searchLabel;
-        private TextBox searchTextBox;
-        private Button searchButton;
-        private Button clearButton;
+        private Label userSearchLabel;
+        private TextBox userSearchTextBox;
+        private Label roleFilterLabel;
+        private ComboBox roleFilterComboBox;
+        private Label actionTypeFilterLabel;
+        private ComboBox actionTypeFilterComboBox;
+        private Label moduleFilterLabel;
+        private ComboBox moduleFilterComboBox;
+        private Label severityFilterLabel;
+        private ComboBox severityFilterComboBox;
         private Label dateFromLabel;
         private DateTimePicker dateFromPicker;
         private Label dateToLabel;
         private DateTimePicker dateToPicker;
+        private FlowLayoutPanel buttonPanel;
+        private Button searchButton;
+        private Button clearButton;
         private Button printButton;
         private Button refreshButton;
         private DataGridView auditLogsGrid;

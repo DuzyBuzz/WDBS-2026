@@ -8,6 +8,7 @@ namespace WDBS_2026.Forms.Concessionaire;
 public partial class UpsertConcessionaireForm : Form
 {
     private readonly UserRole _role;
+    private readonly int _actingUserId;
     private readonly int? _concessionaireId;
 
     private decimal _existingScfTotalAmount;
@@ -15,11 +16,13 @@ public partial class UpsertConcessionaireForm : Form
 
     private bool IsEditMode => _concessionaireId.HasValue;
 
-    public UpsertConcessionaireForm(UserRole role, int? concessionaireId = null)
+    public UpsertConcessionaireForm(UserRole role, int actingUserId = 0, int? concessionaireId = null)
     {
         _role = role;
+        _actingUserId = actingUserId;
         _concessionaireId = concessionaireId;
         InitializeComponent();
+        InitializeStatusOptions();
         WireInputEnhancements();
         ApplyTheme();
         UpdateFormCaption();
@@ -46,7 +49,7 @@ public partial class UpsertConcessionaireForm : Form
         foreach (Label label in new[]
                  {
                      accountNoLabel, nameLabel, tinLabel, addressLabel, zoneLabel, serviceLabel,
-                     meterLabel, firstReadingDateLabel, scfTotalLabel, scfMonthlyLabel
+                     collectionStatusFieldLabel, meterLabel, firstReadingDateLabel, scfTotalLabel, scfMonthlyLabel
                  })
         {
             label.Font = AppTheme.SectionFont;
@@ -60,6 +63,7 @@ public partial class UpsertConcessionaireForm : Form
 
         zoneComboBox.Font = AppTheme.BodyFont;
         serviceComboBox.Font = AppTheme.BodyFont;
+        statusComboBox.Font = AppTheme.BodyFont;
 
         taxExemptedCheckBox.Font = AppTheme.BodyFont;
         dueExemptedCheckBox.Font = AppTheme.BodyFont;
@@ -68,6 +72,18 @@ public partial class UpsertConcessionaireForm : Form
 
         AppTheme.ApplyPrimaryButton(saveButton);
         AppTheme.ApplySeverityButton(cancelButton, ButtonSeverity.Neutral);
+    }
+
+    private void InitializeStatusOptions()
+    {
+        statusComboBox.Items.Clear();
+        statusComboBox.Items.AddRange(new object[]
+        {
+            "ACTIVE",
+            "PENDING",
+            "DISCONNECTED"
+        });
+        statusComboBox.SelectedItem = "PENDING";
     }
 
     private void UpdateFormCaption()
@@ -149,6 +165,7 @@ SELECT
     c.concessionaire_name,
     c.tin_number,
     c.address,
+    COALESCE(c.status, 'Pending') AS concessionaire_status,
     c.zone_id,
     c.service_id,
     c.meter_no,
@@ -179,6 +196,7 @@ LIMIT 1;";
             Convert.ToString(reader["concessionaire_name"], CultureInfo.CurrentCulture) ?? string.Empty,
             Convert.ToString(reader["tin_number"], CultureInfo.CurrentCulture) ?? string.Empty,
             Convert.ToString(reader["address"], CultureInfo.CurrentCulture) ?? string.Empty,
+            Convert.ToString(reader["concessionaire_status"], CultureInfo.CurrentCulture) ?? "Pending",
             reader.IsDBNull(reader.GetOrdinal("zone_id")) ? 0 : reader.GetInt32("zone_id"),
             reader.IsDBNull(reader.GetOrdinal("service_id")) ? 0 : reader.GetInt32("service_id"),
             Convert.ToString(reader["meter_no"], CultureInfo.CurrentCulture) ?? string.Empty,
@@ -194,10 +212,11 @@ LIMIT 1;";
 
     private void PopulateForm(ExistingConcessionaireRecord record)
     {
-        accountNoTextBox.Text = record.AccountNo;
+        accountNoTextBox.Text = record.AccountNo.ToUpper(CultureInfo.CurrentCulture);
         nameTextBox.Text = ToTitleCase(record.ConcessionaireName);
         tinTextBox.Text = record.TinNumber;
         addressTextBox.Text = ToTitleCase(record.Address);
+        SetSelectedStatus(record.Status);
         meterNumberTextBox.Text = record.MeterNumber;
         firstReadingDatePicker.Value = record.FirstReadingDate?.Date ?? DateTime.Today;
         scfTotalTextBox.Text = FormatAmount(record.ScfTotalAmount);
@@ -219,6 +238,22 @@ LIMIT 1;";
 
         _existingScfTotalAmount = record.ScfTotalAmount;
         _existingScfBalanceAmount = record.ScfBalanceAmount;
+    }
+
+    private void SetSelectedStatus(string? status)
+    {
+        string normalized = string.IsNullOrWhiteSpace(status) ? "Pending" : status.Trim();
+
+        foreach (object item in statusComboBox.Items)
+        {
+            if (string.Equals(item.ToString(), normalized, StringComparison.OrdinalIgnoreCase))
+            {
+                statusComboBox.SelectedItem = item;
+                return;
+            }
+        }
+
+        statusComboBox.SelectedItem = "Pending";
     }
 
     private async Task LoadZonesAsync(MySqlConnection connection)
@@ -306,14 +341,14 @@ LIMIT 500;";
             await connection.OpenAsync();
             await using MySqlTransaction transaction = await connection.BeginTransactionAsync();
 
-            int concessionaireId = _concessionaireId ?? await InsertConcessionaireAsync(connection, transaction, request);
+            int concessionaireId = _concessionaireId ?? await InsertConcessionaireAsync(connection, transaction, request, _actingUserId);
             if (IsEditMode)
             {
-                await UpdateConcessionaireAsync(connection, transaction, concessionaireId, request);
+                await UpdateConcessionaireAsync(connection, transaction, concessionaireId, request, _actingUserId);
             }
 
             decimal updatedScfBalance = CalculateScfBalanceForSave(request.ScfTotalAmount);
-            await UpsertScfBalanceAsync(connection, transaction, concessionaireId, request, updatedScfBalance);
+            await UpsertScfBalanceAsync(connection, transaction, concessionaireId, request, updatedScfBalance, _actingUserId);
 
             await transaction.CommitAsync();
 
@@ -343,7 +378,8 @@ LIMIT 500;";
     private static async Task<int> InsertConcessionaireAsync(
         MySqlConnection connection,
         MySqlTransaction transaction,
-        UpsertConcessionaireRequest request)
+        UpsertConcessionaireRequest request,
+        int actingUserId)
     {
         const string sql = @"
 INSERT INTO concessionaire
@@ -360,7 +396,8 @@ INSERT INTO concessionaire
     is_discounted,
     is_not_billable,
     status,
-    tin_number
+    tin_number,
+    user_id
 )
 VALUES
 (
@@ -376,7 +413,8 @@ VALUES
     @isDiscounted,
     @isNotBillable,
     @status,
-    @tin
+    @tin,
+    @userId
 );";
 
         await using var command = new MySqlCommand(sql, connection, transaction);
@@ -391,8 +429,9 @@ VALUES
         command.Parameters.AddWithValue("@isDueExempt", request.IsDueExempt);
         command.Parameters.AddWithValue("@isDiscounted", request.IsDiscounted);
         command.Parameters.AddWithValue("@isNotBillable", request.IsNotBillable);
-        command.Parameters.AddWithValue("@status", "Active");
+        command.Parameters.AddWithValue("@status", request.Status);
         command.Parameters.AddWithValue("@tin", request.TinNumber);
+        command.Parameters.AddWithValue("@userId", actingUserId > 0 ? actingUserId : DBNull.Value);
 
         await command.ExecuteNonQueryAsync();
         return Convert.ToInt32(command.LastInsertedId);
@@ -402,7 +441,8 @@ VALUES
         MySqlConnection connection,
         MySqlTransaction transaction,
         int concessionaireId,
-        UpsertConcessionaireRequest request)
+        UpsertConcessionaireRequest request,
+        int actingUserId)
     {
         const string sql = @"
 UPDATE concessionaire
@@ -410,6 +450,7 @@ SET
     concessionaire_code = @accountNo,
     concessionaire_name = @name,
     address = @address,
+    status = @status,
     zone_id = @zoneId,
     service_id = @serviceId,
     meter_no = @meterNumber,
@@ -418,7 +459,8 @@ SET
     is_due_exempt = @isDueExempt,
     is_discounted = @isDiscounted,
     is_not_billable = @isNotBillable,
-    tin_number = @tin
+    tin_number = @tin,
+    user_id = @userId
 WHERE concessionaire_id = @concessionaireId;";
 
         await using var command = new MySqlCommand(sql, connection, transaction);
@@ -426,6 +468,7 @@ WHERE concessionaire_id = @concessionaireId;";
         command.Parameters.AddWithValue("@accountNo", request.AccountNo);
         command.Parameters.AddWithValue("@name", request.ConcessionaireName);
         command.Parameters.AddWithValue("@address", request.Address);
+        command.Parameters.AddWithValue("@status", request.Status);
         command.Parameters.AddWithValue("@zoneId", request.ZoneId);
         command.Parameters.AddWithValue("@serviceId", request.ServiceId);
         command.Parameters.AddWithValue("@meterNumber", request.MeterNumber);
@@ -435,6 +478,7 @@ WHERE concessionaire_id = @concessionaireId;";
         command.Parameters.AddWithValue("@isDiscounted", request.IsDiscounted);
         command.Parameters.AddWithValue("@isNotBillable", request.IsNotBillable);
         command.Parameters.AddWithValue("@tin", request.TinNumber);
+        command.Parameters.AddWithValue("@userId", actingUserId > 0 ? actingUserId : DBNull.Value);
 
         await command.ExecuteNonQueryAsync();
     }
@@ -444,7 +488,8 @@ WHERE concessionaire_id = @concessionaireId;";
         MySqlTransaction transaction,
         int concessionaireId,
         UpsertConcessionaireRequest request,
-        decimal balance)
+        decimal balance,
+        int actingUserId)
     {
         const string sql = @"
 INSERT INTO scf_balance
@@ -453,6 +498,7 @@ INSERT INTO scf_balance
     total_amount,
     balance,
     monthly,
+    user_id,
     updated_at
 )
 VALUES
@@ -461,12 +507,14 @@ VALUES
     @totalAmount,
     @balance,
     @monthly,
+    @userId,
     NOW()
 )
 ON DUPLICATE KEY UPDATE
     total_amount = @totalAmount,
     balance = @balance,
     monthly = @monthly,
+    user_id = @userId,
     updated_at = NOW();";
 
         await using var command = new MySqlCommand(sql, connection, transaction);
@@ -474,6 +522,7 @@ ON DUPLICATE KEY UPDATE
         command.Parameters.AddWithValue("@totalAmount", request.ScfTotalAmount);
         command.Parameters.AddWithValue("@balance", balance);
         command.Parameters.AddWithValue("@monthly", request.ScfMonthlyAmount);
+        command.Parameters.AddWithValue("@userId", actingUserId > 0 ? actingUserId : DBNull.Value);
 
         await command.ExecuteNonQueryAsync();
     }
@@ -490,7 +539,7 @@ ON DUPLICATE KEY UPDATE
         request = default;
         validationMessage = string.Empty;
 
-        string accountNo = accountNoTextBox.Text.Trim();
+        string accountNo = accountNoTextBox.Text.Trim().ToUpper(CultureInfo.CurrentCulture);
         string name = ToTitleCase(nameTextBox.Text);
         string address = ToTitleCase(addressTextBox.Text);
 
@@ -535,6 +584,7 @@ ON DUPLICATE KEY UPDATE
             name,
             tinTextBox.Text.Trim(),
             address,
+            statusComboBox.SelectedItem?.ToString() ?? "Pending",
             zone.Id,
             service.Id,
             meterNumberTextBox.Text.Trim(),
@@ -573,6 +623,7 @@ ON DUPLICATE KEY UPDATE
 
     private void WireInputEnhancements()
     {
+        accountNoTextBox.Leave += (_, _) => accountNoTextBox.Text = accountNoTextBox.Text.Trim().ToUpper(CultureInfo.CurrentCulture);
         nameTextBox.Leave += (_, _) => nameTextBox.Text = ToTitleCase(nameTextBox.Text);
         addressTextBox.Leave += (_, _) => addressTextBox.Text = ToTitleCase(addressTextBox.Text);
     }
@@ -591,6 +642,7 @@ ON DUPLICATE KEY UPDATE
         addressTextBox.Enabled = !isBusy;
         zoneComboBox.Enabled = !isBusy;
         serviceComboBox.Enabled = !isBusy;
+        statusComboBox.Enabled = !isBusy;
         meterNumberTextBox.Enabled = !isBusy;
         firstReadingDatePicker.Enabled = !isBusy;
         scfTotalTextBox.Enabled = !isBusy;
@@ -619,6 +671,7 @@ ON DUPLICATE KEY UPDATE
         string ConcessionaireName,
         string TinNumber,
         string Address,
+        string Status,
         int ZoneId,
         int ServiceId,
         string MeterNumber,
@@ -636,6 +689,7 @@ ON DUPLICATE KEY UPDATE
         string ConcessionaireName,
         string TinNumber,
         string Address,
+        string Status,
         int ZoneId,
         int ServiceId,
         string MeterNumber,

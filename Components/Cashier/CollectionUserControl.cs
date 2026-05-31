@@ -58,6 +58,7 @@ public partial class CollectionUserControl : UserControl
         InitializeComponent();
         ApplyTheme();
         ConfigureGrid();
+        ConfigureSearchAutoComplete();
     }
 
     public CollectionUserControl()
@@ -143,6 +144,7 @@ public partial class CollectionUserControl : UserControl
             DataTable rows = await CollectionService.GetCollectionHistoryPagedAsync(_user.Role, dateFrom, dateTo, offset, PageSize, searchTerm);
 
             collectionGrid.DataSource = rows;
+            RefreshSearchAutoComplete(rows);
             ApplyGridLayout();
 
             pageInfoLabel.Text = $"Page {_currentPage} of {totalPages}  •  {_totalRecords} record(s)";
@@ -387,6 +389,53 @@ public partial class CollectionUserControl : UserControl
             statusLabel.ForeColor = AppTheme.MutedTextColor;
             statusLabel.Text = busyMessage;
         }
+    }
+
+    private void ConfigureSearchAutoComplete()
+    {
+        searchTextBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        searchTextBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+        searchTextBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+    }
+
+    private void RefreshSearchAutoComplete(DataTable rows)
+    {
+        searchTextBox.AutoCompleteCustomSource = BuildAutoCompleteSource(
+            rows,
+            "or_number",
+            "bill_numbers",
+            "concessionaire_code",
+            "concessionaire_name",
+            "payor_name",
+            "payment_reference",
+            "address",
+            "remarks");
+    }
+
+    private static AutoCompleteStringCollection BuildAutoCompleteSource(DataTable table, params string[] columnNames)
+    {
+        var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (DataRow row in table.Rows)
+        {
+            foreach (string columnName in columnNames)
+            {
+                if (!table.Columns.Contains(columnName))
+                {
+                    continue;
+                }
+
+                string value = Convert.ToString(row[columnName], CultureInfo.CurrentCulture)?.Trim() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    values.Add(value);
+                }
+            }
+        }
+
+        var source = new AutoCompleteStringCollection();
+        source.AddRange(values.OrderBy(static value => value, StringComparer.CurrentCultureIgnoreCase).ToArray());
+        return source;
     }
 
     private async void searchButton_Click(object sender, EventArgs e)

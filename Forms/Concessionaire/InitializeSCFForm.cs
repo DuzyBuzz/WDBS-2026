@@ -8,12 +8,14 @@ namespace WDBS_2026.Forms.Concessionaire;
 public partial class InitializeSCFForm : Form
 {
     private readonly UserRole _role;
+    private readonly int _actingUserId;
     private readonly int _concessionaireId;
 
-    public InitializeSCFForm(UserRole role, int concessionaireId)
+    public InitializeSCFForm(UserRole role, int concessionaireId, int actingUserId = 0)
     {
         _role = role;
         _concessionaireId = concessionaireId;
+        _actingUserId = actingUserId;
 
         InitializeComponent();
         ApplyTheme();
@@ -147,7 +149,7 @@ LIMIT 1;";
             await using MySqlConnection connection = DBConfig.GetConnection();
             await connection.OpenAsync();
 
-            await UpsertScfAsync(connection, _concessionaireId, request);
+            await UpsertScfAsync(connection, _concessionaireId, request, _actingUserId);
 
             statusLabel.ForeColor = AppTheme.SuccessColor;
             statusLabel.Text = "SCF saved successfully.";
@@ -167,7 +169,7 @@ LIMIT 1;";
         }
     }
 
-    private static async Task UpsertScfAsync(MySqlConnection connection, int concessionaireId, ScfUpsertRequest request)
+    private static async Task UpsertScfAsync(MySqlConnection connection, int concessionaireId, ScfUpsertRequest request, int actingUserId)
     {
         const string sql = @"
 INSERT INTO scf_balance
@@ -176,6 +178,7 @@ INSERT INTO scf_balance
     total_amount,
     balance,
     monthly,
+    user_id,
     updated_at
 )
 VALUES
@@ -184,12 +187,14 @@ VALUES
     @totalAmount,
     @balance,
     @monthly,
+    @userId,
     NOW()
 )
 ON DUPLICATE KEY UPDATE
     total_amount = @totalAmount,
     balance = @balance,
     monthly = @monthly,
+    user_id = @userId,
     updated_at = NOW();";
 
         await using var command = new MySqlCommand(sql, connection);
@@ -197,6 +202,7 @@ ON DUPLICATE KEY UPDATE
         command.Parameters.AddWithValue("@totalAmount", request.TotalAmount);
         command.Parameters.AddWithValue("@balance", request.BalanceAmount);
         command.Parameters.AddWithValue("@monthly", request.MonthlyAmount);
+        command.Parameters.AddWithValue("@userId", actingUserId > 0 ? actingUserId : DBNull.Value);
 
         await command.ExecuteNonQueryAsync();
     }

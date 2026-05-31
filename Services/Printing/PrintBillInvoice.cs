@@ -566,7 +566,7 @@ internal sealed class PrintBillInvoice : IReportPreviewSource
 
         int topRowBottom = meterRect.Top + 24;
         int meterTitleBottom = meterRect.Top + 42;
-        int headingBottom = meterRect.Top + 60;
+        int headingBottom = meterRect.Top + 70;
 
         g.DrawLine(_gridPen, meterRect.Left, topRowBottom, meterRect.Right, topRowBottom);
         g.DrawLine(_gridPen, meterRect.Left, meterTitleBottom, meterRect.Right, meterTitleBottom);
@@ -588,9 +588,9 @@ internal sealed class PrintBillInvoice : IReportPreviewSource
         g.DrawString("PRESENT", _smallFont, Brushes.Black, new PointF(col1X + 18, meterTitleBottom + 2));
         g.DrawString("Cu. M. Consumed", _smallFont, Brushes.Black, new PointF(col2X + 2, meterTitleBottom + 2));
 
-        g.DrawString(_document.PreviousReading.ToString(CultureInfo.InvariantCulture), _bodyBoldFont, Brushes.Black, new PointF(meterRect.Left + 35, headingBottom + 1));
-        g.DrawString(_document.PresentReading.ToString(CultureInfo.InvariantCulture), _bodyBoldFont, Brushes.Black, new PointF(col1X + 35, headingBottom + 1));
-        g.DrawString(_document.Consumption.ToString(CultureInfo.InvariantCulture), _bodyBoldFont, Brushes.Black, new PointF(col2X + 45, headingBottom + 1));
+        g.DrawString(_document.PreviousReading.ToString(CultureInfo.InvariantCulture), _bodyBoldFont, Brushes.Black, new PointF(meterRect.Left + 35, headingBottom -1));
+        g.DrawString(_document.PresentReading.ToString(CultureInfo.InvariantCulture), _bodyBoldFont, Brushes.Black, new PointF(col1X + 35, headingBottom - 1));
+        g.DrawString(_document.Consumption.ToString(CultureInfo.InvariantCulture), _bodyBoldFont, Brushes.Black, new PointF(col2X + 45, headingBottom - 1));
 
         g.DrawString("Note: 10% Penalty for late payments.", new Font("Arial", 9.5F, FontStyle.Bold), Brushes.Black, new PointF(meterRect.Left + 35, noteY - 16));
         g.DrawString("ID No.", new Font("Arial", 9.5F, FontStyle.Bold), Brushes.Black, new PointF(rect.Left + 6, footerLineY - 5));

@@ -59,7 +59,13 @@ namespace WDBS_2026.Forms.Auditing
             fullNameTextBox.Text = string.IsNullOrWhiteSpace(_detail.FullName) ? "-" : _detail.FullName;
             usernameTextBox.Text = string.IsNullOrWhiteSpace(_detail.Username) ? "-" : _detail.Username;
             roleTextBox.Text = string.IsNullOrWhiteSpace(_detail.ActorRole) ? "-" : _detail.ActorRole;
-            actionTextBox.Text = string.IsNullOrWhiteSpace(_detail.Action) ? "-" : _detail.Action;
+            actionTypeTextBox.Text = string.IsNullOrWhiteSpace(_detail.ActionType) ? "-" : _detail.ActionType;
+            moduleTextBox.Text = string.IsNullOrWhiteSpace(_detail.Module) ? "-" : _detail.Module;
+            entityNameTextBox.Text = string.IsNullOrWhiteSpace(_detail.EntityName) ? "-" : _detail.EntityName;
+            entityIdTextBox.Text = string.IsNullOrWhiteSpace(_detail.EntityId) ? "-" : _detail.EntityId;
+            severityTextBox.Text = string.IsNullOrWhiteSpace(_detail.Severity) ? "-" : _detail.Severity;
+            descriptionTextBox.Text = string.IsNullOrWhiteSpace(_detail.Description) ? "-" : _detail.Description;
+            activitySummaryTextBox.Text = string.IsNullOrWhiteSpace(_detail.ActivitySummary) ? "-" : _detail.ActivitySummary;
         }
     }
     public sealed class AuditLogDetail
@@ -69,6 +75,12 @@ namespace WDBS_2026.Forms.Auditing
         public string FullName { get; init; } = string.Empty;
         public string Username { get; init; } = string.Empty;
         public string ActorRole { get; init; } = string.Empty;
-        public string Action { get; init; } = string.Empty;
+        public string ActionType { get; init; } = string.Empty;
+        public string Module { get; init; } = string.Empty;
+        public string EntityName { get; init; } = string.Empty;
+        public string EntityId { get; init; } = string.Empty;
+        public string Severity { get; init; } = string.Empty;
+        public string Description { get; init; } = string.Empty;
+        public string ActivitySummary { get; init; } = string.Empty;
     }
 }

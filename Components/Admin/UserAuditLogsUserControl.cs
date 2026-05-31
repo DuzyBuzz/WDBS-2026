@@ -4,7 +4,9 @@ using MySql.Data.MySqlClient;
 using WDBS_2026.Database;
 using WDBS_2026.DTOs.Auth;
 using WDBS_2026.Forms.Auditing;
+using WDBS_2026.Forms.Report;
 using WDBS_2026.Models;
+using WDBS_2026.Services.Printing;
 
 namespace WDBS_2026.Components.Admin
 {
@@ -28,10 +30,26 @@ namespace WDBS_2026.Components.Admin
         {
             _user = user;
             InitializeComponent();
+            InitializeFilterOptions();
             ConfigureGrid();
             WireEvents();
             ApplyTheme();
             InitializeDatePickers();
+        }
+
+        private void InitializeFilterOptions()
+        {
+            InitializeFilterCombo(roleFilterComboBox);
+            InitializeFilterCombo(actionTypeFilterComboBox);
+            InitializeFilterCombo(moduleFilterComboBox);
+            InitializeFilterCombo(severityFilterComboBox);
+        }
+
+        private static void InitializeFilterCombo(ComboBox comboBox)
+        {
+            comboBox.Items.Clear();
+            comboBox.Items.Add("All");
+            comboBox.SelectedIndex = 0;
         }
 
         private void InitializeDatePickers()
@@ -45,11 +63,16 @@ namespace WDBS_2026.Components.Admin
             auditLogsGrid.AutoGenerateColumns = false;
 
             AddTextColumn("log_id", "Log ID", 90, DataGridViewContentAlignment.MiddleCenter, format: "N0");
-            AddTextColumn("logged_at", "Date/Time", 160);
+            AddTextColumn("formatted_date", "Date/Time", 150);
             AddTextColumn("full_name", "User", 220);
             AddTextColumn("username", "Username", 140);
             AddTextColumn("actor_role", "Role", 120);
-            AddTextColumn("action", "Action", 640);
+            AddTextColumn("action_type", "Action Type", 120);
+            AddTextColumn("module", "Module", 120);
+            AddTextColumn("entity_id", "Entity ID", 110);
+            AddTextColumn("severity", "Severity", 100, DataGridViewContentAlignment.MiddleCenter);
+            AddTextColumn("description", "Description", 320);
+            AddTextColumn("activity_summary", "Activity Summary", 420);
         }
 
         private void AddTextColumn(string dataPropertyName, string headerText, int width, DataGridViewContentAlignment alignment = DataGridViewContentAlignment.MiddleLeft, string? format = null)
@@ -79,11 +102,17 @@ namespace WDBS_2026.Components.Admin
             refreshButton.Click += refreshButton_Click;
             searchButton.Click += searchButton_Click;
             clearButton.Click += clearButton_Click;
+            roleFilterComboBox.SelectedIndexChanged += filterComboBox_SelectedIndexChanged;
+            actionTypeFilterComboBox.SelectedIndexChanged += filterComboBox_SelectedIndexChanged;
+            moduleFilterComboBox.SelectedIndexChanged += filterComboBox_SelectedIndexChanged;
+            severityFilterComboBox.SelectedIndexChanged += filterComboBox_SelectedIndexChanged;
+            dateFromPicker.ValueChanged += filterComboBox_SelectedIndexChanged;
+            dateToPicker.ValueChanged += filterComboBox_SelectedIndexChanged;
             printButton.Click += printButton_Click;
             previousPageButton.Click += previousPageButton_Click;
             nextPageButton.Click += nextPageButton_Click;
             auditLogsGrid.CellDoubleClick += auditLogsGrid_CellDoubleClick;
-            searchTextBox.KeyDown += searchTextBox_KeyDown;
+            userSearchTextBox.KeyDown += userSearchTextBox_KeyDown;
         }
 
         private void ApplyTheme()
@@ -106,7 +135,25 @@ namespace WDBS_2026.Components.Admin
             AppTheme.ApplySeverityButton(printButton, ButtonSeverity.Neutral);
             AppTheme.ApplySeverityButton(previousPageButton, ButtonSeverity.Neutral);
             AppTheme.ApplySeverityButton(nextPageButton, ButtonSeverity.Neutral);
-            AppTheme.ApplyInput(searchTextBox);
+            AppTheme.ApplyInput(userSearchTextBox);
+            roleFilterComboBox.Font = AppTheme.BodyFont;
+            actionTypeFilterComboBox.Font = AppTheme.BodyFont;
+            moduleFilterComboBox.Font = AppTheme.BodyFont;
+            severityFilterComboBox.Font = AppTheme.BodyFont;
+            userSearchLabel.ForeColor = AppTheme.BodyTextColor;
+            userSearchLabel.Font = AppTheme.BodyFont;
+            roleFilterLabel.ForeColor = AppTheme.BodyTextColor;
+            roleFilterLabel.Font = AppTheme.BodyFont;
+            actionTypeFilterLabel.ForeColor = AppTheme.BodyTextColor;
+            actionTypeFilterLabel.Font = AppTheme.BodyFont;
+            moduleFilterLabel.ForeColor = AppTheme.BodyTextColor;
+            moduleFilterLabel.Font = AppTheme.BodyFont;
+            severityFilterLabel.ForeColor = AppTheme.BodyTextColor;
+            severityFilterLabel.Font = AppTheme.BodyFont;
+            dateFromLabel.ForeColor = AppTheme.BodyTextColor;
+            dateFromLabel.Font = AppTheme.BodyFont;
+            dateToLabel.ForeColor = AppTheme.BodyTextColor;
+            dateToLabel.Font = AppTheme.BodyFont;
             
             statusLabel.ForeColor = AppTheme.MutedTextColor;
             statusLabel.Font = AppTheme.BodyFont;
@@ -148,15 +195,31 @@ namespace WDBS_2026.Components.Admin
             await LoadAuditLogsAsync();
         }
 
-        private void clearButton_Click(object? sender, EventArgs e)
+        private async void clearButton_Click(object? sender, EventArgs e)
         {
-            searchTextBox.Clear();
+            userSearchTextBox.Clear();
+            roleFilterComboBox.SelectedIndex = 0;
+            actionTypeFilterComboBox.SelectedIndex = 0;
+            moduleFilterComboBox.SelectedIndex = 0;
+            severityFilterComboBox.SelectedIndex = 0;
             dateFromPicker.Value = DateTime.Now.AddMonths(-1);
             dateToPicker.Value = DateTime.Now;
             _currentPage = 1;
+            await LoadAuditLogsAsync();
         }
 
-        private void searchTextBox_KeyDown(object? sender, KeyEventArgs e)
+        private async void filterComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (!IsHandleCreated || _isLoading)
+            {
+                return;
+            }
+
+            _currentPage = 1;
+            await LoadAuditLogsAsync();
+        }
+
+        private void userSearchTextBox_KeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Enter)
             {
@@ -199,43 +262,54 @@ namespace WDBS_2026.Components.Admin
                 await using var connection = DBConfig.GetConnection();
                 await connection.OpenAsync();
 
-                string searchTerm = searchTextBox.Text.Trim();
+                string userSearchTerm = userSearchTextBox.Text.Trim();
+                string roleFilter = GetSelectedFilterValue(roleFilterComboBox);
+                string actionTypeFilter = GetSelectedFilterValue(actionTypeFilterComboBox);
+                string moduleFilter = GetSelectedFilterValue(moduleFilterComboBox);
+                string severityFilter = GetSelectedFilterValue(severityFilterComboBox);
                 DateTime dateFrom = dateFromPicker.Value.Date;
                 DateTime dateTo = dateToPicker.Value.Date.AddDays(1);
 
-                const string sql = @"
+                string sql = $@"
 SELECT
-    l.log_id,
-    l.action,
-    l.created_at,
-    COALESCE(u.full_name, CONCAT('User #', l.user_id)) AS full_name,
-    COALESCE(u.username, '') AS username,
-    COALESCE(u.role, '') AS actor_role
-FROM user_logs l
-LEFT JOIN users u ON u.user_id = l.user_id
-WHERE l.created_at >= @dateFrom
-  AND l.created_at < @dateTo
-  AND (l.action LIKE @searchTerm
-       OR u.full_name LIKE @searchTerm
-       OR u.username LIKE @searchTerm
-       OR u.role LIKE @searchTerm
-       OR CONCAT('User #', l.user_id) LIKE @searchTerm)
-ORDER BY l.created_at DESC, l.log_id DESC;";
+        v.log_id,
+        v.created_at AS logged_at,
+    v.formatted_date,
+        COALESCE(v.full_name, CONCAT('User #', v.user_id)) AS full_name,
+        COALESCE(v.username, '') AS username,
+        COALESCE(v.role, '') AS actor_role,
+    COALESCE(v.action_type, '') AS action_type,
+    COALESCE(v.module, '') AS module,
+    COALESCE(v.entity_name, '') AS entity_name,
+    COALESCE(v.entity_id, '') AS entity_id,
+    COALESCE(v.severity, '') AS severity,
+    COALESCE(v.description, '') AS description,
+    COALESCE(v.activity_summary, '') AS activity_summary
+FROM v_user_logs v
+WHERE v.created_at >= @dateFrom
+    AND v.created_at < @dateTo
+    AND (@userSearchTerm = '' OR COALESCE(v.full_name, '') LIKE @userSearchLike OR COALESCE(v.username, '') LIKE @userSearchLike)
+    AND (@roleFilter = 'All' OR LOWER(COALESCE(v.role, '')) = LOWER(@roleFilter))
+    AND (@actionTypeFilter = 'All' OR LOWER(COALESCE(v.action_type, '')) = LOWER(@actionTypeFilter))
+    AND (@moduleFilter = 'All' OR LOWER(COALESCE(v.module, '')) = LOWER(@moduleFilter))
+    AND (@severityFilter = 'All' OR LOWER(COALESCE(v.severity, '')) = LOWER(@severityFilter))
+ORDER BY v.created_at DESC, v.log_id DESC;";
 
                 await using var command = new MySqlCommand(sql, connection);
                 command.Parameters.AddWithValue("@dateFrom", dateFrom);
                 command.Parameters.AddWithValue("@dateTo", dateTo);
-                command.Parameters.AddWithValue("@searchTerm", $"%{searchTerm}%");
+                command.Parameters.AddWithValue("@userSearchTerm", userSearchTerm);
+                command.Parameters.AddWithValue("@userSearchLike", $"%{userSearchTerm}%");
+                command.Parameters.AddWithValue("@roleFilter", roleFilter);
+                command.Parameters.AddWithValue("@actionTypeFilter", actionTypeFilter);
+                command.Parameters.AddWithValue("@moduleFilter", moduleFilter);
+                command.Parameters.AddWithValue("@severityFilter", severityFilter);
 
                 using var adapter = new MySqlDataAdapter(command);
                 _allLogs = new DataTable();
                 adapter.Fill(_allLogs);
 
-                DataColumn? createdAtColumn = _allLogs.Columns["created_at"];
-                if (createdAtColumn is not null)
-                {
-                    createdAtColumn.ColumnName = "logged_at";
-                }
+                RefreshFilterCollections();
 
                 _totalPages = (_allLogs.Rows.Count + PageSize - 1) / PageSize;
                 if (_totalPages == 0)
@@ -282,6 +356,7 @@ ORDER BY l.created_at DESC, l.log_id DESC;";
             }
 
             auditLogsGrid.DataSource = pageTable;
+            ApplySeverityRowStyles();
             statusLabel.ForeColor = AppTheme.MutedTextColor;
             statusLabel.Text = $"Showing {pageRowCount:N0} of {_allLogs.Rows.Count:N0} audit logs.";
             pageInfoLabel.Text = $"{_currentPage}/{_totalPages}";
@@ -289,12 +364,57 @@ ORDER BY l.created_at DESC, l.log_id DESC;";
             nextPageButton.Enabled = _currentPage < _totalPages;
         }
 
+        private void ApplySeverityRowStyles()
+        {
+            if (auditLogsGrid.Rows.Count == 0)
+            {
+                return;
+            }
+
+            int severityColumnIndex = auditLogsGrid.Columns["severity"]?.Index ?? -1;
+            if (severityColumnIndex < 0)
+            {
+                return;
+            }
+
+            foreach (DataGridViewRow row in auditLogsGrid.Rows)
+            {
+                if (row.IsNewRow)
+                {
+                    continue;
+                }
+
+                string severity = Convert.ToString(row.Cells[severityColumnIndex].Value)?.Trim() ?? string.Empty;
+                (Color backColor, Color selectionBackColor) = GetSeverityRowColors(severity);
+
+                row.DefaultCellStyle.BackColor = backColor;
+                row.DefaultCellStyle.SelectionBackColor = selectionBackColor;
+            }
+        }
+
+        private static (Color BackColor, Color SelectionBackColor) GetSeverityRowColors(string severity)
+        {
+            return severity.ToUpperInvariant() switch
+            {
+                "CRITICAL" => (Color.FromArgb(253, 230, 230), Color.FromArgb(244, 197, 197)),
+                "HIGH" => (Color.FromArgb(255, 239, 230), Color.FromArgb(248, 215, 191)),
+                "MEDIUM" => (Color.FromArgb(255, 249, 230), Color.FromArgb(247, 236, 189)),
+                "LOW" => (Color.FromArgb(236, 248, 236), Color.FromArgb(211, 233, 211)),
+                "INFO" => (Color.FromArgb(236, 245, 255), Color.FromArgb(205, 224, 245)),
+                _ => (Color.White, Color.FromArgb(216, 236, 245))
+            };
+        }
+
         private void SetBusyState(bool isBusy, string? status = null)
         {
             refreshButton.Enabled = !isBusy;
             searchButton.Enabled = !isBusy;
             clearButton.Enabled = !isBusy;
-            searchTextBox.Enabled = !isBusy;
+            userSearchTextBox.Enabled = !isBusy;
+            roleFilterComboBox.Enabled = !isBusy;
+            actionTypeFilterComboBox.Enabled = !isBusy;
+            moduleFilterComboBox.Enabled = !isBusy;
+            severityFilterComboBox.Enabled = !isBusy;
             dateFromPicker.Enabled = !isBusy;
             dateToPicker.Enabled = !isBusy;
             auditLogsGrid.Enabled = !isBusy;
@@ -305,7 +425,57 @@ ORDER BY l.created_at DESC, l.log_id DESC;";
             }
         }
 
-        private async void printButton_Click(object? sender, EventArgs e)
+        private void RefreshFilterCollections()
+        {
+            if (_allLogs is null || _allLogs.Rows.Count == 0)
+            {
+                InitializeFilterOptions();
+                return;
+            }
+
+            RefreshSingleFilterCombo(roleFilterComboBox, "actor_role");
+            RefreshSingleFilterCombo(actionTypeFilterComboBox, "action_type");
+            RefreshSingleFilterCombo(moduleFilterComboBox, "module");
+            RefreshSingleFilterCombo(severityFilterComboBox, "severity");
+        }
+
+        private void RefreshSingleFilterCombo(ComboBox comboBox, string columnName)
+        {
+            string selected = GetSelectedFilterValue(comboBox);
+            var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            if (_allLogs is not null && _allLogs.Columns.Contains(columnName))
+            {
+                foreach (DataRow row in _allLogs.Rows)
+                {
+                    string? value = row[columnName]?.ToString()?.Trim();
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        values.Add(value);
+                    }
+
+                    if (values.Count >= 200)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            comboBox.BeginUpdate();
+            comboBox.Items.Clear();
+            comboBox.Items.Add("All");
+            comboBox.Items.AddRange(values
+                .OrderBy(static value => value, StringComparer.CurrentCultureIgnoreCase)
+                .Cast<object>()
+                .ToArray());
+
+            comboBox.SelectedItem = comboBox.Items.Cast<object>()
+                .FirstOrDefault(item => string.Equals(item.ToString(), selected, StringComparison.CurrentCultureIgnoreCase))
+                ?? "All";
+            comboBox.EndUpdate();
+        }
+
+        private void printButton_Click(object? sender, EventArgs e)
         {
             if (_allLogs is null || _allLogs.Rows.Count == 0)
             {
@@ -315,44 +485,36 @@ ORDER BY l.created_at DESC, l.log_id DESC;";
 
             try
             {
-                SetBusyState(true, "Generating print report...");
+                SetBusyState(true, "Preparing report preview...");
 
-                var printData = new System.Text.StringBuilder();
-                printData.AppendLine("========================================");
-                printData.AppendLine("USER AUDIT LOGS REPORT");
-                printData.AppendLine("========================================");
-                printData.AppendLine($"Generated: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
-                printData.AppendLine($"Period: {dateFromPicker.Value:yyyy-MM-dd} to {dateToPicker.Value:yyyy-MM-dd}");
-                if (!string.IsNullOrWhiteSpace(searchTextBox.Text))
-                {
-                    printData.AppendLine($"Search: {searchTextBox.Text}");
-                }
-                printData.AppendLine($"Total Records: {_allLogs.Rows.Count:N0}");
-                printData.AppendLine("----------------------------------------");
-                printData.AppendLine();
+                string userSearch = userSearchTextBox.Text.Trim();
+                string roleFilter = GetSelectedFilterValue(roleFilterComboBox);
+                string actionTypeFilter = GetSelectedFilterValue(actionTypeFilterComboBox);
+                string moduleFilter = GetSelectedFilterValue(moduleFilterComboBox);
+                string severityFilter = GetSelectedFilterValue(severityFilterComboBox);
 
-                foreach (DataRow row in _allLogs.Rows)
-                {
-                    printData.AppendLine($"Log ID: {row["log_id"]}");
-                    printData.AppendLine($"Date/Time: {row["logged_at"]}");
-                    printData.AppendLine($"User: {row["full_name"]} ({row["username"]})");
-                    printData.AppendLine($"Role: {row["actor_role"]}");
-                    printData.AppendLine($"Action: {row["action"]}");
-                    printData.AppendLine();
-                }
+                string periodCaption = $"Period: {dateFromPicker.Value:yyyy-MM-dd} to {dateToPicker.Value:yyyy-MM-dd}";
+                string filterCaption = $"Filters: User={(string.IsNullOrWhiteSpace(userSearch) ? "All" : userSearch)} | Role={roleFilter} | Action={actionTypeFilter} | Module={moduleFilter} | Severity={severityFilter}";
+                string printedBy = string.IsNullOrWhiteSpace(_user.FullName)
+                    ? _user.Username
+                    : $"{_user.FullName} ({_user.Username})";
 
-                string fileName = $"UserAuditLogs_{DateTime.Now:yyyyMMdd_HHmmss}.txt";
-                string filePath = Path.Combine(Path.GetTempPath(), fileName);
-                await File.WriteAllTextAsync(filePath, printData.ToString());
+                DataTable printableRows = BuildPrintableAuditRows(_allLogs);
+                var document = new UserAuditLogsReportDocumentData(
+                    "User Audit Logs Report",
+                    periodCaption,
+                    filterCaption,
+                    printedBy,
+                    DateTime.Now,
+                    printableRows);
 
-                if (File.Exists(filePath))
-                {
-                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
-                    {
-                        FileName = filePath,
-                        UseShellExecute = true
-                    });
-                }
+                var helper = new UserAuditLogsPrintHelper(document);
+                using var previewForm = new PrintPreviewForm(
+                    "User Audit Logs Report",
+                    periodCaption,
+                    helper,
+                    "UserAuditLogs");
+                previewForm.ShowDialog(this);
             }
             catch (Exception ex)
             {
@@ -364,6 +526,40 @@ ORDER BY l.created_at DESC, l.log_id DESC;";
             {
                 SetBusyState(false);
             }
+        }
+
+        private static DataTable BuildPrintableAuditRows(DataTable source)
+        {
+            var table = new DataTable();
+            table.Columns.Add("Log ID", typeof(string));
+            table.Columns.Add("Date/Time", typeof(string));
+            table.Columns.Add("User", typeof(string));
+            table.Columns.Add("Username", typeof(string));
+            table.Columns.Add("Role", typeof(string));
+            table.Columns.Add("Action", typeof(string));
+            table.Columns.Add("Module", typeof(string));
+            table.Columns.Add("Entity ID", typeof(string));
+            table.Columns.Add("Severity", typeof(string));
+            table.Columns.Add("Description", typeof(string));
+            table.Columns.Add("Activity Summary", typeof(string));
+
+            foreach (DataRow row in source.Rows)
+            {
+                table.Rows.Add(
+                    Convert.ToString(row["log_id"]) ?? string.Empty,
+                    Convert.ToString(row["formatted_date"]) ?? string.Empty,
+                    Convert.ToString(row["full_name"]) ?? string.Empty,
+                    Convert.ToString(row["username"]) ?? string.Empty,
+                    Convert.ToString(row["actor_role"]) ?? string.Empty,
+                    Convert.ToString(row["action_type"]) ?? string.Empty,
+                    Convert.ToString(row["module"]) ?? string.Empty,
+                    Convert.ToString(row["entity_id"]) ?? string.Empty,
+                    Convert.ToString(row["severity"]) ?? string.Empty,
+                    Convert.ToString(row["description"]) ?? string.Empty,
+                    Convert.ToString(row["activity_summary"]) ?? string.Empty);
+            }
+
+            return table;
         }
 
         private void auditLogsGrid_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
@@ -391,11 +587,23 @@ ORDER BY l.created_at DESC, l.log_id DESC;";
                 FullName = rowData.Field<string>("full_name") ?? string.Empty,
                 Username = rowData.Field<string>("username") ?? string.Empty,
                 ActorRole = rowData.Field<string>("actor_role") ?? string.Empty,
-                Action = rowData.Field<string>("action") ?? string.Empty
+                ActionType = rowData.Field<string>("action_type") ?? string.Empty,
+                Module = rowData.Field<string>("module") ?? string.Empty,
+                EntityName = rowData.Field<string>("entity_name") ?? string.Empty,
+                EntityId = rowData.Field<string>("entity_id") ?? string.Empty,
+                Severity = rowData.Field<string>("severity") ?? string.Empty,
+                Description = rowData.Field<string>("description") ?? string.Empty,
+                ActivitySummary = rowData.Field<string>("activity_summary") ?? string.Empty
             };
 
             using var auditingForm = new AuditingForm(detail);
             auditingForm.ShowDialog(this);
+        }
+
+        private static string GetSelectedFilterValue(ComboBox comboBox)
+        {
+            string value = comboBox.SelectedItem?.ToString()?.Trim() ?? "All";
+            return string.IsNullOrWhiteSpace(value) ? "All" : value;
         }
     }
 }

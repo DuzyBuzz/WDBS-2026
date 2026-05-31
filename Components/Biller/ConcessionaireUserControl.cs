@@ -13,6 +13,7 @@ public partial class ConcessionaireUserControl : UserControl
     private const int PageSize = 100;
 
     private readonly UserRole _role;
+    private readonly int _actingUserId;
 
     private int _currentPage = 1;
     private int _totalRecords;
@@ -21,15 +22,16 @@ public partial class ConcessionaireUserControl : UserControl
     private int? _contextConcessionaireId;
 
     private readonly ContextMenuStrip _rowActionsMenu = new();
-    private readonly ToolStripMenuItem _updateConcessionaireMenuItem = new("Update Concessionaire");
     private readonly ToolStripMenuItem _initializeScfMenuItem = new("Initialize SCF");
 
-    public ConcessionaireUserControl(UserRole role)
+    public ConcessionaireUserControl(UserRole role, int actingUserId = 0)
     {
         _role = role;
+        _actingUserId = actingUserId;
         InitializeComponent();
         ConfigureGridContextMenu();
         ApplyTheme();
+        ConfigureSearchAutoComplete();
     }
 
     protected override async void OnLoad(EventArgs e)
@@ -68,14 +70,14 @@ public partial class ConcessionaireUserControl : UserControl
     {
         _rowActionsMenu.Items.AddRange(new ToolStripItem[]
         {
-            _updateConcessionaireMenuItem,
             _initializeScfMenuItem
         });
 
-        _updateConcessionaireMenuItem.Click += updateConcessionaireMenuItem_Click;
         _initializeScfMenuItem.Click += initializeScfMenuItem_Click;
 
         concessionaireGrid.CellMouseDown += concessionaireGrid_CellMouseDown;
+        concessionaireGrid.CellDoubleClick += concessionaireGrid_CellDoubleClick;
+        concessionaireGrid.KeyDown += concessionaireGrid_KeyDown;
     }
 
     private async Task LoadConcessionairesAsync()
@@ -96,6 +98,7 @@ public partial class ConcessionaireUserControl : UserControl
             DataTable rows = await GetRowsAsync(connection, _searchTerm, _statusFilter, offset);
 
             concessionaireGrid.DataSource = rows;
+            RefreshSearchAutoComplete(rows);
             ApplyGridHeaders();
 
             pageInfoLabel.Text = $"Page {_currentPage} of {totalPages}  •  {_totalRecords} record(s)";
@@ -226,6 +229,44 @@ LIMIT @limit OFFSET @offset;";
             .Trim();
     }
 
+    private void ConfigureSearchAutoComplete()
+    {
+        searchTextBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        searchTextBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+        searchTextBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+    }
+
+    private void RefreshSearchAutoComplete(DataTable rows)
+    {
+        searchTextBox.AutoCompleteCustomSource = BuildAutoCompleteSource(rows, "Account_No", "Concessionaire_Name", "Meter_Number", "Address", "Tin");
+    }
+
+    private static AutoCompleteStringCollection BuildAutoCompleteSource(DataTable table, params string[] columnNames)
+    {
+        var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (DataRow row in table.Rows)
+        {
+            foreach (string columnName in columnNames)
+            {
+                if (!table.Columns.Contains(columnName))
+                {
+                    continue;
+                }
+
+                string value = Convert.ToString(row[columnName], CultureInfo.CurrentCulture)?.Trim() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    values.Add(value);
+                }
+            }
+        }
+
+        var source = new AutoCompleteStringCollection();
+        source.AddRange(values.OrderBy(static value => value, StringComparer.CurrentCultureIgnoreCase).ToArray());
+        return source;
+    }
+
     private async void searchButton_Click(object sender, EventArgs e)
     {
         _searchTerm = searchTextBox.Text.Trim();
@@ -273,16 +314,30 @@ LIMIT @limit OFFSET @offset;";
             ? concessionaireId
             : null;
 
-        _updateConcessionaireMenuItem.Enabled = _contextConcessionaireId.HasValue;
         _initializeScfMenuItem.Enabled = _contextConcessionaireId.HasValue;
 
         Point menuPosition = new(Cursor.Position.X + 10, Cursor.Position.Y);
         _rowActionsMenu.Show(menuPosition);
     }
 
+    private async void concessionaireGrid_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
+    {
+        if (e.RowIndex < 0 || e.RowIndex >= concessionaireGrid.Rows.Count)
+        {
+            return;
+        }
+
+        if (!TryGetConcessionaireId(e.RowIndex, out int concessionaireId))
+        {
+            return;
+        }
+
+        await OpenUpsertConcessionaireFormAsync(concessionaireId);
+    }
+
     private async Task OpenUpsertConcessionaireFormAsync(int? concessionaireId = null)
     {
-        using var form = new UpsertConcessionaireForm(_role, concessionaireId);
+        using var form = new UpsertConcessionaireForm(_role, _actingUserId, concessionaireId);
         DialogResult result = form.ShowDialog(this);
         if (result != DialogResult.OK)
         {
@@ -295,7 +350,7 @@ LIMIT @limit OFFSET @offset;";
 
     private async Task OpenInitializeScfFormAsync(int concessionaireId)
     {
-        using var form = new InitializeSCFForm(_role, concessionaireId);
+        using var form = new InitializeSCFForm(_role, concessionaireId, _actingUserId);
         DialogResult result = form.ShowDialog(this);
         if (result != DialogResult.OK)
         {
@@ -303,16 +358,6 @@ LIMIT @limit OFFSET @offset;";
         }
 
         await LoadConcessionairesAsync();
-    }
-
-    private async void updateConcessionaireMenuItem_Click(object? sender, EventArgs e)
-    {
-        if (!_contextConcessionaireId.HasValue)
-        {
-            return;
-        }
-
-        await OpenUpsertConcessionaireFormAsync(_contextConcessionaireId.Value);
     }
 
     private async void initializeScfMenuItem_Click(object? sender, EventArgs e)
@@ -342,6 +387,125 @@ LIMIT @limit OFFSET @offset;";
 
         string? textValue = Convert.ToString(rawValue, CultureInfo.InvariantCulture);
         return int.TryParse(textValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out concessionaireId);
+    }
+
+    private async void concessionaireGrid_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyCode != Keys.Delete)
+        {
+            return;
+        }
+
+        e.SuppressKeyPress = true;
+        e.Handled = true;
+
+        await DeleteSelectedConcessionaireAsync();
+    }
+
+    private async Task DeleteSelectedConcessionaireAsync()
+    {
+        if (concessionaireGrid.CurrentRow is not { } currentRow || currentRow.IsNewRow)
+        {
+            MessageBox.Show(this, "Select a concessionaire row to delete.", "Delete Concessionaire", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (!TryGetConcessionaireId(currentRow.Index, out int concessionaireId))
+        {
+            MessageBox.Show(this, "Unable to identify the selected concessionaire.", "Delete Concessionaire", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            return;
+        }
+
+        string accountNo = Convert.ToString(currentRow.Cells["Account_No"]?.Value, CultureInfo.CurrentCulture)?.Trim() ?? string.Empty;
+        string concessionaireName = Convert.ToString(currentRow.Cells["Concessionaire_Name"]?.Value, CultureInfo.CurrentCulture)?.Trim() ?? string.Empty;
+
+        string displayName = string.IsNullOrWhiteSpace(concessionaireName)
+            ? accountNo
+            : $"{concessionaireName} ({accountNo})";
+
+        DialogResult confirmDelete = MessageBox.Show(
+            this,
+            $"Delete concessionaire {displayName}?\n\nThis action cannot be undone.",
+            "Confirm Delete",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning,
+            MessageBoxDefaultButton.Button2);
+
+        if (confirmDelete != DialogResult.Yes)
+        {
+            return;
+        }
+
+        try
+        {
+            SetBusyState(true, "Deleting concessionaire...");
+
+            DBConfig.SetConnectionString(_role);
+            await using MySqlConnection connection = DBConfig.GetConnection();
+            await connection.OpenAsync();
+            await using MySqlTransaction transaction = await connection.BeginTransactionAsync();
+
+            if (_actingUserId > 0)
+            {
+                const string updateUserSql = @"
+UPDATE concessionaire
+SET user_id = @userId
+WHERE concessionaire_id = @concessionaireId;";
+
+                await using var updateUserCommand = new MySqlCommand(updateUserSql, connection, transaction);
+                updateUserCommand.Parameters.AddWithValue("@userId", _actingUserId);
+                updateUserCommand.Parameters.AddWithValue("@concessionaireId", concessionaireId);
+                await updateUserCommand.ExecuteNonQueryAsync();
+            }
+
+            const string deleteSql = @"
+DELETE FROM concessionaire
+WHERE concessionaire_id = @concessionaireId;";
+
+            await using var command = new MySqlCommand(deleteSql, connection, transaction);
+            command.Parameters.AddWithValue("@concessionaireId", concessionaireId);
+
+            int affectedRows = await command.ExecuteNonQueryAsync();
+            if (affectedRows <= 0)
+            {
+                await transaction.RollbackAsync();
+                MessageBox.Show(this, "No concessionaire record was deleted.", "Delete Concessionaire", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            await transaction.CommitAsync();
+
+            _contextConcessionaireId = null;
+            int totalPagesAfterDelete = Math.Max(1, (int)Math.Ceiling(Math.Max(_totalRecords - 1, 0) / (double)PageSize));
+            _currentPage = Math.Min(_currentPage, totalPagesAfterDelete);
+
+            await LoadConcessionairesAsync();
+
+            statusLabel.ForeColor = AppTheme.SuccessColor;
+            statusLabel.Text = "Concessionaire deleted successfully.";
+        }
+        catch (MySqlException ex) when (ex.Number == 1451)
+        {
+            statusLabel.ForeColor = AppTheme.DangerColor;
+            statusLabel.Text = "Cannot delete concessionaire with existing related records.";
+            MessageBox.Show(
+                this,
+                "The selected concessionaire cannot be deleted because there are related billing, collection, or other dependent records.\n\n" +
+                "Please clear or archive dependent records first.",
+                "Delete Blocked",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Warning);
+        }
+        catch (Exception ex)
+        {
+            statusLabel.ForeColor = AppTheme.DangerColor;
+            statusLabel.Text = "Failed to delete concessionaire.";
+            MessageBox.Show(this, ex.Message, "Delete Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        }
+        finally
+        {
+            SetBusyState(false);
+        }
     }
 
     private async void previousPageButton_Click(object sender, EventArgs e)

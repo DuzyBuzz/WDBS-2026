@@ -52,7 +52,7 @@ WHERE settings_key IN (
         return values;
     }
 
-    public static async Task SaveSystemSettingsAsync(UserRole role, IReadOnlyDictionary<string, string> values)
+    public static async Task SaveSystemSettingsAsync(UserRole role, int userId, IReadOnlyDictionary<string, string> values)
     {
         const string sql = @"
 INSERT INTO system_settings (settings_key, settings_value)
@@ -63,6 +63,7 @@ ON DUPLICATE KEY UPDATE settings_value = @settingsValue;";
         await using MySqlTransaction transaction = await connection.BeginTransactionAsync();
         try
         {
+            int updatedCount = 0;
             foreach (string key in ManagedSettingKeys)
             {
                 if (!values.TryGetValue(key, out string? value))
@@ -74,6 +75,20 @@ ON DUPLICATE KEY UPDATE settings_value = @settingsValue;";
                 command.Parameters.AddWithValue("@settingsKey", key);
                 command.Parameters.AddWithValue("@settingsValue", value?.Trim() ?? string.Empty);
                 await command.ExecuteNonQueryAsync();
+                updatedCount++;
+            }
+
+            if (updatedCount > 0)
+            {
+                await InsertAuditLogAsync(
+                    connection,
+                    transaction,
+                    userId,
+                    "UPDATE",
+                    "SYSTEM_SETTINGS",
+                    "system_settings",
+                    "global",
+                    $"Updated {updatedCount} system setting value(s).");
             }
 
             await transaction.CommitAsync();
@@ -125,7 +140,7 @@ ORDER BY zone_id ASC;";
         return table;
     }
 
-    public static async Task SaveServiceChangesAsync(UserRole role, DataTable servicesTable)
+    public static async Task SaveServiceChangesAsync(UserRole role, int userId, DataTable servicesTable)
     {
         DataTable? changes = servicesTable.GetChanges(DataRowState.Added | DataRowState.Modified | DataRowState.Deleted);
         if (changes is null || changes.Rows.Count == 0)
@@ -177,6 +192,10 @@ VALUES
         await using MySqlTransaction transaction = await connection.BeginTransactionAsync();
         try
         {
+            int addedCount = 0;
+            int updatedCount = 0;
+            int deletedCount = 0;
+
             foreach (DataRow row in changes.Rows)
             {
                 if (row.RowState == DataRowState.Deleted)
@@ -184,6 +203,7 @@ VALUES
                     await using var deleteCommand = new MySqlCommand(deleteSql, connection, transaction);
                     deleteCommand.Parameters.AddWithValue("@serviceId", row["service_id", DataRowVersion.Original]);
                     await deleteCommand.ExecuteNonQueryAsync();
+                    deletedCount++;
                     continue;
                 }
 
@@ -199,6 +219,28 @@ VALUES
                 command.Parameters.AddWithValue("@rate41Above", row["rate_41_above"]);
 
                 await command.ExecuteNonQueryAsync();
+                if (row.RowState == DataRowState.Added)
+                {
+                    addedCount++;
+                }
+                else
+                {
+                    updatedCount++;
+                }
+            }
+
+            int totalChanges = addedCount + updatedCount + deletedCount;
+            if (totalChanges > 0)
+            {
+                await InsertAuditLogAsync(
+                    connection,
+                    transaction,
+                    userId,
+                    "UPDATE",
+                    "SYSTEM_SETTINGS",
+                    "services",
+                    null,
+                    $"Services changed: {addedCount} added, {updatedCount} updated, {deletedCount} deleted.");
             }
 
             await transaction.CommitAsync();
@@ -210,7 +252,7 @@ VALUES
         }
     }
 
-    public static async Task SaveZoneChangesAsync(UserRole role, DataTable zonesTable)
+    public static async Task SaveZoneChangesAsync(UserRole role, int userId, DataTable zonesTable)
     {
         DataTable? changes = zonesTable.GetChanges(DataRowState.Added | DataRowState.Modified | DataRowState.Deleted);
         if (changes is null || changes.Rows.Count == 0)
@@ -243,6 +285,10 @@ VALUES
         await using MySqlTransaction transaction = await connection.BeginTransactionAsync();
         try
         {
+            int addedCount = 0;
+            int updatedCount = 0;
+            int deletedCount = 0;
+
             foreach (DataRow row in changes.Rows)
             {
                 if (row.RowState == DataRowState.Deleted)
@@ -250,6 +296,7 @@ VALUES
                     await using var deleteCommand = new MySqlCommand(deleteSql, connection, transaction);
                     deleteCommand.Parameters.AddWithValue("@zoneId", row["zone_id", DataRowVersion.Original]);
                     await deleteCommand.ExecuteNonQueryAsync();
+                    deletedCount++;
                     continue;
                 }
 
@@ -259,6 +306,28 @@ VALUES
                 command.Parameters.AddWithValue("@zoneName", row["zone_name"]);
 
                 await command.ExecuteNonQueryAsync();
+                if (row.RowState == DataRowState.Added)
+                {
+                    addedCount++;
+                }
+                else
+                {
+                    updatedCount++;
+                }
+            }
+
+            int totalChanges = addedCount + updatedCount + deletedCount;
+            if (totalChanges > 0)
+            {
+                await InsertAuditLogAsync(
+                    connection,
+                    transaction,
+                    userId,
+                    "UPDATE",
+                    "SYSTEM_SETTINGS",
+                    "zone",
+                    null,
+                    $"Zones changed: {addedCount} added, {updatedCount} updated, {deletedCount} deleted.");
             }
 
             await transaction.CommitAsync();
@@ -276,5 +345,53 @@ VALUES
         MySqlConnection connection = DBConfig.GetConnection();
         await connection.OpenAsync();
         return connection;
+    }
+
+    private static async Task InsertAuditLogAsync(
+        MySqlConnection connection,
+        MySqlTransaction transaction,
+        int userId,
+        string actionType,
+        string module,
+        string entityName,
+        string? entityId,
+        string description)
+    {
+        if (userId <= 0)
+        {
+            return;
+        }
+
+        const string sql = @"
+INSERT INTO user_logs
+(
+    user_id,
+    action_type,
+    module,
+    entity_name,
+    entity_id,
+    description,
+    created_at
+)
+VALUES
+(
+    @userId,
+    @actionType,
+    @module,
+    @entityName,
+    @entityId,
+    @description,
+    NOW()
+);";
+
+        await using var command = new MySqlCommand(sql, connection, transaction);
+        command.Parameters.AddWithValue("@userId", userId);
+        command.Parameters.AddWithValue("@actionType", actionType);
+        command.Parameters.AddWithValue("@module", module);
+        command.Parameters.AddWithValue("@entityName", entityName);
+        command.Parameters.AddWithValue("@entityId", string.IsNullOrWhiteSpace(entityId) ? DBNull.Value : entityId);
+        command.Parameters.AddWithValue("@description", description);
+
+        await command.ExecuteNonQueryAsync();
     }
 }

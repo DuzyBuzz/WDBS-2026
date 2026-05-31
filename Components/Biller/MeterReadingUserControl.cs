@@ -63,6 +63,7 @@ public partial class MeterReadingUserControl : UserControl
         ConfigureGrids();
         ConfigureGeneratedBillsContextMenu();
         ApplyTheme();
+        ConfigureSearchAutoComplete();
         SizeChanged += MeterReadingUserControl_SizeChanged;
         UpdateResponsiveLayout();
     }
@@ -202,6 +203,7 @@ public partial class MeterReadingUserControl : UserControl
         _generatedBillsRowMenu.Items.Add(_deleteGeneratedBillMenuItem);
         _deleteGeneratedBillMenuItem.Click += deleteGeneratedBillMenuItem_Click;
         generatedBillsGrid.CellMouseDown += generatedBillsGrid_CellMouseDown;
+        generatedBillsGrid.KeyDown += generatedBillsGrid_KeyDown;
     }
 
     private void MeterReadingUserControl_SizeChanged(object? sender, EventArgs e)
@@ -476,6 +478,7 @@ LIMIT 1;";
             PrepareMeterReadingTable(table, nextBillNumber);
 
             meterReadingGrid.DataSource = table;
+            RefreshMeterSearchAutoComplete(table);
 
             leftStatusLabel.ForeColor = AppTheme.MutedTextColor;
             leftStatusLabel.Text = table.Rows.Count == 0
@@ -628,6 +631,7 @@ FROM billing;";
 
             DataTable table = await GetGeneratedBillsRowsAsync(connection, generatedBillsDatePicker.Value.Date, searchTerm);
             generatedBillsGrid.DataSource = table;
+            RefreshGeneratedBillsSearchAutoComplete(table);
 
             rightStatusLabel.ForeColor = AppTheme.MutedTextColor;
             rightStatusLabel.Text = table.Rows.Count == 0
@@ -1308,6 +1312,62 @@ ON DUPLICATE KEY UPDATE settings_value = @settingsValue;";
         }
     }
 
+    private void ConfigureSearchAutoComplete()
+    {
+        meterSearchTextBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        meterSearchTextBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+        meterSearchTextBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+
+        generatedBillsSearchTextBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        generatedBillsSearchTextBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+        generatedBillsSearchTextBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+    }
+
+    private void RefreshMeterSearchAutoComplete(DataTable rows)
+    {
+        meterSearchTextBox.AutoCompleteCustomSource = BuildAutoCompleteSource(
+            rows,
+            "Concessionaire_Code",
+            "Concessionaire_Name",
+            "Meter_Number");
+    }
+
+    private void RefreshGeneratedBillsSearchAutoComplete(DataTable rows)
+    {
+        generatedBillsSearchTextBox.AutoCompleteCustomSource = BuildAutoCompleteSource(
+            rows,
+            "bill_number",
+            "concessionaire_code",
+            "concessionaire_name",
+            "address");
+    }
+
+    private static AutoCompleteStringCollection BuildAutoCompleteSource(DataTable table, params string[] columnNames)
+    {
+        var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (DataRow row in table.Rows)
+        {
+            foreach (string columnName in columnNames)
+            {
+                if (!table.Columns.Contains(columnName))
+                {
+                    continue;
+                }
+
+                string value = Convert.ToString(row[columnName], CultureInfo.CurrentCulture)?.Trim() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    values.Add(value);
+                }
+            }
+        }
+
+        var source = new AutoCompleteStringCollection();
+        source.AddRange(values.OrderBy(static value => value, StringComparer.CurrentCultureIgnoreCase).ToArray());
+        return source;
+    }
+
     private async void zoneComboBox_SelectedIndexChanged(object sender, EventArgs e)
     {
         if (_isInitializing)
@@ -1474,6 +1534,17 @@ ON DUPLICATE KEY UPDATE settings_value = @settingsValue;";
 
     private async void deleteGeneratedBillMenuItem_Click(object? sender, EventArgs e)
     {
+        await DeleteSelectedGeneratedBillAsync();
+    }
+
+    private async void generatedBillsGrid_KeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.KeyCode != Keys.Delete)
+        {
+            return;
+        }
+
+        e.SuppressKeyPress = true;
         await DeleteSelectedGeneratedBillAsync();
     }
 

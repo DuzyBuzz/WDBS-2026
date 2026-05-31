@@ -77,6 +77,7 @@ namespace WDBS_2026.Components.Cashier
             ConfigureContextMenus();
             WireEvents();
             ApplyTheme();
+            ConfigureSearchAutoComplete();
         }
 
         protected override async void OnLoad(EventArgs e)
@@ -264,6 +265,7 @@ namespace WDBS_2026.Components.Cashier
             selectedGrid.KeyDown += selectedGrid_KeyDown;
 
             collectionGrid.CellMouseDown += collectionGrid_CellMouseDown;
+            collectionGrid.KeyDown += collectionGrid_KeyDown;
 
             previewBillButton.Click += previewBillButton_Click;
             paymentForSCFButton.Click += paymentForSCFButton_Click;
@@ -282,6 +284,7 @@ namespace WDBS_2026.Components.Cashier
                 string search = searchConcessionaireTextBox.Text.Trim();
                 DataTable rows = await CollectionService.GetConcessionaireLookupAsync(_user.Role, search);
                 concessionaireGrid.DataSource = rows;
+                RefreshConcessionaireSearchAutoComplete(rows);
 
                 ApplyFriendlyHeaders(concessionaireGrid);
                 ApplyConcessionaireGridLayout();
@@ -311,6 +314,7 @@ namespace WDBS_2026.Components.Cashier
                 string search = collectionSearchTextBox.Text.Trim();
                 DataTable rows = await CollectionService.GetCollectionHistoryByDateAsync(_user.Role, billingDatePicker.Value.Date, search);
                 collectionGrid.DataSource = rows;
+                RefreshCollectionSearchAutoComplete(rows);
 
                 ApplyFriendlyHeaders(collectionGrid);
                 ApplyCollectionGridLayout();
@@ -349,6 +353,64 @@ namespace WDBS_2026.Components.Cashier
             table.Columns.Add("remaining_scf", typeof(decimal));
             table.Columns.Add("unpaid_bill_count", typeof(int));
             return table;
+        }
+
+        private void ConfigureSearchAutoComplete()
+        {
+            searchConcessionaireTextBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            searchConcessionaireTextBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            searchConcessionaireTextBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+
+            collectionSearchTextBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+            collectionSearchTextBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            collectionSearchTextBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+        }
+
+        private void RefreshConcessionaireSearchAutoComplete(DataTable rows)
+        {
+            searchConcessionaireTextBox.AutoCompleteCustomSource = BuildAutoCompleteSource(
+                rows,
+                "concessionaire_code",
+                "concessionaire_name",
+                "meter_no");
+        }
+
+        private void RefreshCollectionSearchAutoComplete(DataTable rows)
+        {
+            collectionSearchTextBox.AutoCompleteCustomSource = BuildAutoCompleteSource(
+                rows,
+                "or_number",
+                "bill_numbers",
+                "concessionaire_code",
+                "concessionaire_name",
+                "payor_name",
+                "payment_reference");
+        }
+
+        private static AutoCompleteStringCollection BuildAutoCompleteSource(DataTable table, params string[] columnNames)
+        {
+            var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            foreach (DataRow row in table.Rows)
+            {
+                foreach (string columnName in columnNames)
+                {
+                    if (!table.Columns.Contains(columnName))
+                    {
+                        continue;
+                    }
+
+                    string value = Convert.ToString(row[columnName], CultureInfo.CurrentCulture)?.Trim() ?? string.Empty;
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        values.Add(value);
+                    }
+                }
+            }
+
+            var source = new AutoCompleteStringCollection();
+            source.AddRange(values.OrderBy(static value => value, StringComparer.CurrentCultureIgnoreCase).ToArray());
+            return source;
         }
 
         private void ApplyFriendlyHeaders(DataGridView grid)
@@ -1057,6 +1119,18 @@ namespace WDBS_2026.Components.Cashier
 
             Point menuPosition = new(Cursor.Position.X + 10, Cursor.Position.Y);
             _collectionGridMenu.Show(menuPosition);
+        }
+
+        private async void collectionGrid_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode != Keys.Delete)
+            {
+                return;
+            }
+
+            e.SuppressKeyPress = true;
+            await Task.Yield();
+            voidCollectionMenuItem_Click(_voidCollectionMenuItem, EventArgs.Empty);
         }
 
         private async void voidCollectionMenuItem_Click(object? sender, EventArgs e)

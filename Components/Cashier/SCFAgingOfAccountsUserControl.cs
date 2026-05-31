@@ -44,6 +44,7 @@ public partial class SCFAgingOfAccountsUserControl : UserControl
         InitializeComponent();
         ApplyTheme();
         ConfigureGrid();
+        ConfigureSearchAutoComplete();
     }
 
     protected override async void OnLoad(EventArgs e)
@@ -130,6 +131,7 @@ public partial class SCFAgingOfAccountsUserControl : UserControl
             _currentRows = await SCFAgingOfAccountsReportService.GetSummaryRowsAsync(_user.Role, options);
 
             agingGrid.DataSource = _currentRows;
+            RefreshSearchAutoComplete(_currentRows);
             ApplyGridLayout();
 
             statusLabel.ForeColor = AppTheme.MutedTextColor;
@@ -256,6 +258,44 @@ public partial class SCFAgingOfAccountsUserControl : UserControl
             statusLabel.ForeColor = AppTheme.MutedTextColor;
             statusLabel.Text = message;
         }
+    }
+
+    private void ConfigureSearchAutoComplete()
+    {
+        searchTextBox.AutoCompleteMode = AutoCompleteMode.SuggestAppend;
+        searchTextBox.AutoCompleteSource = AutoCompleteSource.CustomSource;
+        searchTextBox.AutoCompleteCustomSource = new AutoCompleteStringCollection();
+    }
+
+    private void RefreshSearchAutoComplete(DataTable rows)
+    {
+        searchTextBox.AutoCompleteCustomSource = BuildAutoCompleteSource(rows, "Account_No", "Concessionaire_Name");
+    }
+
+    private static AutoCompleteStringCollection BuildAutoCompleteSource(DataTable table, params string[] columnNames)
+    {
+        var values = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+        foreach (DataRow row in table.Rows)
+        {
+            foreach (string columnName in columnNames)
+            {
+                if (!table.Columns.Contains(columnName))
+                {
+                    continue;
+                }
+
+                string value = Convert.ToString(row[columnName], CultureInfo.CurrentCulture)?.Trim() ?? string.Empty;
+                if (!string.IsNullOrWhiteSpace(value))
+                {
+                    values.Add(value);
+                }
+            }
+        }
+
+        var source = new AutoCompleteStringCollection();
+        source.AddRange(values.OrderBy(static value => value, StringComparer.CurrentCultureIgnoreCase).ToArray());
+        return source;
     }
 
     private void agingGrid_DataBindingComplete(object? sender, DataGridViewBindingCompleteEventArgs e)

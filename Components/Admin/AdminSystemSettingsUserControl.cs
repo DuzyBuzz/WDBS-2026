@@ -435,13 +435,13 @@ namespace WDBS_2026.Components.Admin
 
                 if (settingsChanged)
                 {
-                    await AdminSystemSettingsService.SaveSystemSettingsAsync(_user.Role, settingsPayload);
+                    await AdminSystemSettingsService.SaveSystemSettingsAsync(_user.Role, _user.UserId, settingsPayload);
                     _loadedSettings = new Dictionary<string, string>(settingsPayload, StringComparer.OrdinalIgnoreCase);
                 }
 
                 if (servicesChanged)
                 {
-                    await AdminSystemSettingsService.SaveServiceChangesAsync(_user.Role, _servicesTable);
+                    await AdminSystemSettingsService.SaveServiceChangesAsync(_user.Role, _user.UserId, _servicesTable);
                     _servicesTable = await AdminSystemSettingsService.GetServicesAsync(_user.Role);
                     _nextServiceId = GetNextId(_servicesTable, "service_id");
                     servicesGrid.DataSource = _servicesTable;
@@ -450,7 +450,7 @@ namespace WDBS_2026.Components.Admin
 
                 if (zonesChanged)
                 {
-                    await AdminSystemSettingsService.SaveZoneChangesAsync(_user.Role, _zonesTable);
+                    await AdminSystemSettingsService.SaveZoneChangesAsync(_user.Role, _user.UserId, _zonesTable);
                     _zonesTable = await AdminSystemSettingsService.GetZonesAsync(_user.Role);
                     _nextZoneId = GetNextId(_zonesTable, "zone_id");
                     zonesGrid.DataSource = _zonesTable;

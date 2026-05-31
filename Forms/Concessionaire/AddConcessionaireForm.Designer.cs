@@ -29,6 +29,8 @@ partial class UpsertConcessionaireForm
         dueExemptedCheckBox = new CheckBox();
         discountedCheckBox = new CheckBox();
         notBillableCheckBox = new CheckBox();
+        statusComboBox = new ComboBox();
+        collectionStatusFieldLabel = new Label();
         scfMonthlyTextBox = new TextBox();
         scfMonthlyLabel = new Label();
         scfTotalTextBox = new TextBox();
@@ -77,9 +79,11 @@ partial class UpsertConcessionaireForm
         fieldsLayout.ColumnCount = 2;
         fieldsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
         fieldsLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-        fieldsLayout.Controls.Add(statusLabel, 0, 11);
-        fieldsLayout.Controls.Add(buttonPanel, 0, 12);
-        fieldsLayout.Controls.Add(optionsPanel, 0, 10);
+        fieldsLayout.Controls.Add(statusLabel, 0, 13);
+        fieldsLayout.Controls.Add(buttonPanel, 0, 14);
+        fieldsLayout.Controls.Add(optionsPanel, 0, 12);
+        fieldsLayout.Controls.Add(statusComboBox, 0, 11);
+        fieldsLayout.Controls.Add(collectionStatusFieldLabel, 0, 10);
         fieldsLayout.Controls.Add(scfMonthlyTextBox, 1, 9);
         fieldsLayout.Controls.Add(scfMonthlyLabel, 1, 8);
         fieldsLayout.Controls.Add(scfTotalTextBox, 0, 9);
@@ -104,7 +108,9 @@ partial class UpsertConcessionaireForm
         fieldsLayout.Location = new Point(24, 39);
         fieldsLayout.Margin = new Padding(0);
         fieldsLayout.Name = "fieldsLayout";
-        fieldsLayout.RowCount = 13;
+        fieldsLayout.RowCount = 15;
+        fieldsLayout.RowStyles.Add(new RowStyle());
+        fieldsLayout.RowStyles.Add(new RowStyle());
         fieldsLayout.RowStyles.Add(new RowStyle());
         fieldsLayout.RowStyles.Add(new RowStyle());
         fieldsLayout.RowStyles.Add(new RowStyle());
@@ -125,7 +131,7 @@ partial class UpsertConcessionaireForm
         // 
         statusLabel.AutoSize = true;
         fieldsLayout.SetColumnSpan(statusLabel, 2);
-        statusLabel.Location = new Point(0, 337);
+        statusLabel.Location = new Point(0, 395);
         statusLabel.Margin = new Padding(0, 14, 0, 0);
         statusLabel.Name = "statusLabel";
         statusLabel.Size = new Size(39, 15);
@@ -139,7 +145,7 @@ partial class UpsertConcessionaireForm
         buttonPanel.Controls.Add(cancelButton);
         buttonPanel.Controls.Add(saveButton);
         buttonPanel.FlowDirection = FlowDirection.RightToLeft;
-        buttonPanel.Location = new Point(0, 366);
+        buttonPanel.Location = new Point(0, 424);
         buttonPanel.Margin = new Padding(0, 14, 0, 0);
         buttonPanel.Name = "buttonPanel";
         buttonPanel.Size = new Size(176, 32);
@@ -175,10 +181,10 @@ partial class UpsertConcessionaireForm
         optionsPanel.Controls.Add(dueExemptedCheckBox);
         optionsPanel.Controls.Add(discountedCheckBox);
         optionsPanel.Controls.Add(notBillableCheckBox);
-        optionsPanel.Location = new Point(0, 304);
+        optionsPanel.Location = new Point(0, 362);
         optionsPanel.Margin = new Padding(0, 14, 0, 0);
         optionsPanel.Name = "optionsPanel";
-        optionsPanel.Size = new Size(386, 19);
+        optionsPanel.Size = new Size(372, 19);
         optionsPanel.TabIndex = 22;
         // 
         // taxExemptedCheckBox
@@ -217,13 +223,36 @@ partial class UpsertConcessionaireForm
         // notBillableCheckBox
         // 
         notBillableCheckBox.AutoSize = true;
-        notBillableCheckBox.Location = new Point(301, 0);
+        notBillableCheckBox.Location = new Point(285, 0);
         notBillableCheckBox.Margin = new Padding(0);
         notBillableCheckBox.Name = "notBillableCheckBox";
-        notBillableCheckBox.Size = new Size(85, 19);
+        notBillableCheckBox.Size = new Size(87, 19);
         notBillableCheckBox.TabIndex = 3;
         notBillableCheckBox.Text = "Not Billable";
         notBillableCheckBox.UseVisualStyleBackColor = true;
+        // 
+        // statusComboBox
+        // 
+        fieldsLayout.SetColumnSpan(statusComboBox, 2);
+        statusComboBox.Dock = DockStyle.Top;
+        statusComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
+        statusComboBox.FormattingEnabled = true;
+        statusComboBox.Location = new Point(0, 325);
+        statusComboBox.Margin = new Padding(0, 6, 0, 0);
+        statusComboBox.Name = "statusComboBox";
+        statusComboBox.Size = new Size(712, 23);
+        statusComboBox.TabIndex = 25;
+        // 
+        // collectionStatusFieldLabel
+        // 
+        collectionStatusFieldLabel.AutoSize = true;
+        fieldsLayout.SetColumnSpan(collectionStatusFieldLabel, 2);
+        collectionStatusFieldLabel.Location = new Point(0, 304);
+        collectionStatusFieldLabel.Margin = new Padding(0, 14, 0, 0);
+        collectionStatusFieldLabel.Name = "collectionStatusFieldLabel";
+        collectionStatusFieldLabel.Size = new Size(39, 15);
+        collectionStatusFieldLabel.TabIndex = 26;
+        collectionStatusFieldLabel.Text = "Status";
         // 
         // scfMonthlyTextBox
         // 
@@ -404,6 +433,7 @@ partial class UpsertConcessionaireForm
         // 
         // accountNoTextBox
         // 
+        accountNoTextBox.CharacterCasing = CharacterCasing.Upper;
         accountNoTextBox.Dock = DockStyle.Top;
         accountNoTextBox.Location = new Point(0, 35);
         accountNoTextBox.Margin = new Padding(0, 6, 12, 0);
@@ -468,6 +498,8 @@ partial class UpsertConcessionaireForm
     private ComboBox zoneComboBox;
     private Label serviceLabel;
     private ComboBox serviceComboBox;
+    private ComboBox statusComboBox;
+    private Label collectionStatusFieldLabel;
     private Label meterLabel;
     private TextBox meterNumberTextBox;
     private Label firstReadingDateLabel;

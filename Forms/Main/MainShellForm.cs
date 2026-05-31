@@ -45,9 +45,9 @@ public partial class MainShellForm : Form
         AppTheme.ApplyNavigationButton(profileButton, ButtonSeverity.Info);
         AppTheme.ApplyNavigationButton(logoutButton, ButtonSeverity.Danger);
 
-        RegisterNavigationButton(dashboardButton, "Dashboard", "🏠");
+        RegisterNavigationButton(dashboardButton, "Dashboard", "📊");
         RegisterNavigationButton(profileButton, "Profile", "👤");
-        RegisterNavigationButton(logoutButton, "Log Out", "🚪");
+        RegisterNavigationButton(logoutButton, "Log Out", "➜]");
 
         foreach (Button button in _roleButtons)
         {
@@ -182,7 +182,7 @@ public partial class MainShellForm : Form
 
         if (_currentUser.Role == UserRole.Biller && string.Equals(moduleName, "Concessionaire", StringComparison.OrdinalIgnoreCase))
         {
-            TryLoadModuleControl(() => new ConcessionaireUserControl(_currentUser.Role), moduleName);
+            TryLoadModuleControl(() => new ConcessionaireUserControl(_currentUser.Role, _currentUser.UserId), moduleName);
             return;
         }
 
@@ -230,7 +230,7 @@ public partial class MainShellForm : Form
 
         if (_currentUser.Role == UserRole.Admin && string.Equals(moduleName, "Concessionaire", StringComparison.OrdinalIgnoreCase))
         {
-            TryLoadModuleControl(() => new ConcessionaireUserControl(UserRole.Biller), moduleName);
+            TryLoadModuleControl(() => new ConcessionaireUserControl(UserRole.Biller, _currentUser.UserId), moduleName);
             return;
         }
 
@@ -448,20 +448,20 @@ public partial class MainShellForm : Form
     {
         return module switch
         {
-            "Concessionaire" => "👥",
-            "Reading" => "📟",
+            "Concessionaire" => "🚰",
+            "Reading" => "📋",
             "Billing" => "🧾",
-            "Reports" => "📊",
-            "Cashier Reports" => "📊",
+            "Reports" => "📑",
+            "Cashier Reports" => "📑",
             "Cashier" => "💰",
             "Collections" => "💳",
-            "Aging" => "📈",
-            "Aging SCF" => "🕒",
-            "Report" => "📊",
+            "Aging" => "⏳",
+            "Aging SCF" => "🧮",
+            "Report" => "📑",
             "Users" => "👥",
             "System Settings" => "⚙️",
             "Collection" => "💳",
-            "Audit Logs" => "🕵️",
+            "Audit Logs" => "📜",
             _ => "📁"
         };
     }
