@@ -20,6 +20,9 @@ partial class LoginForm
     {
         System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(LoginForm));
         loginCardLayout = new TableLayoutPanel();
+        updateFooterLayout = new TableLayoutPanel();
+        versionLabel = new Label();
+        checkForUpdatesButton = new Button();
         logoLayout = new TableLayoutPanel();
         philippinesLogoPictureBox = new PictureBox();
         logoDividerLabel = new Label();
@@ -33,12 +36,10 @@ partial class LoginForm
         showPasswordCheckBox = new CheckBox();
         loginButton = new Button();
         statusLabel = new Label();
-        updateFooterLayout = new TableLayoutPanel();
-        checkForUpdatesButton = new Button();
         loginCardPanel = new Panel();
         rootLayout = new TableLayoutPanel();
-        versionLabel = new Label();
         loginCardLayout.SuspendLayout();
+        updateFooterLayout.SuspendLayout();
         logoLayout.SuspendLayout();
         ((System.ComponentModel.ISupportInitialize)philippinesLogoPictureBox).BeginInit();
         ((System.ComponentModel.ISupportInitialize)tubunganLogoPictureBox).BeginInit();
@@ -79,8 +80,50 @@ partial class LoginForm
         loginCardLayout.RowStyles.Add(new RowStyle());
         loginCardLayout.RowStyles.Add(new RowStyle());
         loginCardLayout.RowStyles.Add(new RowStyle());
-        loginCardLayout.Size = new Size(396, 400);
+        loginCardLayout.Size = new Size(396, 415);
         loginCardLayout.TabIndex = 0;
+        // 
+        // updateFooterLayout
+        // 
+        updateFooterLayout.ColumnCount = 2;
+        updateFooterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+        updateFooterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 146F));
+        updateFooterLayout.Controls.Add(versionLabel, 0, 0);
+        updateFooterLayout.Controls.Add(checkForUpdatesButton, 1, 0);
+        updateFooterLayout.Dock = DockStyle.Fill;
+        updateFooterLayout.Location = new Point(0, 388);
+        updateFooterLayout.Margin = new Padding(0, 8, 0, 0);
+        updateFooterLayout.Name = "updateFooterLayout";
+        updateFooterLayout.RowCount = 1;
+        updateFooterLayout.RowStyles.Add(new RowStyle());
+        updateFooterLayout.Size = new Size(396, 27);
+        updateFooterLayout.TabIndex = 10;
+        // 
+        // versionLabel
+        // 
+        versionLabel.AutoSize = true;
+        versionLabel.Dock = DockStyle.Fill;
+        versionLabel.Location = new Point(0, 6);
+        versionLabel.Margin = new Padding(0, 6, 0, 0);
+        versionLabel.MaximumSize = new Size(396, 0);
+        versionLabel.Name = "versionLabel";
+        versionLabel.Size = new Size(250, 21);
+        versionLabel.TabIndex = 0;
+        versionLabel.Text = "version";
+        versionLabel.TextAlign = ContentAlignment.MiddleLeft;
+        // 
+        // checkForUpdatesButton
+        // 
+        checkForUpdatesButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        checkForUpdatesButton.AutoSize = true;
+        checkForUpdatesButton.Location = new Point(250, 0);
+        checkForUpdatesButton.Margin = new Padding(0);
+        checkForUpdatesButton.Name = "checkForUpdatesButton";
+        checkForUpdatesButton.Size = new Size(146, 27);
+        checkForUpdatesButton.TabIndex = 1;
+        checkForUpdatesButton.Text = "Check for Updates";
+        checkForUpdatesButton.UseVisualStyleBackColor = true;
+        checkForUpdatesButton.Click += checkForUpdatesButton_Click;
         // 
         // logoLayout
         // 
@@ -230,47 +273,18 @@ partial class LoginForm
         statusLabel.Size = new Size(0, 15);
         statusLabel.TabIndex = 9;
         // 
-        // updateFooterLayout
-        // 
-        updateFooterLayout.ColumnCount = 2;
-        updateFooterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-        updateFooterLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 146F));
-        updateFooterLayout.Controls.Add(versionLabel, 0, 0);
-        updateFooterLayout.Controls.Add(checkForUpdatesButton, 1, 0);
-        updateFooterLayout.Dock = DockStyle.Fill;
-        updateFooterLayout.Location = new Point(0, 388);
-        updateFooterLayout.Margin = new Padding(0, 8, 0, 0);
-        updateFooterLayout.Name = "updateFooterLayout";
-        updateFooterLayout.RowCount = 1;
-        updateFooterLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        updateFooterLayout.Size = new Size(396, 27);
-        updateFooterLayout.TabIndex = 10;
-        // 
-        // checkForUpdatesButton
-        // 
-        checkForUpdatesButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
-        checkForUpdatesButton.AutoSize = true;
-        checkForUpdatesButton.Location = new Point(250, 0);
-        checkForUpdatesButton.Margin = new Padding(0);
-        checkForUpdatesButton.Name = "checkForUpdatesButton";
-        checkForUpdatesButton.Size = new Size(146, 27);
-        checkForUpdatesButton.TabIndex = 1;
-        checkForUpdatesButton.Text = "Check for Updates";
-        checkForUpdatesButton.UseVisualStyleBackColor = true;
-        checkForUpdatesButton.Click += checkForUpdatesButton_Click;
-        // 
         // loginCardPanel
         // 
         loginCardPanel.Anchor = AnchorStyles.None;
         loginCardPanel.AutoSize = true;
         loginCardPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
         loginCardPanel.Controls.Add(loginCardLayout);
-        loginCardPanel.Location = new Point(200, 50);
+        loginCardPanel.Location = new Point(200, 42);
         loginCardPanel.Margin = new Padding(0);
         loginCardPanel.MaximumSize = new Size(460, 0);
         loginCardPanel.Name = "loginCardPanel";
         loginCardPanel.Padding = new Padding(32, 30, 32, 30);
-        loginCardPanel.Size = new Size(460, 460);
+        loginCardPanel.Size = new Size(460, 475);
         loginCardPanel.TabIndex = 0;
         // 
         // rootLayout
@@ -292,19 +306,6 @@ partial class LoginForm
         rootLayout.Size = new Size(860, 560);
         rootLayout.TabIndex = 0;
         // 
-        // versionLabel
-        // 
-        versionLabel.AutoSize = true;
-        versionLabel.Dock = DockStyle.Fill;
-        versionLabel.Location = new Point(0, 0);
-        versionLabel.Margin = new Padding(0, 6, 0, 0);
-        versionLabel.MaximumSize = new Size(396, 0);
-        versionLabel.Name = "versionLabel";
-        versionLabel.Size = new Size(250, 27);
-        versionLabel.TabIndex = 0;
-        versionLabel.TextAlign = ContentAlignment.MiddleLeft;
-        versionLabel.Text = "version";
-        // 
         // LoginForm
         // 
         AutoScaleDimensions = new SizeF(7F, 15F);
@@ -316,9 +317,12 @@ partial class LoginForm
         Name = "LoginForm";
         StartPosition = FormStartPosition.CenterScreen;
         Text = "Water District Billing System";
+        WindowState = FormWindowState.Maximized;
         Load += LoginForm_Load;
         loginCardLayout.ResumeLayout(false);
         loginCardLayout.PerformLayout();
+        updateFooterLayout.ResumeLayout(false);
+        updateFooterLayout.PerformLayout();
         logoLayout.ResumeLayout(false);
         logoLayout.PerformLayout();
         ((System.ComponentModel.ISupportInitialize)philippinesLogoPictureBox).EndInit();

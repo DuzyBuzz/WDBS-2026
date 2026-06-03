@@ -165,7 +165,7 @@ SELECT
     c.concessionaire_name,
     c.tin_number,
     c.address,
-    COALESCE(c.status, 'Pending') AS concessionaire_status,
+    COALESCE(c.status, 'PENDING') AS concessionaire_status,
     c.zone_id,
     c.service_id,
     c.meter_no,
@@ -196,7 +196,7 @@ LIMIT 1;";
             Convert.ToString(reader["concessionaire_name"], CultureInfo.CurrentCulture) ?? string.Empty,
             Convert.ToString(reader["tin_number"], CultureInfo.CurrentCulture) ?? string.Empty,
             Convert.ToString(reader["address"], CultureInfo.CurrentCulture) ?? string.Empty,
-            Convert.ToString(reader["concessionaire_status"], CultureInfo.CurrentCulture) ?? "Pending",
+            Convert.ToString(reader["concessionaire_status"], CultureInfo.CurrentCulture) ?? "PENDING",
             reader.IsDBNull(reader.GetOrdinal("zone_id")) ? 0 : reader.GetInt32("zone_id"),
             reader.IsDBNull(reader.GetOrdinal("service_id")) ? 0 : reader.GetInt32("service_id"),
             Convert.ToString(reader["meter_no"], CultureInfo.CurrentCulture) ?? string.Empty,
@@ -228,13 +228,26 @@ LIMIT 1;";
 
         if (record.ZoneId > 0)
         {
+            zoneCheckBox.Checked = true;
             zoneComboBox.SelectedValue = record.ZoneId;
+        }
+        else
+        {
+            zoneCheckBox.Checked = false;
         }
 
         if (record.ServiceId > 0)
         {
+            serviceTypeCheckBox.Checked = true;
             serviceComboBox.SelectedValue = record.ServiceId;
         }
+        else
+        {
+            serviceTypeCheckBox.Checked = false;
+        }
+
+        firstReadingDatePicker.Checked = record.FirstReadingDate.HasValue;
+        firstReadingDatePicker.Value = record.FirstReadingDate?.Date ?? DateTime.Today;
 
         _existingScfTotalAmount = record.ScfTotalAmount;
         _existingScfBalanceAmount = record.ScfBalanceAmount;
@@ -242,7 +255,7 @@ LIMIT 1;";
 
     private void SetSelectedStatus(string? status)
     {
-        string normalized = string.IsNullOrWhiteSpace(status) ? "Pending" : status.Trim();
+        string normalized = string.IsNullOrWhiteSpace(status) ? "PENDING" : status.Trim();
 
         foreach (object item in statusComboBox.Items)
         {
@@ -253,7 +266,7 @@ LIMIT 1;";
             }
         }
 
-        statusComboBox.SelectedItem = "Pending";
+        statusComboBox.SelectedItem = "PENDING";
     }
 
     private async Task LoadZonesAsync(MySqlConnection connection)
@@ -261,7 +274,7 @@ LIMIT 1;";
         const string sql = @"
 SELECT zone_id, zone_name
 FROM zone
-ORDER BY zone_name;";
+ORDER BY zone_id ASC;";
 
         await using var command = new MySqlCommand(sql, connection);
         await using var reader = (MySqlDataReader)await command.ExecuteReaderAsync();
@@ -347,12 +360,12 @@ LIMIT 500;";
                 await UpdateConcessionaireAsync(connection, transaction, concessionaireId, request, _actingUserId);
             }
 
-            decimal updatedScfBalance = CalculateScfBalanceForSave(request.ScfTotalAmount);
+            decimal updatedScfBalance = CalculateScfBalanceForSave(request.ScfTotalAmount ?? 0M);
             await UpsertScfBalanceAsync(connection, transaction, concessionaireId, request, updatedScfBalance, _actingUserId);
 
             await transaction.CommitAsync();
 
-            _existingScfTotalAmount = request.ScfTotalAmount;
+            _existingScfTotalAmount = request.ScfTotalAmount ?? 0M;
             _existingScfBalanceAmount = updatedScfBalance;
 
             statusLabel.ForeColor = AppTheme.SuccessColor;
@@ -418,20 +431,20 @@ VALUES
 );";
 
         await using var command = new MySqlCommand(sql, connection, transaction);
-        command.Parameters.AddWithValue("@accountNo", request.AccountNo);
+        command.Parameters.AddWithValue("@accountNo", (object?)request.AccountNo ?? DBNull.Value);
         command.Parameters.AddWithValue("@name", request.ConcessionaireName);
-        command.Parameters.AddWithValue("@address", request.Address);
-        command.Parameters.AddWithValue("@zoneId", request.ZoneId);
-        command.Parameters.AddWithValue("@serviceId", request.ServiceId);
-        command.Parameters.AddWithValue("@meterNumber", request.MeterNumber);
-        command.Parameters.AddWithValue("@firstReadingDate", request.FirstReadingDate.Date);
+        command.Parameters.AddWithValue("@address", (object?)request.Address ?? DBNull.Value);
+        command.Parameters.AddWithValue("@zoneId", request.ZoneId.HasValue ? (object)request.ZoneId.Value : DBNull.Value);
+        command.Parameters.AddWithValue("@serviceId", request.ServiceId.HasValue ? (object)request.ServiceId.Value : DBNull.Value);
+        command.Parameters.AddWithValue("@meterNumber", (object?)request.MeterNumber ?? DBNull.Value);
+        command.Parameters.AddWithValue("@firstReadingDate", request.FirstReadingDate.HasValue ? (object)request.FirstReadingDate.Value.Date : DBNull.Value);
         command.Parameters.AddWithValue("@isTaxExempt", request.IsTaxExempt);
         command.Parameters.AddWithValue("@isDueExempt", request.IsDueExempt);
         command.Parameters.AddWithValue("@isDiscounted", request.IsDiscounted);
         command.Parameters.AddWithValue("@isNotBillable", request.IsNotBillable);
-        command.Parameters.AddWithValue("@status", request.Status);
-        command.Parameters.AddWithValue("@tin", request.TinNumber);
-        command.Parameters.AddWithValue("@userId", actingUserId > 0 ? actingUserId : DBNull.Value);
+        command.Parameters.AddWithValue("@status", (object?)request.Status ?? DBNull.Value);
+        command.Parameters.AddWithValue("@tin", (object?)request.TinNumber ?? DBNull.Value);
+        command.Parameters.AddWithValue("@userId", actingUserId);
 
         await command.ExecuteNonQueryAsync();
         return Convert.ToInt32(command.LastInsertedId);
@@ -465,20 +478,20 @@ WHERE concessionaire_id = @concessionaireId;";
 
         await using var command = new MySqlCommand(sql, connection, transaction);
         command.Parameters.AddWithValue("@concessionaireId", concessionaireId);
-        command.Parameters.AddWithValue("@accountNo", request.AccountNo);
+        command.Parameters.AddWithValue("@accountNo", (object?)request.AccountNo ?? DBNull.Value);
         command.Parameters.AddWithValue("@name", request.ConcessionaireName);
-        command.Parameters.AddWithValue("@address", request.Address);
-        command.Parameters.AddWithValue("@status", request.Status);
-        command.Parameters.AddWithValue("@zoneId", request.ZoneId);
-        command.Parameters.AddWithValue("@serviceId", request.ServiceId);
-        command.Parameters.AddWithValue("@meterNumber", request.MeterNumber);
-        command.Parameters.AddWithValue("@firstReadingDate", request.FirstReadingDate.Date);
+        command.Parameters.AddWithValue("@address", (object?)request.Address ?? DBNull.Value);
+        command.Parameters.AddWithValue("@status", (object?)request.Status ?? DBNull.Value);
+        command.Parameters.AddWithValue("@zoneId", request.ZoneId.HasValue ? (object)request.ZoneId.Value : DBNull.Value);
+        command.Parameters.AddWithValue("@serviceId", request.ServiceId.HasValue ? (object)request.ServiceId.Value : DBNull.Value);
+        command.Parameters.AddWithValue("@meterNumber", (object?)request.MeterNumber ?? DBNull.Value);
+        command.Parameters.AddWithValue("@firstReadingDate", request.FirstReadingDate.HasValue ? (object)request.FirstReadingDate.Value.Date : DBNull.Value);
         command.Parameters.AddWithValue("@isTaxExempt", request.IsTaxExempt);
         command.Parameters.AddWithValue("@isDueExempt", request.IsDueExempt);
         command.Parameters.AddWithValue("@isDiscounted", request.IsDiscounted);
         command.Parameters.AddWithValue("@isNotBillable", request.IsNotBillable);
-        command.Parameters.AddWithValue("@tin", request.TinNumber);
-        command.Parameters.AddWithValue("@userId", actingUserId > 0 ? actingUserId : DBNull.Value);
+        command.Parameters.AddWithValue("@tin", (object?)request.TinNumber ?? DBNull.Value);
+        command.Parameters.AddWithValue("@userId", actingUserId);
 
         await command.ExecuteNonQueryAsync();
     }
@@ -519,10 +532,10 @@ ON DUPLICATE KEY UPDATE
 
         await using var command = new MySqlCommand(sql, connection, transaction);
         command.Parameters.AddWithValue("@concessionaireId", concessionaireId);
-        command.Parameters.AddWithValue("@totalAmount", request.ScfTotalAmount);
+        command.Parameters.AddWithValue("@totalAmount", request.ScfTotalAmount.HasValue ? (object)request.ScfTotalAmount.Value : DBNull.Value);
         command.Parameters.AddWithValue("@balance", balance);
-        command.Parameters.AddWithValue("@monthly", request.ScfMonthlyAmount);
-        command.Parameters.AddWithValue("@userId", actingUserId > 0 ? actingUserId : DBNull.Value);
+        command.Parameters.AddWithValue("@monthly", request.ScfMonthlyAmount.HasValue ? (object)request.ScfMonthlyAmount.Value : DBNull.Value);
+        command.Parameters.AddWithValue("@userId", actingUserId);
 
         await command.ExecuteNonQueryAsync();
     }
@@ -543,9 +556,9 @@ ON DUPLICATE KEY UPDATE
         string name = ToTitleCase(nameTextBox.Text);
         string address = ToTitleCase(addressTextBox.Text);
 
-        if (string.IsNullOrWhiteSpace(accountNo))
+        if (_actingUserId <= 0)
         {
-            validationMessage = "Account no is required.";
+            validationMessage = "Logged-in user is required.";
             return false;
         }
 
@@ -555,40 +568,49 @@ ON DUPLICATE KEY UPDATE
             return false;
         }
 
-        if (zoneComboBox.SelectedItem is not LookupItem zone)
+        int? zoneId = zoneCheckBox.Checked && zoneComboBox.SelectedItem is LookupItem z ? z.Id : (int?)null;
+        int? serviceId = serviceTypeCheckBox.Checked && serviceComboBox.SelectedItem is LookupItem s ? s.Id : (int?)null;
+
+        // SCF amounts are optional; treat empty as null, otherwise validate parsing
+        decimal? scfTotal = null;
+        decimal? scfMonthly = null;
+
+        string scfTotalRaw = scfTotalTextBox.Text.Trim();
+        if (!string.IsNullOrEmpty(scfTotalRaw))
         {
-            validationMessage = "Select a zone.";
-            return false;
+            if (!TryParseAmount(scfTotalRaw, out decimal parsedTotal))
+            {
+                validationMessage = "SCF total amount must be a valid number.";
+                return false;
+            }
+
+            scfTotal = parsedTotal;
         }
 
-        if (serviceComboBox.SelectedItem is not LookupItem service)
+        string scfMonthlyRaw = scfMonthlyTextBox.Text.Trim();
+        if (!string.IsNullOrEmpty(scfMonthlyRaw))
         {
-            validationMessage = "Select a service type.";
-            return false;
+            if (!TryParseAmount(scfMonthlyRaw, out decimal parsedMonthly))
+            {
+                validationMessage = "SCF monthly amount must be a valid number.";
+                return false;
+            }
+
+            scfMonthly = parsedMonthly;
         }
 
-        if (!TryParseAmount(scfTotalTextBox.Text, out decimal scfTotal))
-        {
-            validationMessage = "SCF total amount must be a valid number.";
-            return false;
-        }
-
-        if (!TryParseAmount(scfMonthlyTextBox.Text, out decimal scfMonthly))
-        {
-            validationMessage = "SCF monthly amount must be a valid number.";
-            return false;
-        }
+        DateTime? firstReading = firstReadingDatePicker.Checked ? firstReadingDatePicker.Value.Date : null;
 
         request = new UpsertConcessionaireRequest(
-            accountNo,
+            string.IsNullOrWhiteSpace(accountNo) ? null : accountNo,
             name,
-            tinTextBox.Text.Trim(),
-            address,
-            statusComboBox.SelectedItem?.ToString() ?? "Pending",
-            zone.Id,
-            service.Id,
-            meterNumberTextBox.Text.Trim(),
-            firstReadingDatePicker.Value,
+            string.IsNullOrWhiteSpace(tinTextBox.Text) ? null : tinTextBox.Text.Trim(),
+            string.IsNullOrWhiteSpace(address) ? null : address,
+            statusComboBox.SelectedItem?.ToString(),
+            zoneId,
+            serviceId,
+            string.IsNullOrWhiteSpace(meterNumberTextBox.Text) ? null : meterNumberTextBox.Text.Trim(),
+            firstReading,
             scfTotal,
             scfMonthly,
             taxExemptedCheckBox.Checked,
@@ -626,6 +648,10 @@ ON DUPLICATE KEY UPDATE
         accountNoTextBox.Leave += (_, _) => accountNoTextBox.Text = accountNoTextBox.Text.Trim().ToUpper(CultureInfo.CurrentCulture);
         nameTextBox.Leave += (_, _) => nameTextBox.Text = ToTitleCase(nameTextBox.Text);
         addressTextBox.Leave += (_, _) => addressTextBox.Text = ToTitleCase(addressTextBox.Text);
+
+        // When zone/service checkboxes are toggled, enable/disable corresponding combo boxes
+        zoneCheckBox.CheckedChanged += (_, _) => zoneComboBox.Enabled = zoneCheckBox.Checked;
+        serviceTypeCheckBox.CheckedChanged += (_, _) => serviceComboBox.Enabled = serviceTypeCheckBox.Checked;
     }
 
     private void cancelButton_Click(object sender, EventArgs e)
@@ -661,6 +687,46 @@ ON DUPLICATE KEY UPDATE
         }
     }
 
+    private void flowLayoutPanel2_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void nameTextBox_TextChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void flowLayoutPanel2_Paint_1(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void fieldsLayout_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void tableLayoutPanel9_Paint(object sender, PaintEventArgs e)
+    {
+
+    }
+
+    private void discountedCheckBox_CheckedChanged(object sender, EventArgs e)
+    {
+
+    }
+
+    private void notBillableCheckBox_CheckedChanged(object sender, EventArgs e)
+    {
+
+    }
+
     private readonly record struct LookupItem(int Id, string Name)
     {
         public override string ToString() => Name;
@@ -685,17 +751,17 @@ ON DUPLICATE KEY UPDATE
         bool IsNotBillable);
 
     private readonly record struct UpsertConcessionaireRequest(
-        string AccountNo,
+        string? AccountNo,
         string ConcessionaireName,
-        string TinNumber,
-        string Address,
-        string Status,
-        int ZoneId,
-        int ServiceId,
-        string MeterNumber,
-        DateTime FirstReadingDate,
-        decimal ScfTotalAmount,
-        decimal ScfMonthlyAmount,
+        string? TinNumber,
+        string? Address,
+        string? Status,
+        int? ZoneId,
+        int? ServiceId,
+        string? MeterNumber,
+        DateTime? FirstReadingDate,
+        decimal? ScfTotalAmount,
+        decimal? ScfMonthlyAmount,
         bool IsTaxExempt,
         bool IsDueExempt,
         bool IsDiscounted,

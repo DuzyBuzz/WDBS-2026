@@ -88,11 +88,12 @@
             rootLayout.Margin = new Padding(0);
             rootLayout.Name = "rootLayout";
             rootLayout.Padding = new Padding(0, 4, 0, 0);
-            rootLayout.RowCount = 4;
+            rootLayout.RowCount = 5;
             rootLayout.RowStyles.Add(new RowStyle());
             rootLayout.RowStyles.Add(new RowStyle());
             rootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             rootLayout.RowStyles.Add(new RowStyle());
+            rootLayout.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             rootLayout.Size = new Size(1120, 720);
             rootLayout.TabIndex = 0;
             // 
@@ -102,7 +103,7 @@
             titleLabel.Location = new Point(0, 4);
             titleLabel.Margin = new Padding(0);
             titleLabel.Name = "titleLabel";
-            titleLabel.Size = new Size(147, 15);
+            titleLabel.Size = new Size(129, 15);
             titleLabel.TabIndex = 0;
             titleLabel.Text = "Admin System Settings";
             // 
@@ -139,7 +140,7 @@
             systemSettingsSectionLabel.Location = new Point(0, 0);
             systemSettingsSectionLabel.Margin = new Padding(0);
             systemSettingsSectionLabel.Name = "systemSettingsSectionLabel";
-            systemSettingsSectionLabel.Size = new Size(94, 15);
+            systemSettingsSectionLabel.Size = new Size(90, 15);
             systemSettingsSectionLabel.TabIndex = 0;
             systemSettingsSectionLabel.Text = "System Settings";
             // 
@@ -179,7 +180,7 @@
             discountPercentLabel.Location = new Point(0, 0);
             discountPercentLabel.Margin = new Padding(0);
             discountPercentLabel.Name = "discountPercentLabel";
-            discountPercentLabel.Size = new Size(92, 15);
+            discountPercentLabel.Size = new Size(97, 15);
             discountPercentLabel.TabIndex = 0;
             discountPercentLabel.Text = "Discount Percent";
             // 
@@ -189,7 +190,7 @@
             discountPercentTextBox.Location = new Point(0, 19);
             discountPercentTextBox.Margin = new Padding(0, 4, 8, 0);
             discountPercentTextBox.Name = "discountPercentTextBox";
-            discountPercentTextBox.Size = new Size(188, 23);
+            discountPercentTextBox.Size = new Size(180, 23);
             discountPercentTextBox.TabIndex = 5;
             // 
             // discountThresholdLabel
@@ -198,7 +199,7 @@
             discountThresholdLabel.Location = new Point(188, 0);
             discountThresholdLabel.Margin = new Padding(0);
             discountThresholdLabel.Name = "discountThresholdLabel";
-            discountThresholdLabel.Size = new Size(111, 15);
+            discountThresholdLabel.Size = new Size(109, 15);
             discountThresholdLabel.TabIndex = 1;
             discountThresholdLabel.Text = "Discount Threshold";
             // 
@@ -208,7 +209,7 @@
             discountThresholdTextBox.Location = new Point(188, 19);
             discountThresholdTextBox.Margin = new Padding(0, 4, 8, 0);
             discountThresholdTextBox.Name = "discountThresholdTextBox";
-            discountThresholdTextBox.Size = new Size(188, 23);
+            discountThresholdTextBox.Size = new Size(180, 23);
             discountThresholdTextBox.TabIndex = 6;
             // 
             // penalizeAfterDaysLabel
@@ -217,7 +218,7 @@
             penalizeAfterDaysLabel.Location = new Point(376, 0);
             penalizeAfterDaysLabel.Margin = new Padding(0);
             penalizeAfterDaysLabel.Name = "penalizeAfterDaysLabel";
-            penalizeAfterDaysLabel.Size = new Size(102, 15);
+            penalizeAfterDaysLabel.Size = new Size(107, 15);
             penalizeAfterDaysLabel.TabIndex = 2;
             penalizeAfterDaysLabel.Text = "Penalize After Days";
             // 
@@ -227,7 +228,7 @@
             penalizeAfterDaysTextBox.Location = new Point(376, 19);
             penalizeAfterDaysTextBox.Margin = new Padding(0, 4, 8, 0);
             penalizeAfterDaysTextBox.Name = "penalizeAfterDaysTextBox";
-            penalizeAfterDaysTextBox.Size = new Size(188, 23);
+            penalizeAfterDaysTextBox.Size = new Size(180, 23);
             penalizeAfterDaysTextBox.TabIndex = 7;
             // 
             // penaltyPercentLabel
@@ -236,7 +237,7 @@
             penaltyPercentLabel.Location = new Point(564, 0);
             penaltyPercentLabel.Margin = new Padding(0);
             penaltyPercentLabel.Name = "penaltyPercentLabel";
-            penaltyPercentLabel.Size = new Size(88, 15);
+            penaltyPercentLabel.Size = new Size(89, 15);
             penaltyPercentLabel.TabIndex = 3;
             penaltyPercentLabel.Text = "Penalty Percent";
             // 
@@ -246,7 +247,7 @@
             penaltyPercentTextBox.Location = new Point(564, 19);
             penaltyPercentTextBox.Margin = new Padding(0, 4, 8, 0);
             penaltyPercentTextBox.Name = "penaltyPercentTextBox";
-            penaltyPercentTextBox.Size = new Size(188, 23);
+            penaltyPercentTextBox.Size = new Size(180, 23);
             penaltyPercentTextBox.TabIndex = 8;
             // 
             // taxPercentLabel
@@ -265,13 +266,13 @@
             taxPercentTextBox.Location = new Point(752, 19);
             taxPercentTextBox.Margin = new Padding(0, 4, 8, 0);
             taxPercentTextBox.Name = "taxPercentTextBox";
-            taxPercentTextBox.Size = new Size(188, 23);
+            taxPercentTextBox.Size = new Size(180, 23);
             taxPercentTextBox.TabIndex = 9;
             // 
             // saveSettingsButton
             // 
             saveSettingsButton.Anchor = AnchorStyles.Right;
-            saveSettingsButton.Location = new Point(952, 16);
+            saveSettingsButton.Location = new Point(952, 32);
             saveSettingsButton.Margin = new Padding(0);
             saveSettingsButton.Name = "saveSettingsButton";
             saveSettingsButton.Size = new Size(140, 28);
@@ -294,7 +295,7 @@
             // splitContainer.Panel2
             // 
             splitContainer.Panel2.Controls.Add(zonesPanel);
-            splitContainer.Size = new Size(1120, 525);
+            splitContainer.Size = new Size(1120, 514);
             splitContainer.SplitterDistance = 725;
             splitContainer.TabIndex = 2;
             // 
@@ -306,7 +307,7 @@
             servicesPanel.Margin = new Padding(0);
             servicesPanel.Name = "servicesPanel";
             servicesPanel.Padding = new Padding(0, 0, 6, 0);
-            servicesPanel.Size = new Size(725, 525);
+            servicesPanel.Size = new Size(725, 514);
             servicesPanel.TabIndex = 0;
             // 
             // servicesLayout
@@ -322,7 +323,7 @@
             servicesLayout.RowCount = 2;
             servicesLayout.RowStyles.Add(new RowStyle());
             servicesLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            servicesLayout.Size = new Size(719, 525);
+            servicesLayout.Size = new Size(719, 514);
             servicesLayout.TabIndex = 0;
             // 
             // servicesHeaderPanel
@@ -352,7 +353,7 @@
             servicesGrid.Location = new Point(0, 32);
             servicesGrid.Margin = new Padding(0);
             servicesGrid.Name = "servicesGrid";
-            servicesGrid.Size = new Size(719, 493);
+            servicesGrid.Size = new Size(719, 482);
             servicesGrid.TabIndex = 1;
             // 
             // zonesPanel
@@ -363,7 +364,7 @@
             zonesPanel.Margin = new Padding(0);
             zonesPanel.Name = "zonesPanel";
             zonesPanel.Padding = new Padding(6, 0, 0, 0);
-            zonesPanel.Size = new Size(391, 525);
+            zonesPanel.Size = new Size(391, 514);
             zonesPanel.TabIndex = 0;
             // 
             // zonesLayout
@@ -379,7 +380,7 @@
             zonesLayout.RowCount = 2;
             zonesLayout.RowStyles.Add(new RowStyle());
             zonesLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            zonesLayout.Size = new Size(385, 525);
+            zonesLayout.Size = new Size(385, 514);
             zonesLayout.TabIndex = 0;
             // 
             // zonesHeaderPanel
@@ -398,7 +399,7 @@
             zonesSectionLabel.Location = new Point(0, 8);
             zonesSectionLabel.Margin = new Padding(0);
             zonesSectionLabel.Name = "zonesSectionLabel";
-            zonesSectionLabel.Size = new Size(40, 15);
+            zonesSectionLabel.Size = new Size(39, 15);
             zonesSectionLabel.TabIndex = 0;
             zonesSectionLabel.Text = "Zones";
             // 
@@ -409,16 +410,16 @@
             zonesGrid.Location = new Point(0, 32);
             zonesGrid.Margin = new Padding(0);
             zonesGrid.Name = "zonesGrid";
-            zonesGrid.Size = new Size(385, 493);
+            zonesGrid.Size = new Size(385, 482);
             zonesGrid.TabIndex = 1;
             // 
             // statusLabel
             // 
             statusLabel.AutoSize = true;
-            statusLabel.Location = new Point(0, 696);
+            statusLabel.Location = new Point(0, 685);
             statusLabel.Margin = new Padding(0, 3, 0, 0);
             statusLabel.Name = "statusLabel";
-            statusLabel.Size = new Size(117, 15);
+            statusLabel.Size = new Size(122, 15);
             statusLabel.TabIndex = 3;
             statusLabel.Text = "Admin settings ready.";
             // 

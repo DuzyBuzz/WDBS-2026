@@ -202,7 +202,7 @@ ON DUPLICATE KEY UPDATE
         command.Parameters.AddWithValue("@totalAmount", request.TotalAmount);
         command.Parameters.AddWithValue("@balance", request.BalanceAmount);
         command.Parameters.AddWithValue("@monthly", request.MonthlyAmount);
-        command.Parameters.AddWithValue("@userId", actingUserId > 0 ? actingUserId : DBNull.Value);
+        command.Parameters.AddWithValue("@userId", actingUserId);
 
         await command.ExecuteNonQueryAsync();
     }
