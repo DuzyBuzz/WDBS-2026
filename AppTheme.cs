@@ -21,7 +21,7 @@ internal readonly record struct ButtonPalette(
 
 internal static class AppTheme
 {
-    private const string GlobalIconRelativePath = "Resources\\tubungan logo.ico";
+    private const string GlobalIconRelativePath = "Resources\\logo.ico";
 
     private static Icon? _cachedGlobalIcon;
     private static bool _isGlobalIconLoaded;

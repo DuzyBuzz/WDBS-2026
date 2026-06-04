@@ -18,7 +18,7 @@ public sealed record SCFAgingOfAccountsReportDocumentData(
 
 internal sealed class SCFAgingOfAccountsReportPrintHelper : IReportPreviewSource
 {
-    private const string WaterDistrictTitle = "TUBUNGAN WATER DISTRICT";
+    private const string WaterDistrictTitle = "IGBARAS WATER DISTRICT";
     private const float HeaderHeight = 58F;
     private const float TableHeaderHeight = 24F;
     private const float FooterHeight = 20F;

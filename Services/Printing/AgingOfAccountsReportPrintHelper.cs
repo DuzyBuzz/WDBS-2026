@@ -18,7 +18,7 @@ public sealed record AgingOfAccountsReportDocumentData(
 
 internal sealed class AgingOfAccountsReportPrintHelper : IReportPreviewSource
 {
-    private const string WaterDistrictTitle = "TUBUNGAN WATER DISTRICT";
+    private const string WaterDistrictTitle = "IGBARAS WATER DISTRICT";
     private const float HeaderHeight = 58F;
     private const float TableHeaderHeight = 24F;
     private const float FooterHeight = 20F;

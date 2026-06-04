@@ -20,15 +20,15 @@ public sealed record CollectionReportDocumentData(
 
 internal sealed class CollectionReportPrintHelper : IReportPreviewSource
 {
-	private const string WaterDistrictTitle = "TUBUNGAN WATER DISTRICT";
+	private const string WaterDistrictTitle = "IGBARAS WATER DISTRICT";
 	private const float HeaderHeight = 60F;
 	private const float TableHeaderHeight = 24F;
 	private const float FooterHeight = 20F;
-	private const float RowHeight = 24F;
-	private const float CellPadding = 4F;
-	private const float WrappedRowAllowance = 8F;
+	private const float RowHeight = 18F;
+	private const float CellPadding = 0F;
+    private const float WrappedRowAllowance = 20F;
 
-	private readonly CollectionReportDocumentData _document;
+    private readonly CollectionReportDocumentData _document;
 	private readonly object _previewPreparationSync = new();
 
 	private static readonly object PdfFontResolverSync = new();
@@ -44,6 +44,7 @@ internal sealed class CollectionReportPrintHelper : IReportPreviewSource
 		"Arrears",
 		"Penalty",
 		"SCF",
+		"Others",
 		"Collected",
 		"Uncollected"
 	];
@@ -220,25 +221,44 @@ internal sealed class CollectionReportPrintHelper : IReportPreviewSource
 		graphics.DrawString(_document.PeriodCaption, captionFont, textBrush, new RectangleF(centerLeft, bounds.Top + 33F, centerWidth, 12F), format);
 	}
 
-	private static void DrawCellText(Graphics graphics, string text, Font font, Brush brush, RectangleF rect, StringAlignment alignment, bool wrap)
-	{
-		RectangleF textBounds = RectangleF.Inflate(rect, -CellPadding, -CellPadding);
-		using var format = new StringFormat
-		{
-			Alignment = alignment,
-			LineAlignment = wrap ? StringAlignment.Near : StringAlignment.Center,
-			Trimming = wrap ? StringTrimming.None : StringTrimming.EllipsisCharacter
-		};
+    private static void DrawCellText(
+        Graphics graphics,
+        string text,
+        Font font,
+        Brush brush,
+        RectangleF rect,
+        StringAlignment alignment,
+        bool wrap)
+    {
+        RectangleF textBounds =
+            RectangleF.Inflate(rect, -CellPadding, -CellPadding);
 
-		if (!wrap)
-		{
-			format.FormatFlags = StringFormatFlags.NoWrap;
-		}
+        using StringFormat format = new()
+        {
+            Alignment = alignment,
+            Trimming = StringTrimming.Word
+        };
 
-		graphics.DrawString(text, font, brush, textBounds, format);
-	}
+        if (wrap)
+        {
+            format.LineAlignment = StringAlignment.Near;
+        }
+        else
+        {
+            format.LineAlignment = StringAlignment.Center;
+            format.FormatFlags = StringFormatFlags.NoWrap;
+            format.Trimming = StringTrimming.EllipsisCharacter;
+        }
 
-	private void ExportToPdfInternal(string filePath, IProgress<ReportOperationProgress>? progress, CancellationToken cancellationToken)
+        graphics.DrawString(
+            text,
+            font,
+            brush,
+            textBounds,
+            format);
+    }
+
+    private void ExportToPdfInternal(string filePath, IProgress<ReportOperationProgress>? progress, CancellationToken cancellationToken)
 	{
 		EnsurePdfFontResolverConfigured();
 		ReportProgress(progress, 5, "Preparing PDF export...");
@@ -510,52 +530,74 @@ internal sealed class CollectionReportPrintHelper : IReportPreviewSource
 		}
 	}
 
-	private static float GetRowHeight(Graphics graphics, Font bodyFont, DataRow row, IReadOnlyList<ColumnLayout> columns)
-	{
-		float resolvedHeight = RowHeight;
+    private static float GetRowHeight(
+       Graphics graphics,
+       Font bodyFont,
+       DataRow row,
+       IReadOnlyList<ColumnLayout> columns)
+    {
+        float rowHeight = RowHeight;
 
-		foreach (ColumnLayout column in columns)
-		{
-			if (!column.Wrap)
-			{
-				continue;
-			}
+        foreach (ColumnLayout column in columns)
+        {
+            if (!column.Wrap)
+            {
+                continue;
+            }
 
-			string text = GetCellDisplay(row, column.Key);
-			if (string.IsNullOrWhiteSpace(text))
-			{
-				continue;
-			}
+            string text = GetCellDisplay(row, column.Key);
 
-			float contentWidth = Math.Max(1F, column.Width - (CellPadding * 2F));
-			float measuredHeight = MeasureWrappedTextHeight(graphics, text, bodyFont, contentWidth);
-			resolvedHeight = Math.Max(resolvedHeight, measuredHeight + (CellPadding * 2F) + GetWrappedHeightAllowance(column.Key));
-		}
+            if (string.IsNullOrWhiteSpace(text))
+            {
+                continue;
+            }
 
-		return (float)Math.Ceiling(resolvedHeight);
-	}
+            float availableWidth = Math.Max(1F, column.Width - (CellPadding * 2F));
 
-	private static float GetWrappedHeightAllowance(string columnKey)
-	{
-		return columnKey switch
-		{
-			"Payor" or "Invoice Number" or "Remarks" => WrappedRowAllowance,
-			_ => 2F
-		};
-	}
+            using StringFormat format = new()
+            {
+                Alignment = StringAlignment.Near,
+                LineAlignment = StringAlignment.Near
+            };
 
-	private static float MeasureWrappedTextHeight(Graphics graphics, string text, Font font, float width)
-	{
-		using var format = new StringFormat
-		{
-			Alignment = StringAlignment.Near,
-			LineAlignment = StringAlignment.Near,
-			Trimming = StringTrimming.None
-		};
+            SizeF size = graphics.MeasureString(
+                text,
+                bodyFont,
+                new SizeF(availableWidth, 10000F),
+                format);
 
-		SizeF measured = graphics.MeasureString(text, font, new SizeF(Math.Max(1F, width), 1000F), format);
-		return measured.Height;
-	}
+            float requiredHeight =
+                size.Height +
+                (CellPadding * 2F) +
+                WrappedRowAllowance;
+
+            rowHeight = Math.Max(rowHeight, requiredHeight);
+        }
+
+        return (float)Math.Ceiling(rowHeight);
+    }
+
+ //   private static float GetWrappedHeightAllowance(string columnKey)
+	//{
+	//	return columnKey switch
+	//	{
+	//		"Payor" or "Invoice #" or "Remarks" => WrappedRowAllowance,
+	//		_ => 2F
+	//	};
+	//}
+
+	//private static float MeasureWrappedTextHeight(Graphics graphics, string text, Font font, float width)
+	//{
+	//	using var format = new StringFormat
+	//	{
+	//		Alignment = StringAlignment.Near,
+	//		LineAlignment = StringAlignment.Near,
+	//		Trimming = StringTrimming.None
+	//	};
+
+	//	SizeF measured = graphics.MeasureString(text, font, new SizeF(Math.Max(1F, width), 1000F), format);
+	//	return measured.Height;
+	//}
 
 	private static RectangleF GetDocumentPageBounds(PrintDocument document)
 	{
@@ -599,16 +641,17 @@ internal sealed class CollectionReportPrintHelper : IReportPreviewSource
 		return
 		[
 			new("Date", "Date", 10F, StringAlignment.Center),
-			new("OR Number", "OR Number", 8F, StringAlignment.Center),
-			new("Payor", "Payor", 18F, StringAlignment.Near, true),
-			new("Invoice Number", "Invoice Number", 13F, StringAlignment.Near, true),
-			new("Remarks", "Remarks", 16F, StringAlignment.Near, true),
-			new("Water Charge", "Water Charge", 10F, StringAlignment.Far),
+			new("OR Number", "OR #", 8F, StringAlignment.Center),
+			new("Payor", "Payor", 14F, StringAlignment.Near, true),
+			new("Invoice Number", "Invoice #", 7F, StringAlignment.Near, true),
+			new("Remarks", "Remarks", 15F, StringAlignment.Near, true),
+            new("Water Charge", "Water Charge", 10F, StringAlignment.Far),
 			new("Tax", "Tax", 8F, StringAlignment.Far),
 			new("Arrears", "Arrears", 8F, StringAlignment.Far),
 			new("Penalty", "Penalty", 8F, StringAlignment.Far),
 			new("SCF", "SCF", 8F, StringAlignment.Far),
-			new("Collected", "Collected", 10F, StringAlignment.Far),
+                    new("Others", "Others", 8F, StringAlignment.Far),
+            new("Collected", "Collected", 10F, StringAlignment.Far),
 			new("Uncollected", "Uncollected", 10F, StringAlignment.Far)
 		];
 	}

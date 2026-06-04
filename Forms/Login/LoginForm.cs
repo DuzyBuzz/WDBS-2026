@@ -183,7 +183,7 @@ public partial class LoginForm : Form
     private void LoadBrandImages()
     {
         SetPictureBoxImage(philippinesLogoPictureBox, Path.Combine(AppContext.BaseDirectory, "Resources", "republika_ng_pilipinas.jpg"));
-        SetPictureBoxImage(tubunganLogoPictureBox, Path.Combine(AppContext.BaseDirectory, "Resources", "tubungan logo.jpg"));
+        SetPictureBoxImage(tubunganLogoPictureBox, Path.Combine(AppContext.BaseDirectory, "Resources", "logo.png"));
     }
 
     private static void SetPictureBoxImage(PictureBox pictureBox, string imagePath)

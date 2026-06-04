@@ -24,6 +24,7 @@ internal static class CollectionReportService
     v.`Arrears` AS `Arrears`,
     v.`Penalty` AS `Penalty`,
     v.`SCF` AS `SCF`,
+    v.`Others` AS `Others`,
     v.`Collected` AS `Collected`,
     v.`Uncollected` AS `Uncollected`";
 

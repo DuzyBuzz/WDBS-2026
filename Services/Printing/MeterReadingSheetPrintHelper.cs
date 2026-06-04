@@ -20,7 +20,7 @@ public sealed record MeterReadingSheetDocumentData(
 
 internal sealed class MeterReadingSheetPrintHelper : IReportPreviewSource
 {
-    private const string WaterDistrictTitle = "TUBUNGAN WATER DISTRICT";
+    private const string WaterDistrictTitle = "IGBARAS WATER DISTRICT";
     private const float A4WidthPoints = 595.28F;
     private const float A4HeightPoints = 841.89F;
     private const float HeaderHeight = 46F;

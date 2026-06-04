@@ -163,7 +163,7 @@ partial class LoginForm
         logoDividerLabel.Name = "logoDividerLabel";
         logoDividerLabel.Size = new Size(224, 84);
         logoDividerLabel.TabIndex = 1;
-        logoDividerLabel.Text = "Tubungan Water District Billing System";
+        logoDividerLabel.Text = "Igbaras Water District Billing System";
         logoDividerLabel.TextAlign = ContentAlignment.MiddleCenter;
         // 
         // tubunganLogoPictureBox

@@ -23,7 +23,7 @@ public sealed record LedgerReportDocumentData(
 
 internal sealed class LedgerReportPrintHelper : IReportPreviewSource
 {
-private const string WaterDistrictTitle = "TUBUNGAN WATER DISTRICT";
+private const string WaterDistrictTitle = "IGBARAS WATER DISTRICT";
 	private const float HeaderHeight = 60F;
 	private const float SubHeaderHeight = 40F;
 	private const float TotalHeaderHeight = HeaderHeight + SubHeaderHeight;
